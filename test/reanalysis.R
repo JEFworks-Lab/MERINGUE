@@ -55,12 +55,25 @@ results <- as.data.frame(results)
 results$p.adj <- stats::p.adjust(results$p.value)
 results <- results[order(results$p.adj),]
 
-head(results)
+#vi <- results$p.adj < 0.05
+#results <- results[vi,]
 
-g <- rownames(results)[1]
+g <- rownames(results)[5]
 plot(pos[,1], pos[,2], col=map2col(matnorm[g,]), pch=16, cex=3)
 
 
+############# Compare with SpatialDE
+spatialde.results <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/MouseOB/MOB_final_results.csv', row.names=1)
+rownames(spatialde.results) <- spatialde.results$g
+
+a = -log10(unlist(results$p.value))
+a[is.infinite(a)] <- NA
+b = -log10(spatialde.results[rownames(results),]$pval)
+b[is.infinite(b)] <- NA
+plot(a, b,
+     ylab = "-log10(p-value) for SpatialDE",
+     xlab = "-log10(p-value) for MERingue")
+cor.test(a,b, use="pairwise.complete.obs")
 
 
 ############# Compare with trensceeek
