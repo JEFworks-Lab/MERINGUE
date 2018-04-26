@@ -21,7 +21,7 @@ getAdj <- function(mat, k) {
 
 #' Plot neighbor network
 #' https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r
-plotNetwork <- function(pos, adj, line.col='red', line.weight=1, ...) {
+plotNetwork <- function(pos, adj, line.col='red', line.power=1, ...) {
   plot(pos, pch=16)
   idx <- which(adj>0, arr.ind = T)
   for(i in seq_len(nrow(idx))) {
@@ -29,7 +29,7 @@ plotNetwork <- function(pos, adj, line.col='red', line.weight=1, ...) {
       c(pos[idx[i,1],1], pos[idx[i,2],1]),
       c(pos[idx[i,1],2], pos[idx[i,2],2]),
       col=line.col,
-      lwd=adj[idx]*line.weight
+      lwd=adj[idx]^line.power
       )
   }
 }
