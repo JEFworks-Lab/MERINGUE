@@ -13,6 +13,6 @@ ncores = 1
 trendstat_list = trendsceek_test(pp2plot, nrand, ncores)
 
 head(trendstat_list[['supstats_wide']])
-alpha = 0.1 ##Benjamini-Hochberg
+alpha = 0.2 ##Benjamini-Hochberg
 sig_list = extract_sig_genes(trendstat_list, alpha)
 sig_list
