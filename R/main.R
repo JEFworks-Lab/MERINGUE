@@ -17,7 +17,7 @@ getSpatialWeights <- function(pos, klist=3:9, plot=FALSE) {
   })
   adj <- Reduce("+", adjList) / length(adjList)
   if(plot) {
-    plotNetwork(pos, adj, line.power=10)
+    plotNetwork(pos, adj, line.power=2)
   }
   return(adj)
 }
@@ -55,24 +55,36 @@ getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=parallel::det
 }
 
 
-groupSigSpatialPatterns <- function(pos, mat, results, alpha=0.05, k=5, verbose=TRUE) {
+groupSigSpatialPatterns <- function(pos, mat, results, alpha=0.05, k=5, plot=TRUE, verbose=TRUE, ...) {
   vi <- results$p.adj < alpha
+  vi[is.na(vi)] <- FALSE
   if(verbose) {
-    print(table(vi))
+    message(paste0('Number of significantly spatially clustered genes: ', sum(vi)))
   }
   results.sig <- rownames(results)[vi]
 
   cv <- cor(t(as.matrix(mat[results.sig,])))
   hc <- hclust(as.dist(1-cv))
-  heatmap(cv[hc$labels, hc$labels], Rowv=as.dendrogram(hc), Colv=as.dendrogram(hc), col=colorRampPalette(c('blue', 'white', 'red'))(100), labRow=NA, labCol=NA)
+  if(plot) {
+    heatmap(cv, Rowv=as.dendrogram(hc), Colv=as.dendrogram(hc), col=colorRampPalette(c('blue', 'white', 'red'))(100), labRow=NA, labCol=NA)
+  }
   groups <- cutree(hc, k)
   groups <- factor(groups)
 
-  par(mfrow=c(length(levels(groups)), 2), mar=rep(1,4))
+  if(plot) {
+    par(mfrow=c(length(levels(groups)), 2), mar=rep(1,4))
+  }
   prs <- lapply(levels(groups), function(g) {
-    pc <- prcomp(mat[results.sig[groups==g],])
-    pr <- pc$rotation[,1]
-    interpolate(pos, pr)
+    # summarize as first pc if more than 1 gene in group
+    if(sum(groups==g)>1) {
+      pc <- prcomp(mat[results.sig[groups==g],])
+      pr <- pc$rotation[,1]
+    } else {
+      pr <- mat[results.sig[groups==g],]
+    }
+    if(plot) {
+      interpolate(pos, pr, main=paste0("Pattern ", g, " : ", sum(groups==g), " genes"), plot=TRUE, ...)
+    }
     return(pr)
   })
   names(prs) <- levels(groups)

@@ -73,14 +73,14 @@ moranPermutationTest <- function(z, w, N=1e4, seed=0, ncores=parallel::detectCor
 
 
 #' Gridded bivariate interpolation
-interpolate <- function(pos, gexp, binSize=100, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE) {
+interpolate <- function(pos, gexp, binSize=100, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
   z <- gexp
   x <- pos[,1]
   y <- pos[,2]
   int <- akima::interp(x, y, z, nx=binSize, ny=binSize, linear=FALSE)
   if(plot) {
-    plot(pos, col=map2col(z), pch=16, cex=2, axes=FALSE, frame.plot=TRUE, xlab=NA, ylab=NA)
-    image(int, col=col, axes=FALSE, frame.plot=TRUE)
+    plot(pos, col=map2col(z), pch=16, cex=2, axes=FALSE, frame.plot=TRUE, xlab=NA, ylab=NA, ...)
+    image(int, col=col, axes=FALSE, frame.plot=TRUE, ...)
   }
   return(int)
 }
@@ -93,3 +93,8 @@ densityPlot <- function(pos) {
   dens <- MASS::kde2d(x, y)
   persp(dens, phi = 30, theta = 20, d = 5)
 }
+
+
+
+
+
