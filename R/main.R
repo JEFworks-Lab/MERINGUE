@@ -13,7 +13,7 @@ getSpatialWeights <- function(pos, klist=3:9, plot=TRUE) {
 getSpatialPatterns <- function(mat, adj, ncores=parallel::detectCores()-1) {
   results <- do.call(rbind, parallel::mclapply(seq_len(nrow(mat)), function(i) {
     value <- mat[i,]
-    ape::Moran.I(value, adj)
+    unlist(ape::Moran.I(value, adj))
   }, mc.cores=ncores))
   rownames(results) <- rownames(mat)
   results <- as.data.frame(results)

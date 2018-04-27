@@ -62,7 +62,7 @@ plotNetwork(pos, adj, line.power=10)
 # calculate Moran's I
 results <- do.call(rbind, parallel::mclapply(seq_len(nrow(mat)), function(i) {
   value <- mat[i,]
-  ape::Moran.I(value, adj)
+  unlist(ape::Moran.I(value, adj))
 }, mc.cores=parallel::detectCores()-1))
 rownames(results) <- rownames(mat)
 results <- as.data.frame(results)
