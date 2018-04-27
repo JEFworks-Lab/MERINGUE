@@ -10,5 +10,7 @@ LazyData: true
 Imports: ape,
     RANN,
     parallel,
-    Matrix
+    Matrix,
+    akima,
+    MASS
 RoxygenNote: 6.0.1

@@ -55,8 +55,29 @@ getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=parallel::det
 }
 
 
-groupSpatialPatterns <- function(pos, mat) {
+groupSigSpatialPatterns <- function(pos, mat, results, alpha=0.05, k=5, verbose=TRUE) {
+  vi <- results$p.adj < alpha
+  if(verbose) {
+    print(table(vi))
+  }
+  results.sig <- rownames(results)[vi]
 
+  cv <- cor(t(as.matrix(mat[results.sig,])))
+  hc <- hclust(as.dist(1-cv))
+  heatmap(cv[hc$labels, hc$labels], Rowv=as.dendrogram(hc), Colv=as.dendrogram(hc), col=colorRampPalette(c('blue', 'white', 'red'))(100), labRow=NA, labCol=NA)
+  groups <- cutree(hc, k)
+  groups <- factor(groups)
+
+  par(mfrow=c(length(levels(groups)), 2), mar=rep(1,4))
+  prs <- lapply(levels(groups), function(g) {
+    pc <- prcomp(mat[results.sig[groups==g],])
+    pr <- pc$rotation[,1]
+    interpolate(pos, pr)
+    return(pr)
+  })
+  names(prs) <- levels(groups)
+
+  return(list(groups=groups, prs=prs))
 }
 
 
