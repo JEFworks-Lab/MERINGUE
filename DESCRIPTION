@@ -11,3 +11,4 @@ Imports: ape,
     RANN,
     parallel,
     Matrix
+RoxygenNote: 6.0.1
