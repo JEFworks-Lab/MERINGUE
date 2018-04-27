@@ -7,13 +7,24 @@ pos <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/MouseOB/MOB_sample_i
 cd <- cd[rownames(pos),]
 pos <- pos[,1:2]
 
+cd <- read.csv('data/mmc6/mmc6_counts.csv', row.names=1, quote="\'", header=FALSE)
+pos <- read.csv('data/mmc6/mmc6_pos.csv')
+cd[1:5,1:5]
+dim(cd)
+dim(cd)
+rownames(pos) <- colnames(cd) <- paste0('cell', 1:nrow(pos))
+head(pos)
+head(cd)
+
 # Clean
 counts <- cleanCounts(t(cd), min.reads=10, min.detected=10)
 mat <- normalizeCounts(counts)
 
 # Analyze
-adj <- getSpatialWeights(pos, plot=TRUE)
+adj <- getSpatialWeights(pos[,1:2], plot=TRUE, klist=3)
 results <- getSpatialPatterns(mat, adj)
+groupSigSpatialPatterns(pos[,1:2], mat, results, k=5)
+hist(-log10(results$p.adj))
 results.sig <- rownames(results)[results$p.adj < 0.05]
 
 # Cluster cells
@@ -35,7 +46,7 @@ par(mfrow=c(1,2))
 plotEmbedding(emb, com, xlab=NA, ylab=NA,
               mark.clusters=TRUE, alpha=0.5, mark.cluster.cex=0.5,
               verbose=FALSE) ## plot
-plot(pos, col=map2col(as.numeric(com)), pch=16)
+plot(pos[,1:2], col=com, pch=16)
 
 # subset
 mat.sub <- mat[, com==2]
