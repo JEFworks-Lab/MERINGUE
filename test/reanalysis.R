@@ -4,29 +4,42 @@ pos <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/MouseOB/MOB_sample_i
 cd <- cd[rownames(pos),]
 pos <- pos[,1:2]
 
+## seqFish
+cd <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/SeqFISH/exp_mat_43.csv', row.names=1, quote="\'", header=TRUE)
+colnames(cd) <- gsub('X', '', colnames(cd))
+cd <- t(cd)
+pos <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/SeqFISH/sample_info_43.csv', row.names=1)
+cd <- cd[rownames(pos),]
+pos <- pos[,1:2]
+head(cd)
+head(pos)
+
+plot(pos)
+
 library(MUDAN)
 mat <- normalizeCounts(t(as.matrix(cd)),
                        verbose=FALSE)
-matnorm.info <- normalizeVariance(mat,
-                                  details=TRUE,
-                                  verbose=FALSE,
-                                  plot=TRUE)
+#matnorm.info <- normalizeVariance(mat,
+#                                  details=TRUE,
+#                                  verbose=FALSE,
+#                                  plot=TRUE)
 ## log transform
-matnorm <- log10(matnorm.info$mat+1)
+#matnorm <- log10(matnorm.info$mat+1)
 ## 30 PCs on overdispersed genes
-pcs <- getPcs(matnorm[matnorm.info$ods,],
-              nGenes=length(matnorm.info$ods),
-              nPcs=30,
-              verbose=FALSE)
+#pcs <- getPcs(matnorm,
+#              nGenes=length(matnorm.info$ods),
+#              nPcs=30,
+#              verbose=FALSE)
 ## get tSNE embedding on PCs
-emb <- Rtsne::Rtsne(pcs,
+emb <- Rtsne::Rtsne(t(log10(as.matrix(mat)+1)),
                     is_distance=FALSE,
                     perplexity=10,
                     num_threads=parallel::detectCores(),
                     verbose=FALSE)$Y
-rownames(emb) <- rownames(pcs)
-com <- getComMembership(pcs,
-                        k=30, method=igraph::cluster_infomap,
+#rownames(emb) <- rownames(pcs)
+rownames(emb) <- colnames(mat)
+com <- getComMembership(t(log10(as.matrix(mat)+1)),
+                        k=10, method=igraph::cluster_infomap,
                         verbose=FALSE)
 
 
@@ -57,16 +70,20 @@ results <- as.data.frame(results)
 results$p.adj <- stats::p.adjust(results$p.value)
 results <- results[order(results$p.adj),]
 
-#vi <- results$p.adj < 0.05
-#results <- results[vi,]
+head(results)
+vi <- results$p.adj < 0.05
+results[vi,]
+table(vi)
 
-g <- rownames(results)[1]
-plot(pos[,1], pos[,2], col=map2col(matnorm[g,]), pch=16, cex=2)
+g <- rownames(results)[8]
+plot(pos[,1], pos[,2], col=map2col(mat[g,]), pch=16, cex=1)
 
 
 ############# Compare with SpatialDE
-spatialde.results <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/MouseOB/MOB_final_results.csv', row.names=1)
+#spatialde.results <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/MouseOB/MOB_final_results.csv', row.names=1)
+spatialde.results <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/SeqFISH/final_results_43.csv', row.names=1, quote="\'")
 rownames(spatialde.results) <- spatialde.results$g
+head(spatialde.results)
 
 a = -log10(unlist(results$p.adj))
 a[is.infinite(a)] <- NA
