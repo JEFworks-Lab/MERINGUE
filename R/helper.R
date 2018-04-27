@@ -1,3 +1,5 @@
+
+
 #' Helper function to map values to colors
 #' Source: https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r
 map2col <- function(x, pal=colorRampPalette(c('blue', 'white', 'red'))(100), limits=NULL){
@@ -30,7 +32,7 @@ plotNetwork <- function(pos, adj, line.col='red', line.power=1, ...) {
       c(pos[idx[i,1],2], pos[idx[i,2],2]),
       col=line.col,
       lwd=adj[idx]^line.power
-      )
+    )
   }
 }
 
@@ -46,10 +48,12 @@ moranTest <- function(x, w) {
   #as.vector(z %*% w %*% (z * sqrt(n / (n-1))))
 
   ## Just use Ape's package since includes empirical p-values
-  unlist(ape::Moran.I(as.vector(x), w))
+  ## Only look for greater autocorrelation / increased clustering
+  unlist(ape::Moran.I(as.vector(x), w, alternative='greater'))
 }
+
 #' Permutation test to assess for significance of Moran's I
-moranPermutationTest <- function(z, w, N=1e4, seed=0, ncores=parallel::detectCores()-1, plot=TRUE, ...) {
+moranPermutationTest <- function(z, w, N=1e4, seed=0, ncores=parallel::detectCores()-1, plot=FALSE, ...) {
   # Set seed for reproducibility
   set.seed(seed)
   # Compute Moran's I
@@ -63,6 +67,6 @@ moranPermutationTest <- function(z, w, N=1e4, seed=0, ncores=parallel::detectCor
     hist(sim, sub=paste("p =", round(p.value, 4)), xlim=range(all), ...)
     abline(v = stat, col="red", lty=3, lwd=2)
   }
-  results <- data.frame('observed'=stat, 'N'=N, 'p.value'=p.value)
+  results <- unlist(data.frame('observed'=stat, 'N'=N, 'p.value'=p.value))
   return(results)
 }
