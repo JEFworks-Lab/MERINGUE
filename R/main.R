@@ -5,19 +5,25 @@
 #' @param pos Position matrix where each row is a cell, columns are
 #'     x, y, (optionally z) coordinations
 #' @param klist range of number of nearest neighbors to consider (default 3:9)
+#' @param ncores Number of cores
 #' @param plot Whether to plot neighbor network
 #'
 #' @returns A weighted adjacency matrix
 #'
 #' @export
 #'
-getSpatialWeights <- function(pos, klist=3:9, plot=FALSE) {
-  adjList <- lapply(klist, function(k) {
+getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE) {
+  if(length(klist)>1) {
+    adjList <-  BiocParallel::bplapply(seq_along(klist), function(i) {
+      k <- klist[i]
+      adj <- getAdj(pos, k=k)
+    }, BPPARAM = MulticoreParam(workers=ncores))
+    adj <- Reduce("+", adjList) / length(adjList)
+  } else {
     adj <- getAdj(pos, k=k)
-  })
-  adj <- Reduce("+", adjList) / length(adjList)
+  }
   if(plot) {
-    plotNetwork(pos, adj, line.power=2)
+    plotNetwork(pos, adj, line.power=3)
   }
   return(adj)
 }
@@ -37,15 +43,26 @@ getSpatialWeights <- function(pos, klist=3:9, plot=FALSE) {
 #'
 #' @export
 #'
-getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=parallel::detectCores()-1, ...) {
-  results <- do.call(rbind, parallel::mclapply(seq_len(nrow(mat)), function(i) {
+getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=1, verbose=TRUE, ...) {
+
+  if(verbose) {
+    pb <- txtProgressBar(min=0, max=nrow(mat), char = ".") # use progress bar
+  }
+  results <- do.call(rbind, BiocParallel::bplapply(seq_len(nrow(mat)), function(i) {
+    if(verbose) {
+      setTxtProgressBar(pb, i)
+    }
     value <- mat[i,]
     if(permutation) {
       moranPermutationTest(value, adj, ncores=1, ...)
     } else {
       moranTest(value, adj)
     }
-  }, mc.cores=ncores))
+  }, BPPARAM = MulticoreParam(workers=ncores)))
+  if(verbose) {
+    close(pb)
+  }
+
   rownames(results) <- rownames(mat)
   results <- as.data.frame(results)
 

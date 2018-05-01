@@ -1,7 +1,7 @@
 # Reanalysis
 cd <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/MouseOB/data/Rep11_MOB_0.csv', row.names=1)
 pos <- read.csv('/Users/jefworks/Desktop/SpatialDE/Analysis/MouseOB/MOB_sample_info.csv', row.names=1)
-cd <- cd[rownames(pos),]
+cd <- cd[rownames(pos),1:100]
 pos <- pos[,1:2]
 
 ## seqFish
@@ -57,15 +57,18 @@ adjList <- lapply(3:9, function(k) {
   adj <- getAdj(pos, k=k)
 })
 adj <- Reduce("+", adjList) / length(adjList)
-plotNetwork(pos, adj, line.power=10)
+plotNetwork(pos, adj, line.power=3)
 
 # calculate Moran's I
-results <- do.call(rbind, parallel::mclapply(seq_len(nrow(mat)), function(i) {
+pb <- txtProgressBar(min=0, max=nrow(mat), char = ".")
+results <- do.call(rbind, lapply(seq_len(nrow(mat)), function(i) {
+  setTxtProgressBar(pb, i)
   value <- mat[i,]
   unlist(ape::Moran.I(value, adj))
-}, mc.cores=parallel::detectCores()-1))
+}))
 rownames(results) <- rownames(mat)
 results <- as.data.frame(results)
+close(pb)
 
 results$p.adj <- stats::p.adjust(results$p.value)
 results <- results[order(results$p.adj),]
