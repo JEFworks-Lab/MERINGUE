@@ -17,10 +17,10 @@ getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE) {
     adjList <-  BiocParallel::bplapply(seq_along(klist), function(i) {
       k <- klist[i]
       adj <- getAdj(pos, k=k)
-    }, BPPARAM = MulticoreParam(workers=ncores))
+    }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores))
     adj <- Reduce("+", adjList) / length(adjList)
   } else {
-    adj <- getAdj(pos, k=k)
+    adj <- getAdj(pos, k=klist)
   }
   if(plot) {
     plotNetwork(pos, adj, line.power=3)
@@ -58,7 +58,7 @@ getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=1, verbose=TR
     } else {
       moranTest(value, adj)
     }
-  }, BPPARAM = MulticoreParam(workers=ncores)))
+  }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores)))
   if(verbose) {
     close(pb)
   }
@@ -73,41 +73,52 @@ getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=1, verbose=TR
 
 
 groupSigSpatialPatterns <- function(pos, mat, results, alpha=0.05, k=5, plot=TRUE, verbose=TRUE, ...) {
-  vi <- results$p.adj < alpha
-  vi[is.na(vi)] <- FALSE
-  if(verbose) {
-    message(paste0('Number of significantly spatially clustered genes: ', sum(vi)))
-  }
-  results.sig <- rownames(results)[vi]
-
-  cv <- cor(t(as.matrix(mat[results.sig,])))
-  hc <- hclust(as.dist(1-cv))
-  if(plot) {
-    heatmap(cv, Rowv=as.dendrogram(hc), Colv=as.dendrogram(hc), col=colorRampPalette(c('blue', 'white', 'red'))(100), labRow=NA, labCol=NA)
-  }
-  groups <- cutree(hc, k)
-  groups <- factor(groups)
-
-  if(plot) {
-    par(mfrow=c(length(levels(groups)), 2), mar=rep(1,4))
-  }
-  prs <- lapply(levels(groups), function(g) {
-    # summarize as first pc if more than 1 gene in group
-    if(sum(groups==g)>1) {
-      pc <- prcomp(mat[results.sig[groups==g],])
-      pr <- pc$rotation[,1]
-    } else {
-      pr <- mat[results.sig[groups==g],]
+    vi <- results$p.adj < alpha
+    vi[is.na(vi)] <- FALSE
+    if(verbose) {
+        message(paste0('Number of significantly spatially clustered genes: ', sum(vi)))
     }
+    results.sig <- rownames(results)[vi]
+
+    m <- as.matrix(mat[results.sig,])
+    m <- apply(m, 1, winsorize) # get rid of outliers
+    m <- scale(m)
+    d <- dist(t(m))
+    hc <- hclust(d)
+    # dynamic tree cut
+    groups <- dynamicTreeCut::cutreeDynamic(dendro=hc, distM=as.matrix(d), method='hybrid', minClusterSize=10, deepSplit=0)
+    names(groups) <- hc$labels
+    groups <- factor(groups)
+    if(verbose) {
+        message('Patterns detected:')
+        message(table(groups))
+    }
+
     if(plot) {
-      interpolate(pos, pr, main=paste0("Pattern ", g, " : ", sum(groups==g), " genes"), plot=TRUE, ...)
+        par(mfrow=c(length(levels(groups)), 2), mar=rep(1,4))
     }
-    return(pr)
-  })
-  names(prs) <- levels(groups)
 
-  return(list(groups=groups, prs=prs))
+    prs <- lapply(levels(groups), function(g) {
+        # summarize as first pc if more than 1 gene in group
+        if(sum(groups==g)>1) {
+            m <- winsorize(mat[results.sig[groups==g],])
+            ps <- colMeans(m)
+            pc <- prcomp(m)
+            pr <- pc$rotation[,1]
+            # double check direction is same
+            # if not, flip pc
+            if(cor(ps, pr)<0) {
+                pr <- -pr
+            }
+        } else {
+            pr <- winsorize(mat[results.sig[groups==g],])
+        }
+        if(plot) {
+            interpolate(pos, pr, main=paste0("Pattern ", g, " : ", sum(groups==g), " genes"), plot=TRUE, ...)
+        }
+        return(pr)
+    })
+    names(prs) <- levels(groups)
+
+    return(list(groups=groups, prs=prs))
 }
-
-
-
