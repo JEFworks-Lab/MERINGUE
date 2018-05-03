@@ -1,5 +1,4 @@
 ## Look at correlation between right and left side
-
 source('../R/helper.R')
 source('../R/main.R')
 source('../R/process.R')
@@ -22,7 +21,7 @@ vi <- features$dataset_name=='171021_FN7_2_M22_M26'
 table(vi)
 features <- features[vi,]
 
-vi <- features$sliceID == 4
+vi <- features$sliceID == 5
 table(vi)
 features <- features[vi,]
 
@@ -45,6 +44,27 @@ annot <- annot[cells.have]
 annot <- as.factor(annot)
 pos <- pos[cells.have,]
 cd <- cd[cells.have,]
+
+cd <- cd[, c("4732456N10Rik", "Ace2", "Adora2a", "Aldh1l1", "Amigo2", "Ano3",
+"Aqp4", "Ar", "Arhgap36", "Avpr1a", "Avpr2", "Baiap2", "Bdnf",
+"Bmp7", "Brs3", "Calcr", "Cbln1", "Cbln2", "Cckar", "Cckbr",
+"Ccnd2", "Cd24a", "Cdkn1a", "Cenpe", "Chat", "Coch", "Col25a1",
+"Cplx3", "Cpne5", "Creb3l1", "Crhbp", "Crhr1", "Crhr2", "Cspg5",
+"Cxcl14", "Cyp19a1", "Cyp26a1", "Cyr61", "Dgkk", "Ebf3", "Egr2",
+"Ermn", "Esr1", "Etv1", "Fbxw13", "Fezf1", "Fn1", "Fst", "Gabra1",
+"Gabrg1", "Gad1", "Galr1", "Galr2", "Gbx2", "Gda", "Gem", "Gjc3",
+"Glra3", "Gpr165", "Greb1", "Grpr", "Htr2c", "Igf1r", "Igf2r",
+"Irs4", "Isl1", "Kiss1r", "Klf4", "Lepr", "Lmod1", "Lpar1", "Man1a",
+"Mc4r", "Mki67", "Mlc1", "Myh11", "Ndnf", "Ndrg1", "Necab1",
+"Nos1", "Npas1", "Npy1r", "Npy2r", "Ntng1", "Ntsr1", "Nup62cl",
+"Omp", "Onecut2", "Opalin", "Oprd1", "Oprk1", "Oprl1", "Oxtr",
+"Pak3", "Pcdh11x", "Pdgfra", "Pgr", "Plin3", "Pnoc", "Pou3f2",
+"Prlr", "Ramp3", "Rgs2", "Rgs5", "Rnd3", "Rxfp1", "Scgn", "Selplg",
+"Sema3c", "Sema4d", "Serpinb1b", "Serpine1", "Sgk1", "Slc15a3",
+"Slc17a6", "Slc17a7", "Slc17a8", "Slc18a2", "Slco1a4", "Sox4",
+"Sox6", "Sox8", "Sp9", "Synpr", "Syt2", "Syt4", "Sytl4", "Tacr1",
+"Tacr3", "Tiparp", "Tmem108", "Traf4", "Trhr", "Ttn", "Ttyh2",
+"Blank-1", "Blank-2", "Blank-3", "Blank-4", "Blank-5")]
 
 # potential confounders
 res <- features[, c("abs_volume", "backgroundScore650", "backgroundScore750", "primary_fovID")]
@@ -83,21 +103,23 @@ adj.right <- getSpatialWeights(pos.right, k=3)
 meringue.results.right <- getSpatialPatterns(mat[, rownames(pos.right)], adj.right, ncores=10)
 
 ## look at correlation
-head(meringue.results.left)
-head(meringue.results.right)
+#head(meringue.results.left)
+#head(meringue.results.right)
 
 #lr <- unlist(meringue.results.left$observed)
 #rr <- unlist(meringue.results.right$observed)
-lp <- unlist(meringue.results.left$p.value)
-rp <- unlist(meringue.results.right$p.value)
+lp <- unlist(meringue.results.left$p.adj)
+rp <- unlist(meringue.results.right$p.adj)
 
 par(mfrow=c(1,1))
 #plot(lr, rr)
 plot(-log10(lp), -log10(rp))
+abline(v=-log10(0.05), col='red')
+abline(h=-log10(0.05), col='red')
 
 ########### MERingue on one cell type
 table(annot)
-cc <- 'OD Immature'
+cc <- 'Inhibitory'
 ct <- na.omit(names(annot)[grepl(cc,annot)])
 unique(annot[ct])
 plot(pos, col=c('grey', 'red')[as.factor(rownames(pos) %in% ct)],pch=16)
@@ -111,8 +133,8 @@ adj.right <- getSpatialWeights(pos.right[ct.right,], k=3)
 meringue.results.right <- getSpatialPatterns(mat[, ct.right], adj.right, ncores=10)
 
 ## look at correlation
-head(meringue.results.left)
-head(meringue.results.right)
+#head(meringue.results.left)
+#head(meringue.results.right)
 
 #lr <- unlist(meringue.results.left$observed)
 #rr <- unlist(meringue.results.right$observed)
@@ -140,6 +162,7 @@ ggplot(pv) +
   theme_classic(base_size = 16)
 
 par(mfrow=c(1,2))
-interpolate(pos[ct,], gexp=mat['Slco1a4',ct])
+g <- 'Egr2'
+interpolate(pos[ct,], gexp=mat[g,ct])
 
 
