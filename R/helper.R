@@ -39,28 +39,126 @@ plotNetwork <- function(pos, adj, line.col='red', line.power=1, ...) {
 
 #' Moran's I compute from scratch
 #' x is value
-#' w is adjacency matrix (weights)
-moranTest <- function(x, w) {
-  ## Compute from scratch
-  #w <- w / sum(w)
-  #n <- length(x)
-  #z <- as.vector((x - mean(x)) / sd(x))
-  #as.vector(z %*% w %*% (z * sqrt(n / (n-1))))
+#' weight is adjacency matrix (weights)
+moranTest <- function (x, weight, na.rm = FALSE, alternative = "two.sided") {
 
-  ## Just use Ape's package since includes empirical p-values
-  ## Only look for greater autocorrelation / increased clustering
-  unlist(ape::Moran.I(as.vector(x), w, alternative='greater'))
+  if (nrow(weight) != ncol(weight)) {
+    stop("'weight' must be a square matrix")
+  }
+
+  N <- length(x)
+
+  if (nrow(weight) != N) {
+    stop("'weight' must have as many rows as observations in 'x'")
+  }
+
+  nas <- is.na(x)
+  if (any(nas)) {
+    if (na.rm) {
+      x <- x[!nas]
+      N <- length(x)
+      weight <- weight[!nas, !nas]
+    }
+    else {
+      stop("'x' has missing values")
+    }
+  }
+
+  # first moment
+  ei <- -1/(N - 1)
+
+  # scale weights
+  rs <- rowSums(weight)
+  rs[rs == 0] <- 1
+  weight <- weight/rs
+
+  # Moran's I
+  W <- sum(weight)
+  m <- mean(x)
+  y <- x - m
+  cv <- sum(weight * y %o% y)
+  v <- sum(y^2)
+  obs <- (N/W) * (cv/v)
+
+  # second moment
+  W.sq <- W^2
+  N.sq <- N^2
+  S1 <- 0.5 * sum((weight + t(weight))^2)
+  S2 <- sum((apply(weight, 1, sum) + apply(weight, 2, sum))^2)
+  S3 <- (sum(y^4)/N)/(v/N)^2
+  S4 <- (N.sq - 3*N + 3)*S1 - N*S2 + 3*W.sq
+  S5 <- (N.sq - N)*S1 - 2*N*S2 + 6*W.sq
+  ei2 <- (N*S4 - S3*S5)/((N - 1)*(N - 2)*(N - 3) * W.sq)
+
+  # standard deviation
+  sdi <- sqrt(ei2 - (ei)^2)
+
+  alternative <- match.arg(alternative, c("two.sided", "less", "greater"))
+  pv <- pnorm(obs, mean = ei, sd = sdi)
+  if (alternative == "two.sided") {
+    if (obs <= ei) {
+      pv <- 2 * pv
+    } else {
+      pv <- 2 * (1 - pv)
+    }
+  }
+  if (alternative == "greater") {
+    pv <- 1 - pv
+  }
+
+  return(list(observed = obs, expected = ei, sd = sdi, p.value = pv))
 }
 
+
+moranSimple <- function(x, weight, na.rm = FALSE) {
+  if (nrow(weight) != ncol(weight)) {
+    stop("'weight' must be a square matrix")
+  }
+
+  N <- length(x)
+
+  if (nrow(weight) != N) {
+    stop("'weight' must have as many rows as observations in 'x'")
+  }
+
+  nas <- is.na(x)
+  if (any(nas)) {
+    if (na.rm) {
+      x <- x[!nas]
+      N <- length(x)
+      weight <- weight[!nas, !nas]
+    }
+    else {
+      stop("'x' has missing values")
+    }
+  }
+
+  # scale weights
+  rs <- rowSums(weight)
+  rs[rs == 0] <- 1
+  weight <- weight/rs
+
+  # Moran's I
+  W <- sum(weight)
+  m <- mean(x)
+  y <- x - m
+  cv <- sum(weight * y %o% y)
+  v <- sum(y^2)
+  obs <- (N/W) * (cv/v)
+
+  return(obs)
+}
+
+
 #' Permutation test to assess for significance of Moran's I
-moranPermutationTest <- function(z, w, N=1e4, seed=0, ncores=parallel::detectCores()-1, plot=FALSE, ...) {
+moranPermutationTest <- function(z, w, na.rm = FALSE, alternative = "two.sided", N=1e4, seed=0, ncores=parallel::detectCores()-1, plot=FALSE, ...) {
   # Set seed for reproducibility
   set.seed(seed)
   # Compute Moran's I
-  stat <- moranTest(z, w)['observed']
+  stat <- moranSimple(z, w)
   # Simulate null distribution
   sim <- unlist(parallel::mclapply(seq_len(N), function(i) {
-    moranTest(sample(z, length(z), replace=TRUE), w)['observed']
+    moranSimple(sample(z, length(z), replace=TRUE), w)
   }, mc.cores=ncores))
   p.value <- mean((all <- c(stat, sim)) >= stat)
   if(plot) {
