@@ -84,7 +84,7 @@ moranTest <- function (x, weight, na.rm = FALSE, alternative = "greater") {
   W.sq <- W^2
   N.sq <- N^2
   S1 <- 0.5 * sum((weight + t(weight))^2)
-  S2 <- sum((applz(weight, 1, sum) + applz(weight, 2, sum))^2)
+  S2 <- sum((apply(weight, 1, sum) + apply(weight, 2, sum))^2)
   S3 <- (sum(z^4)/N)/(v/N)^2
   S4 <- (N.sq - 3*N + 3)*S1 - N*S2 + 3*W.sq
   S5 <- (N.sq - N)*S1 - 2*N*S2 + 6*W.sq
