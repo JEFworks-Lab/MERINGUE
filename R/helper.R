@@ -23,8 +23,8 @@ getAdj <- function(mat, k) {
 
 #' Plot neighbor network
 #' https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r
-plotNetwork <- function(pos, adj, line.col='red', line.power=1, ...) {
-  plot(pos, pch=16)
+plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...) {
+  plot(pos, pch=16, col=col)
   idx <- which(adj>0, arr.ind = T)
   for(i in seq_len(nrow(idx))) {
     lines(
@@ -40,7 +40,8 @@ plotNetwork <- function(pos, adj, line.col='red', line.power=1, ...) {
 #' Moran's I compute from scratch
 #' x is value
 #' weight is adjacency matrix (weights)
-moranTest <- function (x, weight, na.rm = FALSE, alternative = "two.sided") {
+#' use log.p since many p-values very small (avoid 0s)
+moranTest <- function (x, weight, na.rm = FALSE, alternative = "greater") {
 
   if (nrow(weight) != ncol(weight)) {
     stop("'weight' must be a square matrix")
@@ -67,25 +68,24 @@ moranTest <- function (x, weight, na.rm = FALSE, alternative = "two.sided") {
   # first moment
   ei <- -1/(N - 1)
 
-  # scale weights
+  # unitization
   rs <- rowSums(weight)
   rs[rs == 0] <- 1
   weight <- weight/rs
 
   # Moran's I
   W <- sum(weight)
-  m <- mean(x)
-  y <- x - m
-  cv <- sum(weight * y %o% y)
-  v <- sum(y^2)
+  z <- x - mean(x)
+  cv <- sum(weight * z %o% z)
+  v <- sum(z^2)
   obs <- (N/W) * (cv/v)
 
   # second moment
   W.sq <- W^2
   N.sq <- N^2
   S1 <- 0.5 * sum((weight + t(weight))^2)
-  S2 <- sum((apply(weight, 1, sum) + apply(weight, 2, sum))^2)
-  S3 <- (sum(y^4)/N)/(v/N)^2
+  S2 <- sum((applz(weight, 1, sum) + applz(weight, 2, sum))^2)
+  S3 <- (sum(z^4)/N)/(v/N)^2
   S4 <- (N.sq - 3*N + 3)*S1 - N*S2 + 3*W.sq
   S5 <- (N.sq - N)*S1 - 2*N*S2 + 6*W.sq
   ei2 <- (N*S4 - S3*S5)/((N - 1)*(N - 2)*(N - 3) * W.sq)
@@ -171,13 +171,13 @@ moranPermutationTest <- function(z, w, na.rm = FALSE, alternative = "two.sided",
 
 
 #' Gridded bivariate interpolation
-interpolate <- function(pos, gexp, binSize=100, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
+interpolate <- function(pos, gexp, binSize=100, cex=1, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
   z <- gexp
   x <- pos[,1]
   y <- pos[,2]
   int <- akima::interp(x, y, z, nx=binSize, ny=binSize, linear=FALSE)
   if(plot) {
-    plot(pos, col=map2col(z), pch=16, cex=2, axes=FALSE, frame.plot=TRUE, xlab=NA, ylab=NA, ...)
+    plot(pos, col=map2col(z), pch=16, cex=cex, axes=FALSE, frame.plot=TRUE, xlab=NA, ylab=NA, ...)
     image(int, col=col, axes=FALSE, frame.plot=TRUE, ...)
   }
   return(int)

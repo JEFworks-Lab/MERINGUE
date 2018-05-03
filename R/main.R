@@ -12,12 +12,12 @@
 #'
 #' @export
 #'
-getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE) {
+getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) {
   if(length(klist)>1) {
     adjList <-  BiocParallel::bplapply(seq_along(klist), function(i) {
       k <- klist[i]
       adj <- getAdj(pos, k=k)
-    }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores))
+    }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=length(klist), progressbar=verbose))
     adj <- Reduce("+", adjList) / length(adjList)
   } else {
     adj <- getAdj(pos, k=klist)
@@ -58,7 +58,7 @@ getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=1, verbose=TR
     } else {
       moranTest(value, adj)
     }
-  }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores)))
+  }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=min(100, nrow(mat)/10), progressbar=verbose)))
   if(verbose) {
     close(pb)
   }
@@ -68,6 +68,7 @@ getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=1, verbose=TR
 
   results$p.adj <- stats::p.adjust(results$p.value)
   results <- results[order(results$p.adj),]
+
   return(results)
 }
 

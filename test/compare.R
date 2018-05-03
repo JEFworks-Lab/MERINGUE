@@ -18,53 +18,78 @@ set.seed(1)
 #)
 #pos[,1] <- sort(pos[,1])
 #pos[,2] <- sort(pos[,2])
-pos <- rbind(
-    cbind(rep(1:10, 50), 1:500),
-    cbind(rep(1:10, 50), 1:100)
-)
-pos <- data.frame(pos)
-colnames(pos) <- c('x', 'y')
-rownames(pos) <- paste0('cell', 1:nrow(pos))
-head(pos)
-group <- c(rep('g1', 500), rep('g2', 50))
-names(group) <- rownames(pos)
-group <- factor(group)
-plot(pos, col=rainbow(2)[group])
+## pos <- rbind(
+##     cbind(rep(1:10, 50), 100:600),
+##     cbind(rep(1:10, 50), (1:500)/10)
+## )
+## pos <- data.frame(pos)
+## colnames(pos) <- c('x', 'y')
+## rownames(pos) <- paste0('cell', 1:nrow(pos))
+## head(pos)
+## group <- c(rep('g1', 500), rep('g2', 500))
+## names(group) <- rownames(pos)
+## group <- factor(group)
+## plot(pos, col=rainbow(2)[group])
 
-########## gene expression is uniformly distributed (true negative)
-set.seed(1)
-#value <- rnorm(nrow(pos))
-value <- runif(n=nrow(pos))
-names(value) <- rownames(pos)
-plot(pos, col=map2col(value), pch=16)
-v1 <- value
+library('trendsceek')
 
-m <- cov(t(pos))
-hc <- hclust(1-as.dist(m), method='ward')
-heatmap(m, ColSideColors=rainbow(2)[group], Rowv=as.dendrogram(hc), Colv=as.dendrogram(hc))
-plot(pos, col=rainbow(2)[cutree(hc,2)])
-v2 <- m[1,]
-plot(pos, col=map2col(v2), pch=16)
+##create synthetic dataset
+#pp = sim_pois(300)
+set.seed(0)
+win_len = 1
+lambda_int = function(x,y) {1000 * exp(-3*y)} # inhomogenous poisson
+#lambda_int = 300
+pp = spatstat::rpoispp(lambda_int, win = spatstat::owin(c(0, win_len), c(0, win_len)))
+low_expr = c(10, 10)
+high_expr = c(20, 50)
+pp = add_markdist_hotspot(pp, low_expr, high_expr, hotspot_size=0.25)
+pp = add_markdist_streak(pp, low_expr, high_expr, streak_height_frac=0.25)
+pp = add_markdist_step(pp, low_expr, high_expr, step_border=0.25)
+pos <- cbind(pp$x, pp$y)
+cd <- t(pp$marks) + rnorm(nrow(pos))*5
+#cd <- t(pp$marks)
+dim(cd)
+rownames(pos) <- colnames(cd)
+plot(pos, col=map2col(cd[1,]), pch=16)
+plot(pos, col=map2col(cd[3,]), pch=16)
+plot(pos, col=map2col(cd[5,]), pch=16)
 
-########## gene expression is confounded with spatial pattern
-set.seed(1)
-value <- runif(nrow(pos))
-value[1:500] <- value[1:500] + rnorm(500, mean=5)
-#value <- abs(pos$x) + abs(pos$y)
-names(value) <- rownames(pos)
-plot(pos, col=map2col(value), pch=16)
-v3 <- value
+## these simulations fail for trensceek since in-homogenous poisson
 
-########## gene expression
-## set.seed(0)
+## ########## gene expression is uniformly distributed (true negative)
+## set.seed(1)
+## #value <- rnorm(nrow(pos))
 ## value <- runif(n=nrow(pos))
-## value[pos$x > 150] <- value[pos$x > 150]*2
-## value[pos$x < 50] <- value[pos$x < 50]*2
+## names(value) <- rownames(pos)
+## plot(pos, col=map2col(value), pch=16)
+## v1 <- value
+
+## m <- cov(t(pos))
+## hc <- hclust(1-as.dist(m), method='ward')
+## heatmap(m, ColSideColors=rainbow(2)[group], Rowv=as.dendrogram(hc), Colv=as.dendrogram(hc))
+## plot(pos, col=rainbow(2)[cutree(hc,2)])
+## v2 <- m[1,]
+## plot(pos, col=map2col(v2), pch=16)
+
+## ########## gene expression is confounded with spatial pattern
+## set.seed(1)
+## value <- runif(nrow(pos))
+## value[1:500] <- value[1:500] + rnorm(500, mean=5)
+## #value <- abs(pos$x) + abs(pos$y)
+## names(value) <- rownames(pos)
 ## plot(pos, col=map2col(value), pch=16)
 ## v3 <- value
 
-cd <- rbind(v1, v2, v3)
-head(cd)
+## ########## gene expression
+## ## set.seed(0)
+## ## value <- runif(n=nrow(pos))
+## ## value[pos$x > 150] <- value[pos$x > 150]*2
+## ## value[pos$x < 50] <- value[pos$x < 50]*2
+## ## plot(pos, col=map2col(value), pch=16)
+## ## v3 <- value
+
+## cd <- rbind(v1, v2, v3)
+## head(cd)
 
 ########### MERingue
 adj <- getSpatialWeights(pos, k=3)
