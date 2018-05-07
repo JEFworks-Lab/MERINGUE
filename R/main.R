@@ -17,7 +17,7 @@ getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) 
     adjList <-  BiocParallel::bplapply(seq_along(klist), function(i) {
       k <- klist[i]
       adj <- getAdj(pos, k=k)
-    }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=length(klist), progressbar=verbose))
+    }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=length(klist)/ncores, progressbar=verbose))
     adj <- Reduce("+", adjList) / length(adjList)
   } else {
     adj <- getAdj(pos, k=klist)
@@ -45,23 +45,23 @@ getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) 
 #'
 getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=1, verbose=TRUE, ...) {
 
-  if(verbose) {
-    pb <- txtProgressBar(min=0, max=nrow(mat), char = ".") # use progress bar
-  }
+  ## if(verbose) {
+  ##   pb <- txtProgressBar(min=0, max=nrow(mat), char = ".") # use progress bar
+  ## }
   results <- do.call(rbind, BiocParallel::bplapply(seq_len(nrow(mat)), function(i) {
-    if(verbose) {
-      setTxtProgressBar(pb, i)
-    }
+    ## if(verbose) {
+    ##   setTxtProgressBar(pb, i)
+    ## }
     value <- mat[i,]
     if(permutation) {
       moranPermutationTest(value, adj, ncores=1, ...)
     } else {
       moranTest(value, adj)
     }
-  }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=min(100, nrow(mat)/10), progressbar=verbose)))
-  if(verbose) {
-    close(pb)
-  }
+  }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=nrow(mat), progressbar=verbose)))
+  ## if(verbose) {
+  ##   close(pb)
+  ## }
 
   rownames(results) <- rownames(mat)
   results <- as.data.frame(results)

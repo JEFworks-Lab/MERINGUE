@@ -1,10 +1,17 @@
-
-
 #' Helper function to map values to colors
 #' Source: https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r
-map2col <- function(x, pal=colorRampPalette(c('blue', 'white', 'red'))(100), limits=NULL){
+map2col <- function(x, pal=colorRampPalette(c('blue', 'white', 'red'))(100), na.col='grey', limits=NULL){
+  original <- x
+  x <- na.omit(x)
   if(is.null(limits)) limits=range(x)
-  pal[findInterval(x,seq(limits[1],limits[2],length.out=length(pal)+1), all.inside=TRUE)]
+  y <- pal[findInterval(x,seq(limits[1],limits[2],length.out=length(pal)+1), all.inside=TRUE)]
+  names(y) <- names(x)
+
+  colors <- rep(na.col, length(original))
+  names(colors) <- names(original)
+  colors[names(y)] <- y
+
+  return(colors)
 }
 
 #' K nearest neighbors
@@ -40,8 +47,8 @@ getMnn <- function(ctA, ctB, pos, k) {
     ##     knnB.named[i,][vi]
     ## })
     ## names(mnnB) <- rownames(knnB.named)
-    mnnA <- lapply(1:nrow(knnA.named), function(i) {
-        vi <- sapply(1:k, function(j) {
+    mnnA <- lapply(seq_len(nrow(knnA.named)), function(i) {
+        vi <- sapply(seq_len(k), function(j) {
             rownames(knnA.named)[i] %in% knnB.named[knnA.named[i,j],]
         })
         knnA.named[i,][vi]
@@ -61,8 +68,12 @@ getMnn <- function(ctA, ctB, pos, k) {
             names(mnn)[i]
             ] <<- 1
     }))
+
+    # reorder
+    adj <- adj[rownames(pos), rownames(pos)]
     return(adj)
 }
+
 
 #' Nearest background neighbor
 getBnn <- function(cct, nct, pos, k) {
@@ -260,4 +271,80 @@ winsorize <- function (x, fraction=.05) {
    x[ x < lim[1] ] <- lim[1]
    x[ x > lim[2] ] <- lim[2]
    x
+}
+
+
+
+
+spatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight=NULL, pos=NULL, k=3) {
+    # make ctA the smaller group
+    if(length(groupA) < length(groupB)) {
+        ctA <- groupA
+        ctB <- groupB
+    } else {
+        ctA <- groupB
+        ctB <- groupA
+    }
+
+    # restrict to expression of gene A in group A
+    # and expression of gene B in group B
+    x <- gexpA
+    y <- gexpB
+    x[groupB] <- NA
+    y[groupA] <- NA
+
+    if(is.null(weight)) {
+        weight <- getMnn(ctA, ctB, pos, k)
+    }
+
+    # scale weights
+    rs <- rowSums(weight)
+    rs[rs == 0] <- 1
+    weight <- weight/rs
+
+    # compute spatial cross correlation
+    N <- length(x)
+    W <- sum(weight)
+    dx <- x - mean(x, na.rm=TRUE)
+    dy <- y - mean(y, na.rm=TRUE)
+
+    cv1 <- dx %o% dy
+    cv2 <- dy %o% dx
+    cv1[is.na(cv1)] <- 0
+    cv2[is.na(cv2)] <- 0
+
+    cv <- sum(weight * ( cv1 + cv2 ), na.rm=TRUE)
+    v <- sqrt(sum(dx^2, na.rm=TRUE) * sum(dy^2, na.rm=TRUE))
+    SCI <- (N/W) * (cv/v)
+
+    return(SCI)
+}
+
+
+
+
+#' plot boxplot of expression for nearest neighbor
+plotNeighborBoxplot <- function(gexpA, gexpB, groupA, groupB, weight) {
+    par(mfrow=c(1,2))
+
+    ## plot correlation between groupA cells and neighbors
+    nbs <- lapply(groupA, function(x) names(which(weight[x,]==1)))
+    names(nbs) <- groupA
+    ## gene A expression in group A
+    foo <- gexpA[groupA]
+
+    ## average gene B expression for neighbors from group B
+    bar <- unlist(lapply(nbs, function(y) mean(gexpB[y])))
+    plot(foo, bar, xlab='gexpA in groupA', ylab='gexpB in nearest neighbor in groupB')
+
+    ## boxplot of distribution
+    bard <- do.call(rbind, lapply(names(nbs), function(y) {
+                               ngexp <- gexpB[nbs[[y]]]
+                               cbind(cell=rep(y, length(ngexp)), ngexp=ngexp)
+                           }))
+    bard <- cbind(bard, gexp=foo[bard[,'cell']])
+    bard <- data.frame(bard)
+    class(bard$ngexp) <- 'numeric'
+    class(bard$gexp) <- 'numeric'
+    boxplot(ngexp~gexp, data=bard)
 }
