@@ -133,3 +133,120 @@ areColors <- function(x) {
   })
 }
 
+
+
+
+
+
+
+
+#' Plot neighbor network
+#' https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r
+plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...) {
+  plot(pos, pch=16, col=col, ...)
+  idx <- which(adj>0, arr.ind = T)
+  for(i in seq_len(nrow(idx))) {
+    lines(
+      c(pos[idx[i,1],1], pos[idx[i,2],1]),
+      c(pos[idx[i,1],2], pos[idx[i,2],2]),
+      col=line.col,
+      lwd=adj[idx]^line.power,
+    )
+  }
+}
+
+
+#' Helper function to map values to colors
+#' Source: https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r
+map2col <- function(x, pal=colorRampPalette(c('blue', 'white', 'red'))(100), na.col='grey', limits=NULL){
+  original <- x
+  x <- na.omit(x)
+  if(is.null(limits)) limits=range(x)
+  y <- pal[findInterval(x,seq(limits[1],limits[2],length.out=length(pal)+1), all.inside=TRUE)]
+  names(y) <- names(x)
+
+  colors <- rep(na.col, length(original))
+  names(colors) <- names(original)
+  colors[names(y)] <- y
+
+  return(colors)
+}
+
+
+
+#' Gridded bivariate interpolation
+interpolate <- function(pos, gexp, zlim=c(-1,1), fill=FALSE, binSize=100, cex=1, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
+    z <- scale(winsorize(gexp))[,1]
+    names(z) <- cct
+    z[z < zlim[1]] <- zlim[1]
+    z[z > zlim[2]] <- zlim[2]
+    x <- pos[,1]
+    y <- pos[,2]
+    names(x) <- names(y) <- rownames(pos)
+
+    if(fill) {
+        zb <- rep(0, nrow(pos))
+        names(zb) <- rownames(pos)
+        zb[cct] <- z
+    } else {
+        x <- x[cct]
+        y <- y[cct]
+        zb <- z
+    }
+
+    int <- akima::interp(x, y, zb, nx=binSize, ny=binSize, linear=TRUE)
+
+    if(plot) {
+        plot(pos[cct,], col=map2col(z), pch=16)
+        image(int, col=col, axes=FALSE, frame.plot=TRUE)
+    }
+
+    return(int)
+}
+
+
+#' 2D kernel density estimation
+plotDensity <- function(pos) {
+  x <- pos[,1]
+  y <- pos[,2]
+  dens <- MASS::kde2d(x, y)
+  persp(dens, phi = 30, theta = 20, d = 5)
+}
+
+
+
+
+
+
+#' plot boxplot of expression for nearest neighbor
+plotNeighborBoxplot <- function(gexpA, gexpB, groupA, groupB, weight) {
+    par(mfrow=c(1,2))
+
+    ## plot correlation between groupA cells and neighbors
+    nbs <- lapply(groupA, function(x) names(which(weight[x,]==1)))
+    names(nbs) <- groupA
+    ## gene A expression in group A
+    foo <- gexpA[groupA]
+
+    ## average gene B expression for neighbors from group B
+    bar <- unlist(lapply(nbs, function(y) mean(gexpB[y])))
+
+    lmfit <- lm(bar~foo)
+
+    plot(foo, bar, xlab='gexpA in groupA', ylab='gexpB in nearest neighbor in groupB')
+    abline(lmfit)
+    text(0,0, paste0('p-value: ', coef(summary(lmfit))['foo','Pr(>|t|)']), adj=0, col='red', font=2)
+
+    ## boxplot of distribution
+    bard <- do.call(rbind, lapply(names(nbs), function(y) {
+                               ngexp <- gexpB[nbs[[y]]]
+                               cbind(cell=rep(y, length(ngexp)), ngexp=ngexp)
+                           }))
+    bard <- cbind(bard, gexp=foo[bard[,'cell']])
+    bard <- data.frame(bard)
+    class(bard$ngexp) <- 'numeric'
+    class(bard$gexp) <- 'numeric'
+    boxplot(ngexp~gexp, data=bard)
+
+    return(lmfit)
+}
