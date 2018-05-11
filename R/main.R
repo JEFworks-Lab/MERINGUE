@@ -73,26 +73,23 @@ getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=1, verbose=TR
 }
 
 
-groupSigSpatialPatterns <- function(pos, mat, results, alpha=0.05, k=5, plot=TRUE, verbose=TRUE, ...) {
-    vi <- results$p.adj < alpha
-    vi[is.na(vi)] <- FALSE
-    if(verbose) {
-        message(paste0('Number of significantly spatially clustered genes: ', sum(vi)))
-    }
-    results.sig <- rownames(results)[vi]
+groupSigSpatialPatterns <- function(pos, mat, results.sig, deepSplit=0, minClusterSize=0, plot=TRUE, verbose=TRUE, ...) {
 
     m <- as.matrix(mat[results.sig,])
     m <- apply(m, 1, winsorize) # get rid of outliers
-    m <- scale(m)
-    d <- dist(t(m))
-    hc <- hclust(d)
+    d <- as.dist(1-cor(m))
+    hc <- hclust(d, method='ward.D')
+    if(plot) {
+        par(mfrow=c(1,1))
+        plot(hc)
+    }
     # dynamic tree cut
-    groups <- dynamicTreeCut::cutreeDynamic(dendro=hc, distM=as.matrix(d), method='hybrid', minClusterSize=10, deepSplit=0)
+    groups <- dynamicTreeCut::cutreeDynamic(dendro=hc, distM=as.matrix(d), method='hybrid', minClusterSize=minClusterSize, deepSplit=deepSplit)
     names(groups) <- hc$labels
     groups <- factor(groups)
     if(verbose) {
         message('Patterns detected:')
-        message(table(groups))
+        print(table(groups))
     }
 
     if(plot) {
@@ -104,15 +101,10 @@ groupSigSpatialPatterns <- function(pos, mat, results, alpha=0.05, k=5, plot=TRU
         if(sum(groups==g)>1) {
             m <- winsorize(mat[results.sig[groups==g],])
             ps <- colMeans(m)
-            pc <- prcomp(m)
-            pr <- pc$rotation[,1]
-            # double check direction is same
-            # if not, flip pc
-            if(cor(ps, pr)<0) {
-                pr <- -pr
-            }
+            pr <- scale(ps)[,1]
         } else {
-            pr <- winsorize(mat[results.sig[groups==g],])
+            ps <- winsorize(mat[results.sig[groups==g],])
+            pr <- scale(ps)[,1]
         }
         if(plot) {
             interpolate(pos, pr, main=paste0("Pattern ", g, " : ", sum(groups==g), " genes"), plot=TRUE, ...)
@@ -123,3 +115,4 @@ groupSigSpatialPatterns <- function(pos, mat, results, alpha=0.05, k=5, plot=TRU
 
     return(list(groups=groups, prs=prs))
 }
+

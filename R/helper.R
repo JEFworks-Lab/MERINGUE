@@ -1,19 +1,3 @@
-#' Helper function to map values to colors
-#' Source: https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r
-map2col <- function(x, pal=colorRampPalette(c('blue', 'white', 'red'))(100), na.col='grey', limits=NULL){
-  original <- x
-  x <- na.omit(x)
-  if(is.null(limits)) limits=range(x)
-  y <- pal[findInterval(x,seq(limits[1],limits[2],length.out=length(pal)+1), all.inside=TRUE)]
-  names(y) <- names(x)
-
-  colors <- rep(na.col, length(original))
-  names(colors) <- names(original)
-  colors[names(y)] <- y
-
-  return(colors)
-}
-
 #' K nearest neighbors
 getAdj <- function(mat, k) {
   ## nearest neighbors include self so add 1
@@ -87,20 +71,6 @@ getBnn <- function(cct, nct, pos, k) {
 }
 
 
-#' Plot neighbor network
-#' https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r
-plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...) {
-  plot(pos, pch=16, col=col, ...)
-  idx <- which(adj>0, arr.ind = T)
-  for(i in seq_len(nrow(idx))) {
-    lines(
-      c(pos[idx[i,1],1], pos[idx[i,2],1]),
-      c(pos[idx[i,1],2], pos[idx[i,2],2]),
-      col=line.col,
-      lwd=adj[idx]^line.power,
-    )
-  }
-}
 
 
 #' Moran's I compute from scratch
@@ -236,30 +206,6 @@ moranPermutationTest <- function(z, w, na.rm = FALSE, alternative = "two.sided",
 }
 
 
-#' Gridded bivariate interpolation
-interpolate <- function(pos, gexp, binSize=100, cex=1, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
-  z <- gexp
-  x <- pos[,1]
-  y <- pos[,2]
-  int <- akima::interp(x, y, z, nx=binSize, ny=binSize, linear=FALSE)
-  if(plot) {
-    plot(pos, col=map2col(z), pch=16, cex=cex, axes=FALSE, frame.plot=TRUE, xlab=NA, ylab=NA, ...)
-    image(int, col=col, axes=FALSE, frame.plot=TRUE, ...)
-  }
-  return(int)
-}
-
-
-#' 2D kernel density estimation
-densityPlot <- function(pos) {
-  x <- pos[,1]
-  y <- pos[,2]
-  dens <- MASS::kde2d(x, y)
-  persp(dens, phi = 30, theta = 20, d = 5)
-}
-
-
-
 
 #' Winsorize expression values to prevent outliers
 winsorize <- function (x, fraction=.05) {
@@ -276,6 +222,7 @@ winsorize <- function (x, fraction=.05) {
 
 
 
+#' inter-cell-type cross cor
 spatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight=NULL, pos=NULL, k=3) {
     # make ctA the smaller group
     if(length(groupA) < length(groupB)) {
@@ -321,30 +268,27 @@ spatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight=NULL, pos=NULL,
 }
 
 
+#' intra-cell-type cross cor
+spatialIntraCrossCor <- function(x, y, weight) {
+    # scale weights
+    rs <- rowSums(weight)
+    rs[rs == 0] <- 1
+    weight <- weight/rs
 
+    # compute spatial cross correlation
+    N <- length(x)
+    W <- sum(weight)
+    dx <- x - mean(x, na.rm=TRUE)
+    dy <- y - mean(y, na.rm=TRUE)
 
-#' plot boxplot of expression for nearest neighbor
-plotNeighborBoxplot <- function(gexpA, gexpB, groupA, groupB, weight) {
-    par(mfrow=c(1,2))
+    cv1 <- dx %o% dy
+    cv2 <- dy %o% dx
+    cv1[is.na(cv1)] <- 0
+    cv2[is.na(cv2)] <- 0
 
-    ## plot correlation between groupA cells and neighbors
-    nbs <- lapply(groupA, function(x) names(which(weight[x,]==1)))
-    names(nbs) <- groupA
-    ## gene A expression in group A
-    foo <- gexpA[groupA]
-
-    ## average gene B expression for neighbors from group B
-    bar <- unlist(lapply(nbs, function(y) mean(gexpB[y])))
-    plot(foo, bar, xlab='gexpA in groupA', ylab='gexpB in nearest neighbor in groupB')
-
-    ## boxplot of distribution
-    bard <- do.call(rbind, lapply(names(nbs), function(y) {
-                               ngexp <- gexpB[nbs[[y]]]
-                               cbind(cell=rep(y, length(ngexp)), ngexp=ngexp)
-                           }))
-    bard <- cbind(bard, gexp=foo[bard[,'cell']])
-    bard <- data.frame(bard)
-    class(bard$ngexp) <- 'numeric'
-    class(bard$gexp) <- 'numeric'
-    boxplot(ngexp~gexp, data=bard)
+    cv <- sum(weight * ( cv1 + cv2 ), na.rm=TRUE)
+    v <- sqrt(sum(dx^2, na.rm=TRUE) * sum(dy^2, na.rm=TRUE))
+    SCI <- (N/W) * (cv/v)
+    SCI
 }
+
