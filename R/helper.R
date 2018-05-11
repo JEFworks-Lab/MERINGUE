@@ -276,6 +276,7 @@ winsorize <- function (x, fraction=.05) {
 
 
 
+#' inter-cell-type cross cor
 spatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight=NULL, pos=NULL, k=3) {
     # make ctA the smaller group
     if(length(groupA) < length(groupB)) {
@@ -321,6 +322,29 @@ spatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight=NULL, pos=NULL,
 }
 
 
+#' intra-cell-type cross cor
+spatialIntraCrossCor <- function(x, y, weight) {
+    # scale weights
+    rs <- rowSums(weight)
+    rs[rs == 0] <- 1
+    weight <- weight/rs
+
+    # compute spatial cross correlation
+    N <- length(x)
+    W <- sum(weight)
+    dx <- x - mean(x, na.rm=TRUE)
+    dy <- y - mean(y, na.rm=TRUE)
+
+    cv1 <- dx %o% dy
+    cv2 <- dy %o% dx
+    cv1[is.na(cv1)] <- 0
+    cv2[is.na(cv2)] <- 0
+
+    cv <- sum(weight * ( cv1 + cv2 ), na.rm=TRUE)
+    v <- sqrt(sum(dx^2, na.rm=TRUE) * sum(dy^2, na.rm=TRUE))
+    SCI <- (N/W) * (cv/v)
+    SCI
+}
 
 
 #' plot boxplot of expression for nearest neighbor
@@ -335,7 +359,12 @@ plotNeighborBoxplot <- function(gexpA, gexpB, groupA, groupB, weight) {
 
     ## average gene B expression for neighbors from group B
     bar <- unlist(lapply(nbs, function(y) mean(gexpB[y])))
+
+    lmfit <- lm(bar~foo)
+
     plot(foo, bar, xlab='gexpA in groupA', ylab='gexpB in nearest neighbor in groupB')
+    abline(lmfit)
+    text(0,0, paste0('p-value: ', coef(summary(lmfit))['foo','Pr(>|t|)']), adj=0, col='red', font=2)
 
     ## boxplot of distribution
     bard <- do.call(rbind, lapply(names(nbs), function(y) {
@@ -347,4 +376,6 @@ plotNeighborBoxplot <- function(gexpA, gexpB, groupA, groupB, weight) {
     class(bard$ngexp) <- 'numeric'
     class(bard$gexp) <- 'numeric'
     boxplot(ngexp~gexp, data=bard)
+
+    return(lmfit)
 }
