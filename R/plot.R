@@ -177,7 +177,7 @@ map2col <- function(x, pal=colorRampPalette(c('blue', 'white', 'red'))(100), na.
 #' Gridded bivariate interpolation
 interpolate <- function(pos, gexp, zlim=c(-1,1), fill=FALSE, binSize=100, cex=1, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
     z <- scale(winsorize(gexp))[,1]
-    names(z) <- cct
+    names(z) <- names(gexp)
     z[z < zlim[1]] <- zlim[1]
     z[z > zlim[2]] <- zlim[2]
     x <- pos[,1]
@@ -187,17 +187,17 @@ interpolate <- function(pos, gexp, zlim=c(-1,1), fill=FALSE, binSize=100, cex=1,
     if(fill) {
         zb <- rep(0, nrow(pos))
         names(zb) <- rownames(pos)
-        zb[cct] <- z
+        zb[names(gexp)] <- z
     } else {
-        x <- x[cct]
-        y <- y[cct]
+        x <- x[names(gexp)]
+        y <- y[names(gexp)]
         zb <- z
     }
 
     int <- akima::interp(x, y, zb, nx=binSize, ny=binSize, linear=TRUE)
 
     if(plot) {
-        plot(pos[cct,], col=map2col(z), pch=16)
+        plot(pos[names(gexp),], col=map2col(z), pch=16)
         image(int, col=col, axes=FALSE, frame.plot=TRUE)
     }
 
