@@ -73,12 +73,13 @@ getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=1, verbose=TR
 }
 
 
-groupSigSpatialPatterns <- function(pos, mat, results.sig, deepSplit=0, minClusterSize=0, plot=TRUE, verbose=TRUE, ...) {
+groupSigSpatialPatterns <- function(pos, mat, d, deepSplit=0, minClusterSize=0, plot=TRUE, verbose=TRUE, ...) {
 
-    m <- as.matrix(mat[results.sig,])
-    m <- apply(m, 1, winsorize) # get rid of outliers
-    d <- as.dist(1-cor(m))
-    hc <- hclust(d, method='ward.D')
+    #m <- as.matrix(mat[results.sig,])
+    #m <- apply(m, 1, winsorize) # get rid of outliers
+    #d <- as.dist(1-cor(m))
+
+    hc <- hclust(d)
     if(plot) {
         par(mfrow=c(1,1))
         plot(hc)
@@ -113,6 +114,6 @@ groupSigSpatialPatterns <- function(pos, mat, results.sig, deepSplit=0, minClust
     })
     names(prs) <- levels(groups)
 
-    return(list(groups=groups, prs=prs))
+    return(list(hc=hc, groups=groups, prs=prs))
 }
 
