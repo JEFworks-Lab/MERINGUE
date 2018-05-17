@@ -15,5 +15,7 @@ Imports:
     BiocParallel,
     Matrix,
     akima,
-    MASS
+    MASS,
+    Rcpp
+LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 6.0.1
