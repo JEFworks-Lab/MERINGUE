@@ -57,11 +57,10 @@ double spatialCrossCor_C(arma::vec x,
 
 // [[Rcpp::export]]
 arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight) {
-  int N = sigMat.n_cols;
-  int M = sigMat.n_rows;
+  int N = sigMat.n_rows;
 
   arma::mat scor;
-  scor.set_size(N, M);
+  scor.set_size(N, N);
 
   int i;
   int j;
@@ -69,7 +68,7 @@ arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight) {
   arma::vec y;
   double SCI;
   for (i = 0; i < N; i++) {
-    for (j = 0; j < M; j++) {
+    for (j = 0; j < N; j++) {
       x = conv_to<arma::vec>::from(sigMat.row(i)); // convert from rowvec to vec
       y = conv_to<arma::vec>::from(sigMat.row(j));
       SCI = spatialCrossCor_C(x, y, weight);
@@ -81,19 +80,52 @@ arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight) {
 }
 
 
-/*** R
-w = matrix(c(1,1,0,1), 2,2)
-#unitize_C(w)
-#weight = w
-#rs <- rowSums(weight)
-#rs[rs == 0] <- 1
-#weight <- weight/rs
-#print(weight)
+// [[Rcpp::export]]
+arma::vec moranTest_C(arma::vec x, arma::mat weight) {
+  double N = weight.n_rows;
 
-x = c(1,2)
-y = c(1,3)
-#spatialCrossCor_C(x,y,w)
+  // first moment
+  double ei = -1/(N - 1);
 
-sigMat = rbind(x,y)
-spatialCrossCorMatrix_C(sigMat, w)
-*/
+  // unitization
+  weight = unitize_C(weight);
+
+  // Moran's I
+  double W = sum(sum(weight));
+  arma::vec z = x - mean(x);
+  double cv = sum(sum(weight % (z * z.t()))); // weight * (z %o% z)
+  NumericVector zbar = wrap(z); // convert to numeric vector to use power
+  double v = sum(pow(zbar, 2));
+  double obs = (N/W) * (cv/v);
+
+  // second moment
+  double Wsq = pow(W, 2);
+  double Nsq = pow(N, 2);
+  NumericMatrix wbar = wrap(weight + weight.t());
+  arma::mat wbarbar = pow(wbar, 2);
+  double S1 = 0.5 * sum(sum(wbarbar));
+  arma::vec rs = conv_to<arma::vec>::from(sum(weight, 1));
+  arma::vec cs = conv_to<arma::vec>::from(sum(weight, 0));
+  arma::vec sg =  rs + cs;
+  NumericVector sgbar = wrap(sg);
+  arma::vec sbarbar = pow(sgbar, 2);
+  double S2 = sum(sbarbar); //sg^2
+  arma::vec zbarbar = pow(zbar, 4);
+  double S3 = (sum(zbarbar)/N)/pow(v/N, 2);
+  double S4 = (Nsq - 3*N + 3)*S1 - N*S2 + 3*Wsq;
+  double S5 = (Nsq - N)*S1 - 2*N*S2 + 6*Wsq;
+  double ei2 = (N*S4 - S3*S5)/((N - 1)*(N - 2)*(N - 3) * Wsq);
+
+  // standard deviation
+  double sdi = sqrt(ei2 - pow(ei, 2));
+
+  // return results as vector
+  arma::vec results;
+  results.set_size(3);
+  results.at(0) = obs; // Moran's I
+  results.at(1) = ei; // Expected
+  results.at(2) = sdi; // SD
+
+  return results;
+}
+
