@@ -1,9 +1,11 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppProgress)]]
+#include <progress.hpp>
+#include <progress_bar.hpp>
 
 using namespace arma;
 using namespace Rcpp;
-
 
 // [[Rcpp::export]]
 arma::mat unitize_C(arma::mat weight) {
@@ -131,7 +133,7 @@ arma::vec moranTest_C(arma::vec x, arma::mat weight) {
 
 
 // [[Rcpp::export]]
-arma::mat getSpatialPatterns_C(arma::mat mat, arma::mat adj) {
+arma::mat getSpatialPatterns_C(arma::mat mat, arma::mat adj, bool display_progress=true) {
   double N = mat.n_rows;
 
   arma::mat results;
@@ -140,7 +142,13 @@ arma::mat getSpatialPatterns_C(arma::mat mat, arma::mat adj) {
   int i;
   arma::vec value;
   arma::vec Ir;
+
+  Progress p(N, display_progress);
+  if (Progress::check_abort() ) {
+    return results;
+  }
   for (i = 0; i < N; i++) {
+    p.increment();
     value = conv_to<arma::vec>::from(mat.row(i));
     Ir = moranTest_C(value, adj);
     results.row(i) = Ir.t();
