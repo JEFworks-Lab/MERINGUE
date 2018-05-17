@@ -16,7 +16,6 @@ Imports:
     Matrix,
     akima,
     MASS,
-    Rcpp,
-    RcppProgress
-LinkingTo: Rcpp, RcppArmadillo
+    Rcpp
+LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 6.0.1

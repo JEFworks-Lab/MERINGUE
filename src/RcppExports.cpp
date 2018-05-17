@@ -31,14 +31,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // spatialCrossCorMatrix_C
-arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight);
-RcppExport SEXP _MERingue_spatialCrossCorMatrix_C(SEXP sigMatSEXP, SEXP weightSEXP) {
+arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight, bool display_progress);
+RcppExport SEXP _MERingue_spatialCrossCorMatrix_C(SEXP sigMatSEXP, SEXP weightSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type sigMat(sigMatSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type weight(weightSEXP);
-    rcpp_result_gen = Rcpp::wrap(spatialCrossCorMatrix_C(sigMat, weight));
+    Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
+    rcpp_result_gen = Rcpp::wrap(spatialCrossCorMatrix_C(sigMat, weight, display_progress));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -55,14 +56,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // getSpatialPatterns_C
-arma::mat getSpatialPatterns_C(arma::mat mat, arma::mat adj);
-RcppExport SEXP _MERingue_getSpatialPatterns_C(SEXP matSEXP, SEXP adjSEXP) {
+arma::mat getSpatialPatterns_C(arma::mat mat, arma::mat adj, bool display_progress);
+RcppExport SEXP _MERingue_getSpatialPatterns_C(SEXP matSEXP, SEXP adjSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type mat(matSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type adj(adjSEXP);
-    rcpp_result_gen = Rcpp::wrap(getSpatialPatterns_C(mat, adj));
+    Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
+    rcpp_result_gen = Rcpp::wrap(getSpatialPatterns_C(mat, adj, display_progress));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -70,9 +72,9 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_MERingue_unitize_C", (DL_FUNC) &_MERingue_unitize_C, 1},
     {"_MERingue_spatialCrossCor_C", (DL_FUNC) &_MERingue_spatialCrossCor_C, 3},
-    {"_MERingue_spatialCrossCorMatrix_C", (DL_FUNC) &_MERingue_spatialCrossCorMatrix_C, 2},
+    {"_MERingue_spatialCrossCorMatrix_C", (DL_FUNC) &_MERingue_spatialCrossCorMatrix_C, 3},
     {"_MERingue_moranTest_C", (DL_FUNC) &_MERingue_moranTest_C, 2},
-    {"_MERingue_getSpatialPatterns_C", (DL_FUNC) &_MERingue_getSpatialPatterns_C, 2},
+    {"_MERingue_getSpatialPatterns_C", (DL_FUNC) &_MERingue_getSpatialPatterns_C, 3},
     {NULL, NULL, 0}
 };
 

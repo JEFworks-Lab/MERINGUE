@@ -9,15 +9,15 @@ spatialCrossCor_C <- function(x, y, weight) {
     .Call('_MERingue_spatialCrossCor_C', PACKAGE = 'MERingue', x, y, weight)
 }
 
-spatialCrossCorMatrix_C <- function(sigMat, weight) {
-    .Call('_MERingue_spatialCrossCorMatrix_C', PACKAGE = 'MERingue', sigMat, weight)
+spatialCrossCorMatrix_C <- function(sigMat, weight, display_progress = TRUE) {
+    .Call('_MERingue_spatialCrossCorMatrix_C', PACKAGE = 'MERingue', sigMat, weight, display_progress)
 }
 
 moranTest_C <- function(x, weight) {
     .Call('_MERingue_moranTest_C', PACKAGE = 'MERingue', x, weight)
 }
 
-getSpatialPatterns_C <- function(mat, adj) {
-    .Call('_MERingue_getSpatialPatterns_C', PACKAGE = 'MERingue', mat, adj)
+getSpatialPatterns_C <- function(mat, adj, display_progress = TRUE) {
+    .Call('_MERingue_getSpatialPatterns_C', PACKAGE = 'MERingue', mat, adj, display_progress)
 }
 

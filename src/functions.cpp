@@ -58,7 +58,7 @@ double spatialCrossCor_C(arma::vec x,
 
 
 // [[Rcpp::export]]
-arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight) {
+arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight, bool display_progress=true) {
   int N = sigMat.n_rows;
 
   arma::mat scor;
@@ -69,8 +69,14 @@ arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight) {
   arma::vec x;
   arma::vec y;
   double SCI;
+
+  Progress p(N*N, display_progress);
   for (i = 0; i < N; i++) {
     for (j = 0; j < N; j++) {
+      if (Progress::check_abort() ) {
+        return scor;
+      }
+      p.increment();
       x = conv_to<arma::vec>::from(sigMat.row(i)); // convert from rowvec to vec
       y = conv_to<arma::vec>::from(sigMat.row(j));
       SCI = spatialCrossCor_C(x, y, weight);
@@ -144,10 +150,10 @@ arma::mat getSpatialPatterns_C(arma::mat mat, arma::mat adj, bool display_progre
   arma::vec Ir;
 
   Progress p(N, display_progress);
-  if (Progress::check_abort() ) {
-    return results;
-  }
   for (i = 0; i < N; i++) {
+    if (Progress::check_abort() ) {
+      return results;
+    }
     p.increment();
     value = conv_to<arma::vec>::from(mat.row(i));
     Ir = moranTest_C(value, adj);
