@@ -4,6 +4,11 @@
 #include <progress.hpp>
 #include <progress_bar.hpp>
 
+#ifdef _OPENMP
+  // [[Rcpp::plugins(openmp)]]
+  #include <omp.h>
+#endif
+
 using namespace arma;
 using namespace Rcpp;
 
@@ -71,6 +76,9 @@ arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight, bool displ
   double SCI;
 
   Progress p(N*N, display_progress);
+  #ifdef _OPENMP
+    #pragma omp parallel for private(i, j)
+  #endif
   for (i = 0; i < N; i++) {
     for (j = 0; j < N; j++) {
       if (Progress::check_abort() ) {
