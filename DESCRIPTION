@@ -7,10 +7,10 @@ Description: Identifies spatial gene expression patterns in
   taking into consideration potential cell-type and 
   density differences within tissues.
 Depends: R (>= 3.0.0)
-License: What license is it under?
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: 
+Imports:
     RANN,
     BiocParallel,
     Matrix,
