@@ -39,10 +39,10 @@ getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) 
 #'
 #' @export
 #'
-getSpatialPatterns <- function(mat, adj) {
+getSpatialPatterns <- function(mat, adj, verbose=TRUE) {
 
   # Calculate Moran's I for each gene
-  results <- getSpatialPatterns_C(as.matrix(mat), as.matrix(adj))
+  results <- getSpatialPatterns_C(as.matrix(mat), as.matrix(adj), verbose)
   colnames(results) <- c('observed', 'expected', 'sd')
   rownames(results) <- rownames(mat)
   results <- as.data.frame(results)

@@ -142,6 +142,8 @@ areColors <- function(x) {
 
 #' Plot neighbor network
 #' https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r
+#'
+#' @export
 plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...) {
   plot(pos, pch=16, col=col, ...)
   idx <- which(adj>0, arr.ind = T)
@@ -151,6 +153,7 @@ plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...
       c(pos[idx[i,1],2], pos[idx[i,2],2]),
       col=line.col,
       lwd=adj[idx]^line.power,
+      ...
     )
   }
 }
@@ -175,6 +178,7 @@ map2col <- function(x, pal=colorRampPalette(c('blue', 'white', 'red'))(100), na.
 
 
 #' Gridded bivariate interpolation
+#' @export
 interpolate <- function(pos, gexp, trim=0, zlim=c(-1,1), fill=FALSE, binSize=100, cex=1, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
     z <- scale(winsorize(gexp, fraction=trim))[,1]
     names(z) <- names(gexp)
@@ -219,6 +223,7 @@ plotDensity <- function(pos) {
 
 
 #' plot boxplot of expression for nearest neighbor
+#' @export
 plotNeighborBoxplot <- function(gexpA, gexpB, groupA, groupB, weight) {
     par(mfrow=c(1,2))
 

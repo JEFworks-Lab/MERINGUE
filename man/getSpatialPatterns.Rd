@@ -4,21 +4,13 @@
 \alias{getSpatialPatterns}
 \title{Identify spatial clusters}
 \usage{
-getSpatialPatterns(mat, adj, permutation = FALSE, ncores = 1,
-  verbose = TRUE, ...)
+getSpatialPatterns(mat, adj)
 }
 \arguments{
 \item{mat}{Gene expression matrix. Must be normalized such that correlations
 will not be driven by technical artifacts.}
 
 \item{adj}{Spatial weights such as a weighted adjacency matrix}
-
-\item{permutation}{Whether to use a permutation-based testing. Empirical
-test used by default}
-
-\item{ncores}{Number of cores for parallelization across genes}
-
-\item{...}{Additional parameters to send to moranPermutationTest}
 }
 \description{
 Identify spatially clustered genes using Moran's I

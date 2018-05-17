@@ -5,7 +5,8 @@
 \title{Moran's I compute from scratch
 x is value
 weight is adjacency matrix (weights)
-use log.p since many p-values very small (avoid 0s)}
+use log.p since many p-values very small (avoid 0s)
+DEPRECATED -> use moranTest_C}
 \usage{
 moranTest(x, weight, na.rm = FALSE, alternative = "greater")
 }
@@ -14,4 +15,5 @@ Moran's I compute from scratch
 x is value
 weight is adjacency matrix (weights)
 use log.p since many p-values very small (avoid 0s)
+DEPRECATED -> use moranTest_C
 }
