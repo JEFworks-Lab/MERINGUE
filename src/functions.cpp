@@ -129,3 +129,24 @@ arma::vec moranTest_C(arma::vec x, arma::mat weight) {
   return results;
 }
 
+
+// [[Rcpp::export]]
+arma::mat getSpatialPatterns_C(arma::mat mat, arma::mat adj) {
+  double N = mat.n_rows;
+
+  arma::mat results;
+  results.set_size(N, 3);
+
+  int i;
+  arma::vec value;
+  arma::vec Ir;
+  for (i = 0; i < N; i++) {
+    value = conv_to<arma::vec>::from(mat.row(i));
+    Ir = moranTest_C(value, adj);
+    results.row(i) = Ir.t();
+  }
+
+  return results;
+}
+
+

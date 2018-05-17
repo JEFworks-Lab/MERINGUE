@@ -2,6 +2,7 @@
 #' x is value
 #' weight is adjacency matrix (weights)
 #' use log.p since many p-values very small (avoid 0s)
+#' DEPRECATED -> use moranTest_C
 moranTest <- function (x, weight, na.rm = FALSE, alternative = "greater") {
 
   if (nrow(weight) != ncol(weight)) {
@@ -68,46 +69,6 @@ moranTest <- function (x, weight, na.rm = FALSE, alternative = "greater") {
   }
 
   return(list(observed = obs, expected = ei, sd = sdi, p.value = pv))
-}
-
-
-moranSimple <- function(x, weight, na.rm = FALSE) {
-  if (nrow(weight) != ncol(weight)) {
-    stop("'weight' must be a square matrix")
-  }
-
-  N <- length(x)
-
-  if (nrow(weight) != N) {
-    stop("'weight' must have as many rows as observations in 'x'")
-  }
-
-  nas <- is.na(x)
-  if (any(nas)) {
-    if (na.rm) {
-      x <- x[!nas]
-      N <- length(x)
-      weight <- weight[!nas, !nas]
-    }
-    else {
-      stop("'x' has missing values")
-    }
-  }
-
-  # scale weights
-  rs <- rowSums(weight)
-  rs[rs == 0] <- 1
-  weight <- weight/rs
-
-  # Moran's I
-  W <- sum(weight)
-  m <- mean(x)
-  y <- x - m
-  cv <- sum(weight * y %o% y)
-  v <- sum(y^2)
-  obs <- (N/W) * (cv/v)
-
-  return(obs)
 }
 
 
@@ -256,4 +217,13 @@ lisaTest <- function (x, weight, na.rm=FALSE, alternative = "greater") {
     }
 
     return(data.frame(observed = Ii, expected = E.Ii, sd = Sd.Ii, p.value = pv))
+}
+
+
+#' Calculates a spatial cross correlation matrix
+#'
+spatialCrossCorMatrix <- function(sigMat, w) {
+  scor <- spatialCrossCorMatrix_C(as.matrix(sigMat), w)
+  colnames(scor) <- rownames(scor) <- rownames(sigMat)
+  return(scor)
 }

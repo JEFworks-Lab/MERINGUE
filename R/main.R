@@ -36,37 +36,24 @@ getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) 
 #' @param mat Gene expression matrix. Must be normalized such that correlations
 #'     will not be driven by technical artifacts.
 #' @param adj Spatial weights such as a weighted adjacency matrix
-#' @param permutation Whether to use a permutation-based testing. Empirical
-#'     test used by default
-#' @param ncores Number of cores for parallelization across genes
-#' @param ... Additional parameters to send to moranPermutationTest
 #'
 #' @export
 #'
-getSpatialPatterns <- function(mat, adj, permutation=FALSE, ncores=1, verbose=TRUE, ...) {
+getSpatialPatterns <- function(mat, adj) {
 
-  ## if(verbose) {
-  ##   pb <- txtProgressBar(min=0, max=nrow(mat), char = ".") # use progress bar
-  ## }
-  results <- do.call(rbind, BiocParallel::bplapply(seq_len(nrow(mat)), function(i) {
-    ## if(verbose) {
-    ##   setTxtProgressBar(pb, i)
-    ## }
-    value <- mat[i,]
-    if(permutation) {
-      moranPermutationTest(value, adj, ncores=1, ...)
-    } else {
-      moranTest(value, adj)
-    }
-  }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=nrow(mat), progressbar=verbose)))
-  ## if(verbose) {
-  ##   close(pb)
-  ## }
-
+  # Calculate Moran's I for each gene
+  results <- getSpatialPatterns_C(as.matrix(mat), as.matrix(adj))
+  colnames(results) <- c('observed', 'expected', 'sd')
   rownames(results) <- rownames(mat)
   results <- as.data.frame(results)
 
+  # Get p-value
+  # always assume we want greater autocorrelation
+  pv <- 1 - pnorm(results$observed, mean = results$expected, sd = results$sd)
+  results$p.value <- pv;
+  # multiple testing correction
   results$p.adj <- stats::p.adjust(results$p.value)
+  # order by significance
   results <- results[order(results$p.adj),]
 
   return(results)
