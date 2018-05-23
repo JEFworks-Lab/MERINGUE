@@ -239,11 +239,18 @@ getDensity <- function(pos, n = 100) {
   return(dens)
 }
 
-plotDensity(pos, n=100) {
+plotDensity <- function(pos, n=100) {
   dens <- getDensity(pos, n)
   plot(pos, col=map2col(dens), pch=16)
 }
 
+plotDensitySubset <- function(pos, subset, n=100) {
+  dens <- getDensity(pos[subset,], n)
+  densall <- rep(NA, nrow(pos))
+  names(densall) <- rownames(pos)
+  densall[subset] <- dens
+  plot(pos, col=map2col(densall), pch=16)
+}
 
 
 
