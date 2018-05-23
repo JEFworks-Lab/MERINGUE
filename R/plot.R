@@ -210,13 +210,39 @@ interpolate <- function(pos, gexp, trim=0, zlim=c(-1,1), fill=FALSE, binSize=100
 
 
 #' 2D kernel density estimation
-plotDensity <- function(pos) {
+plotInterpolatedDensity <- function(pos) {
   x <- pos[,1]
   y <- pos[,2]
   dens <- MASS::kde2d(x, y)
   persp(dens, phi = 30, theta = 20, d = 5)
 }
 
+
+
+#' Get density of points in 2 dimensions.
+#' @author Kamil Slowikowski http://slowkow.com/notes/ggplot2-color-by-density/
+#'
+#' @param x A numeric vector.
+#' @param y A numeric vector.
+#' @param n Create a square n by n grid to compute density.
+#' @return The density within each square.
+#'
+getDensity <- function(pos, n = 100) {
+  x <- pos[,1]
+  y <- pos[,2]
+  dens <- MASS::kde2d(x = x, y = y, n = n)
+  ix <- findInterval(x, dens$x)
+  iy <- findInterval(y, dens$y)
+  ii <- cbind(ix, iy)
+  dens <- dens$z[ii]
+  names(dens) <- rownames(pos)
+  return(dens)
+}
+
+plotDensity(pos, n=100) {
+  dens <- getDensity(pos, n)
+  plot(pos, col=map2col(dens), pch=16)
+}
 
 
 
