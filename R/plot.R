@@ -288,3 +288,14 @@ plotNeighborBoxplot <- function(gexpA, gexpB, groupA, groupB, weight) {
 
     return(lmfit)
 }
+
+
+
+
+#' Rotate position by angle theta in radians
+rotatePos <- function(pos, theta) {
+  rotMat <- matrix(c(cos(theta), sin(theta), -sin(theta), cos(theta)), nrow=2)
+  pos2 <- t(rotMat %*% t(pos))
+  colnames(pos2) <- colnames(pos)
+  return(pos2)
+}
