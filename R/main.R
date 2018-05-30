@@ -60,7 +60,7 @@ getSpatialPatterns <- function(mat, adj, verbose=TRUE) {
 }
 
 
-groupSigSpatialPatterns <- function(pos, mat, d, deepSplit=0, minClusterSize=0, plot=TRUE, verbose=TRUE, ...) {
+groupSigSpatialPatterns <- function(pos, mat, d, t=0, deepSplit=0, minClusterSize=0, plot=TRUE, verbose=TRUE, ...) {
 
     #m <- as.matrix(mat[results.sig,])
     #m <- apply(m, 1, winsorize) # get rid of outliers
@@ -87,11 +87,11 @@ groupSigSpatialPatterns <- function(pos, mat, d, deepSplit=0, minClusterSize=0, 
     prs <- lapply(levels(groups), function(g) {
         # summarize as first pc if more than 1 gene in group
         if(sum(groups==g)>1) {
-            m <- winsorize(mat[results.sig[groups==g],])
+            m <- winsorize(mat[groups==g,], fraction=t)
             ps <- colMeans(m)
             pr <- scale(ps)[,1]
         } else {
-            ps <- winsorize(mat[results.sig[groups==g],])
+            ps <- winsorize(mat[groups==g,], fraction=t)
             pr <- scale(ps)[,1]
         }
         if(plot) {
