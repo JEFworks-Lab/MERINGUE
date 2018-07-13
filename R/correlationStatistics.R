@@ -91,8 +91,45 @@ moranPermutationTest <- function(z, w, na.rm = FALSE, alternative = "two.sided",
     hist(sim, sub=paste("p =", round(p.value, 4)), xlim=range(all), ...)
     abline(v = stat, col="red", lty=3, lwd=2)
   }
-  results <- unlist(data.frame('observed'=stat, 'N'=N, 'p.value'=p.value))
+  results <- data.frame('observed'=stat, 'N'=N, 'p.value'=p.value)
   return(results)
+}
+moranSimple <- function(x, weight,  na.rm = FALSE) {
+  if (nrow(weight) != ncol(weight)) {
+    stop("'weight' must be a square matrix")
+  }
+
+  N <- length(x)
+
+  if (nrow(weight) != N) {
+    stop("'weight' must have as many rows as observations in 'x'")
+  }
+
+  nas <- is.na(x)
+  if (any(nas)) {
+    if (na.rm) {
+      x <- x[!nas]
+      N <- length(x)
+      weight <- weight[!nas, !nas]
+    }
+    else {
+      stop("'x' has missing values")
+    }
+  }
+
+  # unitization
+  rs <- rowSums(weight)
+  rs[rs == 0] <- 1
+  weight <- weight/rs
+
+  # Moran's I
+  W <- sum(weight)
+  z <- x - mean(x)
+  cv <- sum(weight * z %o% z)
+  v <- sum(z^2)
+  obs <- (N/W) * (cv/v)
+
+  return(obs)
 }
 
 
