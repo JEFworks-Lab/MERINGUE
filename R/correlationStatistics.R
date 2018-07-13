@@ -3,6 +3,9 @@
 #' weight is adjacency matrix (weights)
 #' use log.p since many p-values very small (avoid 0s)
 #' DEPRECATED -> use moranTest_C
+#'
+#' @export
+#'
 moranTest <- function (x, weight, na.rm = FALSE, alternative = "greater") {
 
   if (nrow(weight) != ncol(weight)) {
@@ -73,6 +76,7 @@ moranTest <- function (x, weight, na.rm = FALSE, alternative = "greater") {
 
 
 #' Permutation test to assess for significance of Moran's I
+#' @export
 moranPermutationTest <- function(z, w, na.rm = FALSE, alternative = "two.sided", N=1e4, seed=0, ncores=parallel::detectCores()-1, plot=FALSE, ...) {
   # Set seed for reproducibility
   set.seed(seed)
@@ -94,6 +98,7 @@ moranPermutationTest <- function(z, w, na.rm = FALSE, alternative = "two.sided",
 
 
 #' Winsorize expression values to prevent outliers
+#' @export
 winsorize <- function (x, fraction=.05) {
    if(length(fraction) != 1 || fraction < 0 ||
          fraction > 0.5) {
@@ -109,6 +114,7 @@ winsorize <- function (x, fraction=.05) {
 
 
 #' inter-cell-type cross cor
+#' @export
 spatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight=NULL, pos=NULL, k=3) {
     # make ctA the smaller group
     if(length(groupA) < length(groupB)) {
@@ -155,6 +161,7 @@ spatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight=NULL, pos=NULL,
 
 
 #' intra-cell-type cross cor
+#' @export
 spatialIntraCrossCor <- function(x, y, weight) {
     # scale weights
     rs <- rowSums(weight)
@@ -180,6 +187,7 @@ spatialIntraCrossCor <- function(x, y, weight) {
 
 
 # Local indicators of spatial association
+#' @export
 lisaTest <- function (x, weight, na.rm=FALSE, alternative = "greater") {
     # unitization
     rs <- rowSums(weight)
@@ -222,6 +230,7 @@ lisaTest <- function (x, weight, na.rm=FALSE, alternative = "greater") {
 
 #' Calculates a spatial cross correlation matrix
 #'
+#' @export
 spatialCrossCorMatrix <- function(sigMat, w) {
   scor <- spatialCrossCorMatrix_C(as.matrix(sigMat), w)
   colnames(scor) <- rownames(scor) <- rownames(sigMat)

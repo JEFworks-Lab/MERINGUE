@@ -22,7 +22,7 @@
 #' @importFrom Matrix Matrix colSums rowSums
 #'
 cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads = 1, min.detected = 1, verbose = TRUE) {
-  if (!class(counts) %in% c("dgCMatrix", "dgTMatrix")) {
+  if (!class(counts) %in% c("dgCMatrix", "dgTMatrix", "dgeMatrix")) {
     if (verbose) {
       message("Converting to sparse matrix ...")
     }

@@ -5,8 +5,8 @@
 \title{Helper function to map values to colors
 Source: https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r}
 \usage{
-map2col(x, pal = colorRampPalette(c("blue", "white", "red"))(100),
-  na.col = "grey", limits = NULL)
+map2col(x, pal = colorRampPalette(c("blue", "grey", "red"))(100),
+  na.col = "lightgrey", limits = NULL)
 }
 \description{
 Helper function to map values to colors

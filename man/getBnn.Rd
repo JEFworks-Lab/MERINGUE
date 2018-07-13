@@ -6,6 +6,15 @@
 \usage{
 getBnn(cct, nct, pos, k)
 }
+\arguments{
+\item{cct}{Vector of cell names from cell type of interest}
+
+\item{nct}{Vector of cell names from background}
+
+\item{pos}{Position}
+
+\item{k}{Number of nearest neighbors from background for each cell from cell type of interest}
+}
 \description{
-Nearest background neighbor
+Identify nearest neighbors in the background cell-type
 }

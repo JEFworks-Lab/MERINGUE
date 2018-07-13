@@ -25,7 +25,7 @@ NULL
 #' @param ... Additional parameters to pass to BASE::plot
 #'
 #' @export
-plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gradientPalette=NULL, zlim=NULL, s=1, v=0.8, min.group.size=1, show.legend=FALSE, mark.clusters=FALSE, mark.cluster.cex=2, shuffle.colors=F, legend.x='topright', gradient.range.quantile=0.95, verbose=TRUE, unclassified.cell.color='gray70', group.level.colors=NULL, ...) {
+plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gradientPalette=NULL, zlim=NULL, s=1, v=0.8, min.group.size=1, show.legend=FALSE, mark.clusters=FALSE, mark.cluster.cex=2, shuffle.colors=F, legend.x='topright', gradient.range.quantile=0.95, verbose=TRUE, unclassified.cell.color='gray70', group.level.colors=NULL, xlab=NA, ylab=NA, ...) {
 
   if(!is.null(colors)) {
     ## use clusters information
@@ -84,7 +84,7 @@ plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gra
     }
   }
 
-  plot(emb,col=adjustcolor(cols,alpha.f=alpha),cex=cex,pch=19,axes=F, ...); box();
+  plot(emb,col=adjustcolor(cols,alpha.f=alpha),cex=cex,pch=19,axes=F,xlab=xlab,ylab=ylab, ...); box();
   if(mark.clusters) {
     if(!is.null(groups)) {
       cent.pos <- do.call(rbind,tapply(1:nrow(emb),groups,function(ii) apply(emb[ii,,drop=F],2,median)))
@@ -152,8 +152,7 @@ plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...
       c(pos[idx[i,1],1], pos[idx[i,2],1]),
       c(pos[idx[i,1],2], pos[idx[i,2],2]),
       col=line.col,
-      lwd=adj[idx]^line.power,
-      ...
+      lwd=adj[idx]^line.power
     )
   }
 }
@@ -161,7 +160,7 @@ plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...
 
 #' Helper function to map values to colors
 #' Source: https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r
-map2col <- function(x, pal=colorRampPalette(c('blue', 'white', 'red'))(100), na.col='grey', limits=NULL){
+map2col <- function(x, pal=colorRampPalette(c('blue', 'grey', 'red'))(100), na.col='lightgrey', limits=NULL){
   original <- x
   x <- na.omit(x)
   if(is.null(limits)) limits=range(x)
@@ -179,7 +178,7 @@ map2col <- function(x, pal=colorRampPalette(c('blue', 'white', 'red'))(100), na.
 
 #' Gridded bivariate interpolation
 #' @export
-interpolate <- function(pos, gexp, trim=0, zlim=c(-1,1), fill=FALSE, binSize=100, cex=1, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
+interpolate <- function(pos, gexp, trim=0, zlim=c(-1,1), fill=TRUE, binSize=100, cex=1, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
     z <- scale(winsorize(gexp, fraction=trim))[,1]
     names(z) <- names(gexp)
     z[z < zlim[1]] <- zlim[1]
@@ -201,7 +200,7 @@ interpolate <- function(pos, gexp, trim=0, zlim=c(-1,1), fill=FALSE, binSize=100
     int <- akima::interp(x, y, zb, nx=binSize, ny=binSize, linear=TRUE)
 
     if(plot) {
-        plot(pos[names(gexp),], col=map2col(z), pch=16, ...)
+        plot(pos[names(gexp),], col=map2col(z), pch=16, axes=FALSE, xlab=NA, ylab=NA, ...); box()
         image(int, col=col, axes=FALSE, frame.plot=TRUE, ...)
     }
 

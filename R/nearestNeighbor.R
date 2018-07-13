@@ -1,18 +1,37 @@
 #' K nearest neighbors
-getAdj <- function(mat, k) {
+#'
+#' @description K nearest neighbors in space based on position
+#'
+#' @param pos Position
+#' @param k Number of nearest neighbors
+#'
+#' @export
+#'
+getKnn <- function(pos, k) {
   ## nearest neighbors include self so add 1
-  knn <- RANN::nn2(mat, k=k+1)[[1]]
+  knn <- RANN::nn2(pos, k=k+1)[[1]]
   knn <- knn[, -1]
   ## convert to adjacency matrix
-  adj <- matrix(0, nrow(mat), nrow(mat))
-  rownames(adj) <- colnames(adj) <- rownames(mat)
-  invisible(lapply(seq_len(nrow(mat)), function(i) {
+  adj <- matrix(0, nrow(pos), nrow(pos))
+  rownames(adj) <- colnames(adj) <- rownames(pos)
+  invisible(lapply(seq_len(nrow(pos)), function(i) {
     adj[i,rownames(mat)[knn[i,]]] <<- 1
   }))
   return(adj)
 }
 
+
 #' Mutual nearest neighbors
+#'
+#' @description Mutual nearest neighbors in space between group A and B based on position
+#'
+#' @param ctA vector of cell names in group A
+#' @param ctB vector of cell names in group B
+#' @param pos Position
+#' @param k Number of mutual nearest neighbors
+#'
+#' @export
+#'
 getMnn <- function(ctA, ctB, pos, k) {
     # ctB's nearest ctA neighbors
     knnB <- RANN::nn2(pos[ctA,], pos[ctB,], k=k)[[1]]
@@ -60,6 +79,15 @@ getMnn <- function(ctA, ctB, pos, k) {
 
 
 #' Nearest background neighbor
+#'
+#' @description Identify nearest neighbors in the background cell-type
+#'
+#' @param cct Vector of cell names from cell type of interest
+#' @param nct Vector of cell names from background
+#' @param pos Position
+#' @param k Number of nearest neighbors from background for each cell from cell type of interest
+#'
+#' @export
 getBnn <- function(cct, nct, pos, k) {
     knn <- RANN::nn2(pos[nct,], pos[cct,], k=k)[[1]]
     adj <- matrix(0, nrow(pos), nrow(pos))

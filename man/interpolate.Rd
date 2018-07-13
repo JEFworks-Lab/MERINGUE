@@ -4,7 +4,7 @@
 \alias{interpolate}
 \title{Gridded bivariate interpolation}
 \usage{
-interpolate(pos, gexp, trim = 0, zlim = c(-1, 1), fill = FALSE,
+interpolate(pos, gexp, trim = 0, zlim = c(-1, 1), fill = TRUE,
   binSize = 100, cex = 1, col = colorRampPalette(c("blue", "white",
   "red"))(100), plot = TRUE, ...)
 }

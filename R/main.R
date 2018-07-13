@@ -8,19 +8,19 @@
 #' @param ncores Number of cores
 #' @param plot Whether to plot neighbor network
 #'
-#' @returns A weighted adjacency matrix
-#'
 #' @export
 #'
 getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) {
   if(length(klist)>1) {
     adjList <-  BiocParallel::bplapply(seq_along(klist), function(i) {
       k <- klist[i]
-      adj <- getAdj(pos, k=k)
+      adj <- getMnn(rownames(pos), rownames(pos), pos, k=i)
+      diag(adj) <- 0
     }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=length(klist)/ncores, progressbar=verbose))
     adj <- Reduce("+", adjList) / length(adjList)
   } else {
-    adj <- getAdj(pos, k=klist)
+    adj <- getMnn(rownames(pos), rownames(pos), pos, k=klist)
+    diag(adj) <- 0
   }
   if(plot) {
     plotNetwork(pos, adj, line.power=3)
@@ -42,7 +42,7 @@ getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) 
 getSpatialPatterns <- function(mat, adj, verbose=TRUE) {
 
   # Calculate Moran's I for each gene
-  results <- getSpatialPatterns_C(as.matrix(mat), as.matrix(adj), verbose)
+  results <- MERingue:::getSpatialPatterns_C(as.matrix(mat), as.matrix(adj), verbose)
   colnames(results) <- c('observed', 'expected', 'sd')
   rownames(results) <- rownames(mat)
   results <- as.data.frame(results)
@@ -54,24 +54,77 @@ getSpatialPatterns <- function(mat, adj, verbose=TRUE) {
   # multiple testing correction
   results$p.adj <- stats::p.adjust(results$p.value)
   # order by significance
-  results <- results[order(results$p.adj),]
+  #results <- results[order(results$p.adj),]
 
   return(results)
 }
 
+#' Filter for spatial patterns
+#'
+#' @description Filter out spatial patterns driven by small number of cells using LISA
+#'
+#' @param mat Gene expression matrix.
+#' @param I Output of getSpatialPatterns
+#' @param alpha P-value threshold for LISA score to be considered significant.
+#' @param minPercentCells Minimum percent of cells that must be driving spatial pattern
+#'
+#' @export
+#'
+filterSpatialPatterns <- function(mat, I, adjustPv=TRUE, alpha = 0.05, minPercentCells = 0.05, verbose=TRUE) {
+  ## filter for significant based on p-value
+  if(adjustPv) {
+    vi <- I$p.adj < alpha
+  } else {
+    vi <- I$p.value < alpha
+  }
+  vi[is.na(vi)] <- FALSE
+  results.sig <- rownames(I)[vi]
 
-groupSigSpatialPatterns <- function(pos, mat, d, t=0, deepSplit=0, minClusterSize=0, plot=TRUE, verbose=TRUE, ...) {
+  if(verbose) {
+    message(paste0('Number of significantly autocorrelated genes: ', length(results.sig)))
+  }
 
-    #m <- as.matrix(mat[results.sig,])
-    #m <- apply(m, 1, winsorize) # get rid of outliers
-    #d <- as.dist(1-cor(m))
+  ## use LISA to remove patterns driven by too few cells
+  lisa <- sapply(results.sig, function(g) {
+    gexp <- mat[g,]
+    Ii <- lisaTest(gexp, w)
+    lisa <- Ii$p.value
+    names(lisa) <- rownames(Ii)
+    sum(lisa < alpha)/length(lisa) ## percent significant
+  })
+  vi <- lisa > minPercentCells
+  if(verbose) {
+    message(paste0('...driven by > ', minPercentCells*ncol(mat), ' cells: ', sum(vi)))
+  }
 
-    hc <- hclust(d)
-    if(plot) {
-        par(mfrow=c(1,1))
-        plot(hc)
-    }
-    # dynamic tree cut
+  return(results.sig[vi])
+}
+
+
+#' Group significant spatial patterns
+#'
+#' @description Identify primary spatial patterns using hierarchical clustering and dynamic tree cutting
+#'
+#' @param pos Position matrix where each row is a cell, columns are
+#'     x, y, (optionally z) coordinations
+#' @param mat Gene expression matrix. Must be normalized such that correlations
+#'     will not be driven by technical artifacts.
+#' @param d Distance matrix relating genes. Spatial cross-correlation recommended.
+#' @param hclustMethod Method for hclust()
+#' @param deepSplit Tuning parameter for dynamic tree cutting cutreeDynamic()
+#' @param minClusterSize Smallest gene cluster size
+#'
+#' @export
+#'
+groupSigSpatialPatterns <- function(pos, mat, d, hclustMethod='complete', trim=0, deepSplit=0, minClusterSize=0, plot=TRUE, verbose=TRUE, ...) {
+
+    hc <- hclust(d, method=hclustMethod)
+    #if(plot) {
+    #    par(mfrow=c(1,1))
+    #    plot(hc)
+    #}
+
+    ## dynamic tree cut
     groups <- dynamicTreeCut::cutreeDynamic(dendro=hc, distM=as.matrix(d), method='hybrid', minClusterSize=minClusterSize, deepSplit=deepSplit)
     names(groups) <- hc$labels
     groups <- factor(groups)
@@ -81,21 +134,21 @@ groupSigSpatialPatterns <- function(pos, mat, d, t=0, deepSplit=0, minClusterSiz
     }
 
     if(plot) {
-        par(mfrow=c(length(levels(groups)), 2), mar=rep(1,4))
+        par(mfrow=c(length(levels(groups)), 2), mar=rep(2,4))
     }
 
     prs <- lapply(levels(groups), function(g) {
         # summarize as first pc if more than 1 gene in group
         if(sum(groups==g)>1) {
-            m <- winsorize(mat[groups==g,], fraction=t)
+            m <- winsorize(mat[groups==g,], fraction=trim)
             ps <- colMeans(m)
             pr <- scale(ps)[,1]
         } else {
-            ps <- winsorize(mat[groups==g,], fraction=t)
+            ps <- winsorize(mat[groups==g,], fraction=trim)
             pr <- scale(ps)[,1]
         }
         if(plot) {
-            interpolate(pos, pr, main=paste0("Pattern ", g, " : ", sum(groups==g), " genes"), plot=TRUE, ...)
+            interpolate(pos, pr, main=paste0("Pattern ", g, " : ", sum(groups==g), " genes"), plot=TRUE, trim=trim, ...)
         }
         return(pr)
     })

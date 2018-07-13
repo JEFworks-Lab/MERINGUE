@@ -6,6 +6,15 @@
 \usage{
 getMnn(ctA, ctB, pos, k)
 }
+\arguments{
+\item{ctA}{vector of cell names in group A}
+
+\item{ctB}{vector of cell names in group B}
+
+\item{pos}{Position}
+
+\item{k}{Number of mutual nearest neighbors}
+}
 \description{
-Mutual nearest neighbors
+Mutual nearest neighbors in space between group A and B based on position
 }
