@@ -16,13 +16,14 @@ library(knitr)
 opts_chunk$set(
     fig.path = 'figure/',
     cache.path = 'cache/',
-    cache = TRUE
+    cache = TRUE, 
+    results = "hold"
 )
 ```
 
 In this vignette, we will walk through an analysis of spatial transcriptomics data for the mouse olfactory bulb. The data has been prepared for you and is available as a part of the package.
 
-```{r, 'mOB_data'}
+```{r, 'mOB_data', fig.width=6, fig.height=3}
 library(MERingue)
 library(Matrix)
 
@@ -41,10 +42,10 @@ plotEmbedding(pos, colors=colSums(mat>0), cex=1, main='Library Complexity')
 
 We will define voxels as neighbors if they are mutual nearest neighbors in space with k=6.
 
-```{r, 'mOB_neighbor', fig.width=3, fig.height=3}
+```{r, 'mOB_neighbor', fig.width=5, fig.height=5}
 ## get neighbor relationship
 w <- getSpatialWeights(pos, k=6)
-par(mfrow=c(1,1))
+par(mfrow=c(1,1), mar=rep(2,4))
 plotNetwork(pos, w, main='MNN Network')
 ````
 

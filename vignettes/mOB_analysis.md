@@ -33,17 +33,13 @@ mat <- normalizeCounts(counts)
 ``` r
 par(mfrow=c(1,2), mar=rep(2,4))
 plotEmbedding(pos, colors=colSums(mat), cex=1, main='Library Size')
-```
-
-    ## treating colors as a gradient with zlim: 9472.281 13665.91
-
-``` r
 plotEmbedding(pos, colors=colSums(mat>0), cex=1, main='Library Complexity')
 ```
 
-    ## treating colors as a gradient with zlim: 4293.95 7258.3
-
 ![](figure/mOB_data-1.png)
+
+    ## treating colors as a gradient with zlim: 9472.281 13665.91 
+    ## treating colors as a gradient with zlim: 4293.95 7258.3
 
 We will define voxels as neighbors if they are mutual nearest neighbors
 in space with k=6.
@@ -51,7 +47,7 @@ in space with k=6.
 ``` r
 ## get neighbor relationship
 w <- getSpatialWeights(pos, k=6)
-par(mfrow=c(1,1))
+par(mfrow=c(1,1), mar=rep(2,4))
 plotNetwork(pos, w, main='MNN Network')
 ```
 
@@ -67,7 +63,7 @@ end <- Sys.time()
 message(paste0(nrow(mat), ' genes analyzed in ', difftime(end, start, units='mins'), ' minutes.'))
 ```
 
-    ## 8999 genes analyzed in 0.129575165112813 minutes.
+    ## 8999 genes analyzed in 0.130047818024953 minutes.
 
 ``` r
 print(head(I))
@@ -138,13 +134,12 @@ ggroup <- groupSigSpatialPatterns(pos=pos,
                                   plot=TRUE)
 ```
 
-    ##  ..cutHeight not given, setting it to 2.39  ===>  99% of the (truncated) height range in dendro.
-    ##  ..done.
-
     ## Patterns detected:
 
+![](figure/mOB_group-1.png)
+
+    ##  ..cutHeight not given, setting it to 2.39  ===>  99% of the (truncated) height range in dendro.
+    ##  ..done.
     ## groups
     ##   1   2   3   4   5   6 
     ## 113  34  18  15  14  11
-
-![](figure/mOB_group-1.png)
