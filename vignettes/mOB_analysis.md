@@ -12,9 +12,26 @@ data(pos)
 
 cd <- cd[,rownames(pos)]
 counts <- cleanCounts(cd, min.reads=100)
-mat <- normalizeCounts(counts)
+```
 
-par(mfrow=c(1,2))
+    ## Converting to sparse matrix ...
+
+    ## Filtering matrix with 260 cells and 16218 genes ...
+
+    ## Resulting matrix has 260 cells and 8999 genes
+
+``` r
+mat <- normalizeCounts(counts)
+```
+
+    ## Normalizing matrix with 260 cells and 8999 genes.
+
+    ## normFactor not provided. Normalizing by library size.
+
+    ## Using depthScale 1e+06 and log transforming with pseudocount 1.
+
+``` r
+par(mfrow=c(1,2), mar=rep(2,4))
 plotEmbedding(pos, colors=colSums(mat), cex=1, main='Library Size')
 ```
 
@@ -26,7 +43,7 @@ plotEmbedding(pos, colors=colSums(mat>0), cex=1, main='Library Complexity')
 
     ## treating colors as a gradient with zlim: 4293.95 7258.3
 
-![](figure/unnamed-chunk-2-1.png)
+![](figure/mOB_data-1.png)
 
 We will define voxels as neighbors if they are mutual nearest neighbors
 in space with k=6.
@@ -38,7 +55,7 @@ par(mfrow=c(1,1))
 plotNetwork(pos, w, main='MNN Network')
 ```
 
-![](figure/unnamed-chunk-3-1.png)
+![](figure/mOB_neighbor-1.png)
 
 We can calculate the spatial autocorrelation for all genes.
 
@@ -48,6 +65,11 @@ start <- Sys.time()
 I <- getSpatialPatterns(mat, w, verbose=TRUE)
 end <- Sys.time()
 message(paste0(nrow(mat), ' genes analyzed in ', difftime(end, start, units='mins'), ' minutes.'))
+```
+
+    ## 8999 genes analyzed in 0.129575165112813 minutes.
+
+``` r
 print(head(I))
 ```
 
@@ -70,6 +92,13 @@ results.filter <- filterSpatialPatterns(mat = mat,
                                         alpha = 0.05,
                                         minPercentCells = 0.05,
                                         verbose = TRUE)
+```
+
+    ## Number of significantly autocorrelated genes: 236
+
+    ## ...driven by > 13 cells: 205
+
+``` r
 print(head(I[results.filter,]))
 ```
 
@@ -90,7 +119,7 @@ par(mfrow=c(1,2), mar=rep(2,4))
 invisible(interpolate(pos, mat[rownames(I.final)[1],], main=rownames(I.final)[1]))
 ```
 
-![](figure/unnamed-chunk-6-1.png)
+![](figure/mOB_sample-1.png)
 
 Or group them into prominant patterns based on spatial
 cross-correlation.
@@ -111,8 +140,11 @@ ggroup <- groupSigSpatialPatterns(pos=pos,
 
     ##  ..cutHeight not given, setting it to 2.39  ===>  99% of the (truncated) height range in dendro.
     ##  ..done.
+
+    ## Patterns detected:
+
     ## groups
     ##   1   2   3   4   5   6 
     ## 113  34  18  15  14  11
 
-![](figure/unnamed-chunk-8-1.png)
+![](figure/mOB_group-1.png)
