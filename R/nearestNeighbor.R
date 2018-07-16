@@ -100,4 +100,36 @@ getBnn <- function(cct, nct, pos, k) {
 
 
 
+#' Nearest neighbors across layers
+#'
+#' @param layers List of positions
+#' @param k Number of nearest neighbors
+#'
+#' @export
+#'
+getCrossLayerNeighbors <- function(layers, k=3) {
+  subset <- unlist(lapply(layers, rownames))
+  between <- lapply(1:(length(layers)-1), function(i) {
+    pos1 <- layers[[i]]
+    pos2 <- layers[[i+1]]
+    ctA <- rownames(pos1)
+    ctB <- rownames(pos2)
+    pos <- rbind(pos1, pos2)
+    if(length(ctA)==0 | length(ctB)==0) {
+      wa1 <- NA
+    } else {
+      pos <- as.matrix(pos)
+      wa1 <- getMnn(ctA, ctB, pos=pos, k=k)
+    }
+    return(wa1)
+  })
 
+  w <- matrix(0, nrow=length(subset), ncol=length(subset))
+  rownames(w) <- colnames(w) <- subset
+  ## across layers
+  invisible(lapply(between, function(wa1) {
+    w[rownames(wa1), colnames(wa1)] <<- wa1
+  }))
+
+  return(w)
+}

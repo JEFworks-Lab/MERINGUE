@@ -3,6 +3,7 @@
 export(cleanCounts)
 export(filterSpatialPatterns)
 export(getBnn)
+export(getCrossLayerNeighbors)
 export(getKnn)
 export(getMnn)
 export(getSpatialPatterns)
