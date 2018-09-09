@@ -11,7 +11,7 @@ getSpatialWeights(pos, klist = 6, ncores = 1, plot = FALSE,
 \item{pos}{Position matrix where each row is a cell, columns are
 x, y, (optionally z) coordinations}
 
-\item{klist}{range of number of nearest neighbors to consider (default 3:9)}
+\item{klist}{range of number of nearest neighbors to consider}
 
 \item{ncores}{Number of cores}
 

@@ -14,6 +14,7 @@
 #' @param min.detected Minimum number of cells a gene must be seen in. Genes
 #'      not seen in a sufficient number of cells will be removed (default: 1)
 #' @param verbose Verbosity (default: TRUE)
+#' @param plot Whether to plot (default: TRUE)
 #'
 #' @return a filtered read count matrix
 #'
@@ -21,7 +22,7 @@
 #'
 #' @importFrom Matrix Matrix colSums rowSums
 #'
-cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads = 1, min.detected = 1, verbose = TRUE) {
+cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads = 1, min.detected = 1, verbose = TRUE, plot=TRUE) {
   if (!class(counts) %in% c("dgCMatrix", "dgTMatrix", "dgeMatrix")) {
     if (verbose) {
       message("Converting to sparse matrix ...")
@@ -40,6 +41,11 @@ cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads
   if (verbose) {
     message("Resulting matrix has ", ncol(counts), " cells and ", nrow(counts), " genes")
   }
+  if (plot) {
+    par(mfrow=c(1,2), mar=rep(5,4))
+    hist(log10(Matrix::colSums(counts)+1), breaks=20, main='Genes Per Dataset')
+    hist(log10(Matrix::rowSums(counts)+1), breaks=20, main='Datasets Per Gene')
+  }
   return(counts)
 }
 
@@ -54,6 +60,7 @@ cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads
 #'      column sum as proxy for library size will be used
 #' @param depthScale Depth scaling. Using a million for CPM (default: 1e6)
 #' @param pseudo Pseudocount for log transform (default: 1)
+#' @param log Whether to apply log transform
 #' @param verbose Verbosity (default: TRUE)
 #'
 #' @return a normalized matrix
@@ -62,7 +69,7 @@ cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads
 #'
 #' @importFrom Matrix Matrix colSums t
 #'
-normalizeCounts <- function (counts, normFactor = NULL, depthScale = 1e+06, pseudo=1, verbose = TRUE) {
+normalizeCounts <- function (counts, normFactor = NULL, depthScale = 1e+06, pseudo=1, log=TRUE, verbose = TRUE) {
   if (!class(counts) %in% c("dgCMatrix", "dgTMatrix")) {
     if (verbose) {
       message("Converting to sparse matrix ...")
@@ -79,10 +86,16 @@ normalizeCounts <- function (counts, normFactor = NULL, depthScale = 1e+06, pseu
     normFactor <- Matrix::colSums(counts)
   }
   if (verbose) {
-    message(paste0("Using depthScale ", depthScale, " and log transforming with pseudocount ", pseudo,"."))
+    message(paste0("Using depthScale ", depthScale))
   }
   counts <- Matrix::t(Matrix::t(counts)/normFactor)
   counts <- counts * depthScale
-  counts <- log10(counts + pseudo)
+  if(log) {
+    if (verbose) {
+      message("Log10 transforming with pseudocount ", pseudo,".")
+    }
+    counts <- log10(counts + pseudo)
+  }
+
   return(counts)
 }

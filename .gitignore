@@ -1,3 +1,4 @@
+.DS_Store
 .Rproj.user
 .Rhistory
 .RData
@@ -5,3 +6,9 @@
 *RData
 inst/doc
 vignettes/cache
+vignettes/figure
+data/*.gz
+data/*.jpg
+data/*.txt
+data/*.tsv
+test/*

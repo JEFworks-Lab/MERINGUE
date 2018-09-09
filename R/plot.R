@@ -179,7 +179,7 @@ map2col <- function(x, pal=colorRampPalette(c('blue', 'grey', 'red'))(100), na.c
 #' Gridded bivariate interpolation
 #' @export
 interpolate <- function(pos, gexp, trim=0, zlim=c(-1,1), fill=TRUE, binSize=100, cex=1, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
-    z <- scale(winsorize(gexp, fraction=trim))[,1]
+    z <- scale(winsorize(gexp, trim))[,1]
     names(z) <- names(gexp)
     z[z < zlim[1]] <- zlim[1]
     z[z > zlim[2]] <- zlim[2]
@@ -272,7 +272,8 @@ plotNeighborBoxplot <- function(gexpA, gexpB, groupA, groupB, weight) {
 
     plot(foo, bar, xlab='gexpA in groupA', ylab='gexpB in nearest neighbor in groupB')
     abline(lmfit)
-    text(0,0, paste0('p-value: ', coef(summary(lmfit))['foo','Pr(>|t|)']), adj=0, col='red', font=2)
+    pv <- coef(summary(lmfit))['foo','Pr(>|t|)']
+    text(0,0, paste0('p-value: ', signif(pv, 3)), adj=0, col='red', font=2)
 
     ## boxplot of distribution
     bard <- do.call(rbind, lapply(names(nbs), function(y) {

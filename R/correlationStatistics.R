@@ -1,12 +1,17 @@
-#' Moran's I compute from scratch
-#' x is value
-#' weight is adjacency matrix (weights)
-#' use log.p since many p-values very small (avoid 0s)
-#' DEPRECATED -> use moranTest_C
+#' Spatialy autocorrelation by Moran's I
+#'
+#' DEPRECATED! Use moranTest_C()
+#'
+#' @param x Feature value
+#' @param weight Adjacency matrix
+#' @param na.rm Whether to remove NAs from feature value
+#' @param alternative "two.sided", "less", or "greater"
 #'
 #' @export
 #'
 moranTest <- function (x, weight, na.rm = FALSE, alternative = "greater") {
+
+  warning('DEPRECATED! Use moranTest_C()')
 
   if (nrow(weight) != ncol(weight)) {
     stop("'weight' must be a square matrix")
@@ -75,9 +80,21 @@ moranTest <- function (x, weight, na.rm = FALSE, alternative = "greater") {
 }
 
 
-#' Permutation test to assess for significance of Moran's I
+#' Spatialy autocorrelation by Moran's I using permutation testing
+#'
+#' @param z Feature value
+#' @param w Adjacency matrix
+#' @param na.rm Whether to remove NAs from feature value
+#' @param alternative "two.sided", "less", or "greater"
+#' @param N Number of permutations
+#' @param seed Random seed
+#' @param n.cores Number of cores for parallel processing
+#' @param plot Plot permutated distribution
+#' @param ... Additional parameters to pass to histogram plotting
+#'
 #' @export
-moranPermutationTest <- function(z, w, na.rm = FALSE, alternative = "two.sided", N=1e4, seed=0, ncores=parallel::detectCores()-1, plot=FALSE, ...) {
+#'
+moranPermutationTest <- function(z, w, na.rm = FALSE, alternative = "two.sided", N=1e4, seed=0, ncores=1, plot=FALSE, ...) {
   # Set seed for reproducibility
   set.seed(seed)
   # Compute Moran's I
@@ -135,13 +152,18 @@ moranSimple <- function(x, weight,  na.rm = FALSE) {
 
 
 #' Winsorize expression values to prevent outliers
+#'
+#' @param x Values
+#' @param qt Values below this quantile and above 1-this quantile will be set to the quantile value
+#'
 #' @export
-winsorize <- function (x, fraction=.05) {
-   if(length(fraction) != 1 || fraction < 0 ||
-         fraction > 0.5) {
-      stop("bad value for 'fraction'")
+#'
+winsorize <- function (x, qt=.05) {
+   if(length(qt) != 1 || qt < 0 ||
+      qt > 0.5) {
+      stop("bad value for quantile threashold")
    }
-   lim <- quantile(x, probs=c(fraction, 1-fraction))
+   lim <- quantile(x, probs=c(qt, 1-qt))
    x[ x < lim[1] ] <- lim[1]
    x[ x > lim[2] ] <- lim[2]
    x
@@ -150,8 +172,12 @@ winsorize <- function (x, fraction=.05) {
 
 
 
-#' inter-cell-type cross cor
+#' Spatial cross-correlation
+#'
+#'
+#'
 #' @export
+#'
 spatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight=NULL, pos=NULL, k=3) {
     # make ctA the smaller group
     if(length(groupA) < length(groupB)) {
@@ -223,8 +249,15 @@ spatialIntraCrossCor <- function(x, y, weight) {
 }
 
 
-# Local indicators of spatial association
+#' Local indicators of spatial association
+#'
+#' @param x Feature value
+#' @param weight Adjacency matrix
+#' @param na.rm Whether to remove NAs from feature value
+#' @param alternative "two.sided", "less", or "greater"
+#'
 #' @export
+#'
 lisaTest <- function (x, weight, na.rm=FALSE, alternative = "greater") {
     # unitization
     rs <- rowSums(weight)

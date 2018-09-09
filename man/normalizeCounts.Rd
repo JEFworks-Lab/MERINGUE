@@ -5,7 +5,7 @@
 \title{Normalizes counts to CPM}
 \usage{
 normalizeCounts(counts, normFactor = NULL, depthScale = 1e+06, pseudo = 1,
-  verbose = TRUE)
+  log = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Read count matrix. The rows correspond to genes, columns
@@ -17,6 +17,8 @@ column sum as proxy for library size will be used}
 \item{depthScale}{Depth scaling. Using a million for CPM (default: 1e6)}
 
 \item{pseudo}{Pseudocount for log transform (default: 1)}
+
+\item{log}{Whether to apply log transform}
 
 \item{verbose}{Verbosity (default: TRUE)}
 }

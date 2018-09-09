@@ -4,17 +4,18 @@
 \alias{groupSigSpatialPatterns}
 \title{Group significant spatial patterns}
 \usage{
-groupSigSpatialPatterns(pos, mat, d, hclustMethod = "complete", trim = 0,
-  deepSplit = 0, minClusterSize = 0, plot = TRUE, verbose = TRUE, ...)
+groupSigSpatialPatterns(pos, mat, scc, hclustMethod = "complete", trim = 0,
+  deepSplit = 0, minClusterSize = 0, power = 1, plot = TRUE,
+  verbose = TRUE, ...)
 }
 \arguments{
 \item{pos}{Position matrix where each row is a cell, columns are
 x, y, (optionally z) coordinations}
 
 \item{mat}{Gene expression matrix. Must be normalized such that correlations
-will not be driven by technical artifacts.}
+will not be driven by technical artifacts}
 
-\item{d}{Distance matrix relating genes. Spatial cross-correlation recommended.}
+\item{scc}{Spatial cross-correlation matrix}
 
 \item{hclustMethod}{Method for hclust()}
 

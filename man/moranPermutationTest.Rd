@@ -2,12 +2,30 @@
 % Please edit documentation in R/correlationStatistics.R
 \name{moranPermutationTest}
 \alias{moranPermutationTest}
-\title{Permutation test to assess for significance of Moran's I}
+\title{Spatialy autocorrelation by Moran's I using permutation testing}
 \usage{
 moranPermutationTest(z, w, na.rm = FALSE, alternative = "two.sided",
-  N = 10000, seed = 0, ncores = parallel::detectCores() - 1,
-  plot = FALSE, ...)
+  N = 10000, seed = 0, ncores = 1, plot = FALSE, ...)
+}
+\arguments{
+\item{z}{Feature value}
+
+\item{w}{Adjacency matrix}
+
+\item{na.rm}{Whether to remove NAs from feature value}
+
+\item{alternative}{"two.sided", "less", or "greater"}
+
+\item{N}{Number of permutations}
+
+\item{seed}{Random seed}
+
+\item{plot}{Plot permutated distribution}
+
+\item{...}{Additional parameters to pass to histogram plotting}
+
+\item{n.cores}{Number of cores for parallel processing}
 }
 \description{
-Permutation test to assess for significance of Moran's I
+Spatialy autocorrelation by Moran's I using permutation testing
 }

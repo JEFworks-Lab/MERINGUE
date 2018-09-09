@@ -4,13 +4,15 @@
 \alias{filterSpatialPatterns}
 \title{Filter for spatial patterns}
 \usage{
-filterSpatialPatterns(mat, I, adjustPv = TRUE, alpha = 0.05,
+filterSpatialPatterns(mat, I, w, adjustPv = TRUE, alpha = 0.05,
   minPercentCells = 0.05, verbose = TRUE)
 }
 \arguments{
 \item{mat}{Gene expression matrix.}
 
 \item{I}{Output of getSpatialPatterns}
+
+\item{w}{Weight adjacency matrix}
 
 \item{alpha}{P-value threshold for LISA score to be considered significant.}
 

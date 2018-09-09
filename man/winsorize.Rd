@@ -4,7 +4,12 @@
 \alias{winsorize}
 \title{Winsorize expression values to prevent outliers}
 \usage{
-winsorize(x, fraction = 0.05)
+winsorize(x, qt = 0.05)
+}
+\arguments{
+\item{x}{Values}
+
+\item{qt}{Values below this quantile and above 1-this quantile will be set to the quantile value}
 }
 \description{
 Winsorize expression values to prevent outliers

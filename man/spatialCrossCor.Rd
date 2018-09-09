@@ -2,11 +2,11 @@
 % Please edit documentation in R/correlationStatistics.R
 \name{spatialCrossCor}
 \alias{spatialCrossCor}
-\title{inter-cell-type cross cor}
+\title{Spatial cross-correlation}
 \usage{
 spatialCrossCor(gexpA, gexpB, groupA, groupB, weight = NULL, pos = NULL,
   k = 3)
 }
 \description{
-inter-cell-type cross cor
+Spatial cross-correlation
 }

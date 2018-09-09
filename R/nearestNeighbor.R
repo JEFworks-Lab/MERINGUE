@@ -15,7 +15,7 @@ getKnn <- function(pos, k) {
   adj <- matrix(0, nrow(pos), nrow(pos))
   rownames(adj) <- colnames(adj) <- rownames(pos)
   invisible(lapply(seq_len(nrow(pos)), function(i) {
-    adj[i,rownames(mat)[knn[i,]]] <<- 1
+    adj[i,rownames(pos)[knn[i,]]] <<- 1
   }))
   return(adj)
 }

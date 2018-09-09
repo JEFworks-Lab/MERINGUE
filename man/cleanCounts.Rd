@@ -5,7 +5,7 @@
 \title{Filter a counts matrix}
 \usage{
 cleanCounts(counts, min.lib.size = 1, max.lib.size = Inf, min.reads = 1,
-  min.detected = 1, verbose = TRUE)
+  min.detected = 1, verbose = TRUE, plot = TRUE)
 }
 \arguments{
 \item{counts}{A sparse read count matrix. The rows correspond to genes,
@@ -24,6 +24,8 @@ will be removed (default: 1)}
 not seen in a sufficient number of cells will be removed (default: 1)}
 
 \item{verbose}{Verbosity (default: TRUE)}
+
+\item{plot}{Whether to plot (default: TRUE)}
 }
 \value{
 a filtered read count matrix

@@ -4,7 +4,7 @@
 #'
 #' @param pos Position matrix where each row is a cell, columns are
 #'     x, y, (optionally z) coordinations
-#' @param klist range of number of nearest neighbors to consider (default 3:9)
+#' @param klist range of number of nearest neighbors to consider
 #' @param ncores Number of cores
 #' @param plot Whether to plot neighbor network
 #'
@@ -14,8 +14,9 @@ getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) 
   if(length(klist)>1) {
     adjList <-  BiocParallel::bplapply(seq_along(klist), function(i) {
       k <- klist[i]
-      adj <- getMnn(rownames(pos), rownames(pos), pos, k=i)
+      adj <- getKnn(pos, k=k)
       diag(adj) <- 0
+      return(adj)
     }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=length(klist)/ncores, progressbar=verbose))
     adj <- Reduce("+", adjList) / length(adjList)
   } else {
@@ -65,12 +66,13 @@ getSpatialPatterns <- function(mat, adj, verbose=TRUE) {
 #'
 #' @param mat Gene expression matrix.
 #' @param I Output of getSpatialPatterns
+#' @param w Weight adjacency matrix
 #' @param alpha P-value threshold for LISA score to be considered significant.
 #' @param minPercentCells Minimum percent of cells that must be driving spatial pattern
 #'
 #' @export
 #'
-filterSpatialPatterns <- function(mat, I, adjustPv=TRUE, alpha = 0.05, minPercentCells = 0.05, verbose=TRUE) {
+filterSpatialPatterns <- function(mat, I, w, adjustPv=TRUE, alpha = 0.05, minPercentCells = 0.05, verbose=TRUE) {
   ## filter for significant based on p-value
   if(adjustPv) {
     vi <- I$p.adj < alpha
@@ -84,17 +86,19 @@ filterSpatialPatterns <- function(mat, I, adjustPv=TRUE, alpha = 0.05, minPercen
     message(paste0('Number of significantly autocorrelated genes: ', length(results.sig)))
   }
 
-  ## use LISA to remove patterns driven by too few cells
-  lisa <- sapply(results.sig, function(g) {
-    gexp <- mat[g,]
-    Ii <- lisaTest(gexp, w)
-    lisa <- Ii$p.value
-    names(lisa) <- rownames(Ii)
-    sum(lisa < alpha)/length(lisa) ## percent significant
-  })
-  vi <- lisa > minPercentCells
-  if(verbose) {
-    message(paste0('...driven by > ', minPercentCells*ncol(mat), ' cells: ', sum(vi)))
+  if(alpha > 0 | minPercentCells > 0) {
+    ## use LISA to remove patterns driven by too few cells
+    lisa <- sapply(results.sig, function(g) {
+      gexp <- mat[g,]
+      Ii <- lisaTest(gexp, w)
+      lisa <- Ii$p.value
+      names(lisa) <- rownames(Ii)
+      sum(lisa < alpha)/length(lisa) ## percent significant
+    })
+    vi <- lisa > minPercentCells
+    if(verbose) {
+      message(paste0('...driven by > ', minPercentCells*ncol(mat), ' cells: ', sum(vi)))
+    }
   }
 
   return(results.sig[vi])
@@ -108,15 +112,17 @@ filterSpatialPatterns <- function(mat, I, adjustPv=TRUE, alpha = 0.05, minPercen
 #' @param pos Position matrix where each row is a cell, columns are
 #'     x, y, (optionally z) coordinations
 #' @param mat Gene expression matrix. Must be normalized such that correlations
-#'     will not be driven by technical artifacts.
-#' @param d Distance matrix relating genes. Spatial cross-correlation recommended.
+#'     will not be driven by technical artifacts
+#' @param scc Spatial cross-correlation matrix
 #' @param hclustMethod Method for hclust()
 #' @param deepSplit Tuning parameter for dynamic tree cutting cutreeDynamic()
 #' @param minClusterSize Smallest gene cluster size
 #'
 #' @export
 #'
-groupSigSpatialPatterns <- function(pos, mat, d, hclustMethod='complete', trim=0, deepSplit=0, minClusterSize=0, plot=TRUE, verbose=TRUE, ...) {
+groupSigSpatialPatterns <- function(pos, mat, scc, hclustMethod='complete', trim=0, deepSplit=0, minClusterSize=0, power = 1, plot=TRUE, verbose=TRUE, ...) {
+
+    d <- as.dist((-scc - min(-scc))^(power))
 
     hc <- hclust(d, method=hclustMethod)
     #if(plot) {
@@ -140,11 +146,11 @@ groupSigSpatialPatterns <- function(pos, mat, d, hclustMethod='complete', trim=0
     prs <- lapply(levels(groups), function(g) {
         # summarize as first pc if more than 1 gene in group
         if(sum(groups==g)>1) {
-            m <- winsorize(mat[groups==g,], fraction=trim)
+            m <- winsorize(mat[names(groups)[which(groups==g)],], trim)
             ps <- colMeans(m)
             pr <- scale(ps)[,1]
         } else {
-            ps <- winsorize(mat[groups==g,], fraction=trim)
+            ps <- winsorize(mat[names(groups)[which(groups==g)],], trim)
             pr <- scale(ps)[,1]
         }
         if(plot) {
