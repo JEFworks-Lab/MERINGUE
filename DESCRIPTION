@@ -16,7 +16,8 @@ Imports:
     Matrix,
     akima,
     MASS,
-    Rcpp
+    Rcpp,
+    preprocessCore
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 6.0.1
 Suggests: knitr,

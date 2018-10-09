@@ -11,23 +11,28 @@
 #' @export
 #'
 getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) {
+  pos_norm <- preprocessCore::normalize.quantiles(as.matrix(pos))
+  rownames(pos_norm) <- rownames(pos)
+  colnames(pos_norm) <- colnames(pos)
+
   if(length(klist)>1) {
     adjList <-  BiocParallel::bplapply(seq_along(klist), function(i) {
       k <- klist[i]
-      adj <- getKnn(pos, k=k)
+      adj <- getMnn(rownames(pos_norm), rownames(pos_norm), pos_norm, k=i)
       diag(adj) <- 0
-      return(adj)
     }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=length(klist)/ncores, progressbar=verbose))
     adj <- Reduce("+", adjList) / length(adjList)
   } else {
-    adj <- getMnn(rownames(pos), rownames(pos), pos, k=klist)
+    adj <- getMnn(rownames(pos_norm), rownames(pos_norm), pos_norm, k=klist)
     diag(adj) <- 0
   }
+
   if(plot) {
     plotNetwork(pos, adj, line.power=3)
   }
   return(adj)
 }
+
 
 
 #' Identify spatial clusters
