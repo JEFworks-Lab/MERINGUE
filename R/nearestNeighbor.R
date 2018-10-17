@@ -88,6 +88,7 @@ getMnn <- function(ctA, ctB, pos, k) {
 #' @param k Number of nearest neighbors from background for each cell from cell type of interest
 #'
 #' @export
+#'
 getBnn <- function(cct, nct, pos, k) {
     knn <- RANN::nn2(pos[nct,], pos[cct,], k=k)[[1]]
     adj <- matrix(0, nrow(pos), nrow(pos))
@@ -133,3 +134,84 @@ getCrossLayerNeighbors <- function(layers, k=3) {
 
   return(w)
 }
+
+
+#' Neighbor weight matrix by voronoi adjacency
+#'
+#' @description Neighbor weight matrix by voronoi adjacency. Modified from Barry Rowlingson and Alison Hale's voronoi_adjacency function in the caramellar package
+#'
+#' @param pos Position
+#' @param njitter Number of times to jitter positions (useful for gridded spatial transcriptomics data)
+#' @param ajitter Amount to jitter
+#' @param filterDist Euclidean distance beyond which two cells cannot be considered neighbors
+#' @param plot Whether to plot
+#'
+#' @examples {
+#' data(mOB)
+#' pos <- mOB$pos
+#' w <- voronoiAdjacency(pos, njitter=100, ajitter=5, filterDist=1.8)
+#' }
+#'
+#' @export
+#'
+voronoiAdjacency = function(pos, njitter=0, ajitter=0, filterDist = NA, plot=FALSE){
+
+  makeixy <- function(data, formula, scale){
+    m = model.frame(formula, data=data)
+    if(ncol(m)!=3){
+      stop("incorrect adjacency formula: id~x+y needed")
+    }
+    names(m)=c("id","x","y")
+    m[,2]=m[,2]/scale
+    m[,3]=m[,3]/scale
+    m
+  }
+
+  data <- data.frame('i'=1:nrow(pos), pos)
+  data <- makeixy(data, formula=i~x+y, scale=1)
+
+  P <- nrow(data);  # number of rows
+
+  # Jitter round for most robust neighbor relations
+  if(njitter > 0) {
+    Ds <- lapply(seq_len(njitter), function(i) {
+      set.seed(i)
+      dd1 = deldir::deldir(jitter(data$x, factor=diff(range(data$x))*ajitter),
+                           jitter(data$y, factor=diff(range(data$y))*ajitter),
+                           suppressMsge=TRUE, plotit = FALSE, sort=FALSE);  # find adjacencies
+      ## create distance matrix
+      D1 <- matrix(0,P,P);
+      D1[as.matrix(dd1$delsgs[,c("ind1","ind2")])] = sqrt((dd1$delsgs[,c("x1")]-dd1$delsgs[,c("x2")])^2+(dd1$delsgs[,c("y1")]-dd1$delsgs[,c("y2")])^2);
+      D1[as.matrix(dd1$delsgs[,c("ind2","ind1")])] = sqrt((dd1$delsgs[,c("x1")]-dd1$delsgs[,c("x2")])^2+(dd1$delsgs[,c("y1")]-dd1$delsgs[,c("y2")])^2);
+      return(D1)
+    })
+    Dp <- Reduce('+', Ds)
+    Dc <- Reduce('+', lapply(Ds, function(x) x>0))
+    # Average
+    D <- Dp/Dc
+    D[is.nan(D)] <- 0
+  } else {
+    dd1 = deldir::deldir(data$x,
+                         data$y,
+                         suppressMsge=TRUE, plotit = FALSE, sort=FALSE);  # find adjacencies
+    ## create distance matrix
+    D1 <- matrix(0,P,P);
+    D1[as.matrix(dd1$delsgs[,c("ind1","ind2")])] = sqrt((dd1$delsgs[,c("x1")]-dd1$delsgs[,c("x2")])^2+(dd1$delsgs[,c("y1")]-dd1$delsgs[,c("y2")])^2);
+    D1[as.matrix(dd1$delsgs[,c("ind2","ind1")])] = sqrt((dd1$delsgs[,c("x1")]-dd1$delsgs[,c("x2")])^2+(dd1$delsgs[,c("y1")]-dd1$delsgs[,c("y2")])^2);
+    D <- D1
+  }
+
+  if(!is.na(filterDist)) {
+    D[D>filterDist] = 0
+  }
+
+  # binarize
+  D[D>0] <- 1
+
+  if(plot) {
+    plotNetwork(pos, adj=D)
+  }
+
+  return(D);
+}
+
