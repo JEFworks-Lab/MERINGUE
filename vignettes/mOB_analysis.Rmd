@@ -2,10 +2,14 @@
 title: "mOB Spatial Transcriptomics Analysis with MERingue"
 author: "Jean Fan"
 date: '`r Sys.Date()`'
-output_format: all
-output:
-  pdf_document: 
-    highlight: zenburn
+# rmarkdown::render('vignettes/mOB_analysis.Rmd', clean=FALSE)
+#output:
+  #html_document:
+  #  keep_md: yes
+  #pdf_document: 
+  #  highlight: zenburn
+  #md_document:
+  #variant: markdown_github
 vignette: >
   %\VignetteIndexEntry{mOB Spatial Transcriptomics Analysis with MERingue}
   %\VignetteEncoding{UTF-8}
@@ -51,13 +55,14 @@ mat <- normalizeCounts(counts = counts,
 To better understand the value of integrating spatial information, we will first perform a spatially-unaware analysis. Without considering the spatial information of each voxel, we will simply perform dimensionality reduction and graph-based clustering to identify transcriptional subpoplations in the mOB. Note for spatial transcriptomics, a transcriptional subpopulation in this context may reflect underlying cell-type transcriptional differences or cell-type composition differences among voxels. In this particular instance, the identified transcriptional subpopulations primarily reflect understanding cell-type. We can annotate the identified clusters based on their proposed cell-type in accordance with the original publication. We can then visualize the data using a tSNE embedding. 
 
 ```{r, spatially-unaware, fig.width=8, fig.height=4}
-# Dimensionality reduction by PCA
+# Dimensionality reduction by PCA on log10 CPM expression values
 pcs.info <- prcomp(t(log10(as.matrix(mat)+1)), center=TRUE)
 nPcs <- 5
 pcs <- pcs.info$x[,1:nPcs]
 
 # 2D embedding by tSNE
-emb <- Rtsne::Rtsne(pcs,
+library(Rtsne)
+emb <- Rtsne(pcs,
                     is_distance=FALSE,
                     perplexity=30,
                     num_threads=1,
@@ -68,7 +73,7 @@ rownames(emb) <- rownames(pcs)
 library(igraph)
 library(RANN)
 k <- 30
-nn = nn2(as.matrix(pcs), k = k)
+nn <- nn2(as.matrix(pcs), k = k)
 nn.df <- data.frame(from = rep(1:nrow(nn$nn.idx), k),
                       to = as.vector(nn$nn.idx),
                       weight = 1/(1 + as.vector(nn$nn.dists)))
@@ -104,20 +109,12 @@ test <- sample(rownames(mat), 2000)
 
 # Identify significantly differentially upregulated genes
 # in each identified cluster by Wilcox test
-dg <- do.call(rbind, lapply(test, function(g) {
-  do.call(cbind, lapply(levels(annot), function(ct) {
-    x <- mat[g, names(annot)[annot == ct]]
-    y <- mat[g, names(annot)[annot != ct]]
-    wilcox.test(x, y, alternative='greater')$p.val
-  }))
-}))
-colnames(dg) <- levels(annot)
-rownames(dg) <- test
-
-# Bonferonni correct p-value < 0.05
-dg.sig <- apply(dg, 2, function(x) {
-  x <- p.adjust(x, n=length(dg))
-  names(x)[x < 0.05]
+dg <- getDifferentialGenes(as.matrix(mat[test,]), annot)
+dg.sig <- lapply(dg, function(x) {
+  x <- x[x$p.adj < 0.05,]
+  x <- na.omit(x)
+  x <- x[x$highest,]
+  rownames(x)
 })
 print(lapply(dg.sig, length))
 ```
@@ -155,7 +152,7 @@ Now, to integrate the spatial information, we will create a spatial weight matri
 
 ```{r, spatial-weights, fig.width=4, fig.height=3}
 # Get neighbor-relationships
-w <- getSpatialWeights(pos, klist=9)
+w <- voronoiAdjacency(pos, njitter = 20, ajitter = 2.5, filterDist = 2.5)
 par(mfrow=c(1,1), mar=rep(1,4))
 plotNetwork(pos, w, line.power=3,
             axes=FALSE, xlab=NA, ylab=NA); box()
@@ -171,7 +168,7 @@ results.filter <- filterSpatialPatterns(mat = mat,
                                         w = w,
                                         adjustPv = TRUE,
                                         alpha = 0.05,
-                                        minPercentCells = 0.01,
+                                        minPercentCells = 0.1,
                                         verbose = TRUE)
 ```
 
@@ -242,66 +239,31 @@ upset(UpSetR::fromList(c(diffgexp, spatgexp)),
       keep.order=TRUE, order.by="degree")
 ```
 
-# Complementary analysis: Intra-cell-type spatial heterogeneity
+# Complementary analysis: Inter-cell-type spatial heterogeneity
 
-Spatial analysis can also be complementary to spatially-unaware clustering analysis. For example, after identifying putative cell-types by spatially-unaware clustering analysis, we may be interesting in identifying genes that exhibit spatial clustering within this cell-type. For demonstration purposes, we will focus on testing whether any marker genes for the Olfactory Nerve Layer exhibit spatial clustering within the Olfactory Nerve Layer. 
+Spatial analysis can also be complementary to spatially-unaware clustering analysis. For example, after identifying putative cell-types by spatially-unaware clustering analysis, we may be interesting in identifying genes that exhibit spatial clustering within this cell-type. For demonstration purposes, we will focus on testing whether any marker genes for the Granular Cell Layer exhibit spatial clustering within the Granular Cell Layer. 
 
 ```{r, spatial-sub-network, fig.width=4, fig.height=3}
-# Restrict to just voxels corresponding to the Olfactory Nerve Layer
-sub <- names(annot)[annot == '5: Olfactory Nerve Layer']
-w.sub <- getSpatialWeights(pos[sub,], klist=9)
+# Restrict to just voxels corresponding to the Granular Cell Layer.
+sub <- names(annot)[annot == '1: Granular Cell Layer']
+w.sub <- voronoiAdjacency(pos[sub,], njitter = 20, ajitter = 2.5, filterDist = 2.5)
 par(mfrow=c(1,1), mar=rep(1,4))
 plotNetwork(pos[sub,], w.sub, w, 
             axes=FALSE, xlab=NA, ylab=NA); box()
 ```
 
 ```{r, spaital-sub-results, fig.width=6, fig.height=5}
-# Limit to marker genes for the Olfactory Nerve Layer
-gs <- dg.sig[[levels(annot)[5]]]
-I.sub <- getSpatialPatterns(mat[gs,sub], w.sub)
+gs <- dg.sig[['1: Granular Cell Layer']]
+I.sub <- getSpatialPatterns(mat[gs, sub], w.sub)
 results.filter.sub <- filterSpatialPatterns(mat = mat[gs, sub],
                                         I = I.sub,
                                         w = w.sub,
                                         adjustPv = TRUE,
                                         alpha = 0.05,
-                                        minPercentCells = 0.05,
+                                        minPercentCells = 0.1,
                                         verbose = TRUE)
-
-# Identify spatial patterns
-scc.sub <- spatialCrossCorMatrix(sigMat = as.matrix(mat[results.filter.sub, sub]), 
-                                 w = w.sub)
-ggroup.sub <- groupSigSpatialPatterns(pos = pos, 
-                                      mat = as.matrix(mat[results.filter.sub, sub]), 
-                                      scc = scc.sub, 
-                                      power = 1, 
-                                      hclustMethod = 'ward.D', 
-                                      deepSplit = 4)
 ```
 
-```{r, spatial-sub-heatmap, fig.width=4, fig.height=4}
-# Visualize as heatmaps
-gcol <- rainbow(length(levels(ggroup.sub$groups)), v=0.5)[ggroup.sub$groups]
-  names(gcol) <- names(ggroup.sub$groups)
-heatmap(scc.sub[ggroup.sub$hc$labels, ggroup.sub$hc$labels], scale='none', 
-        Colv=as.dendrogram(ggroup.sub$hc), 
-        Rowv=as.dendrogram(ggroup.sub$hc), 
-        labRow=NA, labCol=NA,
-        ColSideColors=gcol[ggroup.sub$hc$labels],
-        RowSideColors=gcol[ggroup.sub$hc$labels],
-        col=colorRampPalette(c('blue', 'white', 'red'))(100)
-)
-
-sp.genes.sub <- unlist(lapply(levels(ggroup.sub$groups), function(x) {
-  names(ggroup.sub$groups)[ggroup.sub$groups==x]
-}))
-m <- as.matrix(mat[sp.genes.sub,sub])
-m <- t(scale(t(m)))
-m[m < -2.5] <- -2.5
-m[m > 2.5] <- 2.5
-heatmap(m, scale='none', Rowv=NA, labRow=NA, labCol=NA,
-          RowSideColors=gcol[rownames(m)],
-          col=colorRampPalette(c('blue', 'white', 'red'))(100)
-)
-```
+In this case, we do not identify any additional aspects of spatial heterogeneity within this cell-type. 
 
 
