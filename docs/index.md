@@ -22,6 +22,9 @@ To install `MERingue`, we recommend using `devtools`:
 require(devtools)
 devtools::install_github('JEFworks/MERingue')
 ```
+## Tutorials
+
+[Sample analysis using built-in spatial transcriptomics data of the mouse olfactory bulb](mOB_analysis)
 
 ## Contributing
 
