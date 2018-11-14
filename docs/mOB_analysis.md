@@ -1,3 +1,5 @@
+# mOB Spatial Transcriptomics Analysis with MERingue
+
 In this vignette, we will walk through an analysis of spatial
 transcriptomics data for the mouse olfactory bulb (mOB). The data has
 been prepared for you and is available as a part of the package. Here,

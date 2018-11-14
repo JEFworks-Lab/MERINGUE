@@ -24,7 +24,9 @@ devtools::install_github('JEFworks/MERingue')
 ```
 ## Tutorials
 
-[Sample analysis using built-in spatial transcriptomics data of the mouse olfactory bulb](mOB_analysis)
+[mOB Spatial Transcriptomics Analysis with MERingue](mOB_analysis)
+
+[3D Breast Cancer Spatial Transcriptomics Analysis with MERingue](BCL_analysis)
 
 ## Contributing
 

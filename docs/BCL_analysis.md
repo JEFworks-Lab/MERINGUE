@@ -1,3 +1,5 @@
+# 3D Breast Cancer Spatial Transcriptomics Analysis with MERingue
+
 In this vignette, we will walk through an analysis of spatial
 transcriptomics data for 4 consecutive tissue slices of a breast cancer
 biopsy. The data has been prepared for you and is available as a part of
