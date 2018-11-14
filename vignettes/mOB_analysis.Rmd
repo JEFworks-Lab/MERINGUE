@@ -2,14 +2,14 @@
 title: "mOB Spatial Transcriptomics Analysis with MERingue"
 author: "Jean Fan"
 date: '`r Sys.Date()`'
-# rmarkdown::render('vignettes/mOB_analysis.Rmd', clean=FALSE)
-#output:
-  #html_document:
-  #  keep_md: yes
-  #pdf_document: 
-  #  highlight: zenburn
-  #md_document:
-  #variant: markdown_github
+# rmarkdown::render('vignettes/mOB_analysis.Rmd', clean=FALSE, output_format='all')
+output:
+  html_document:
+    keep_md: yes
+  pdf_document: 
+    highlight: zenburn
+  md_document:
+    variant: markdown_github
 vignette: >
   %\VignetteIndexEntry{mOB Spatial Transcriptomics Analysis with MERingue}
   %\VignetteEncoding{UTF-8}
@@ -28,7 +28,7 @@ opts_chunk$set(
 
 In this vignette, we will walk through an analysis of spatial transcriptomics data for the mouse olfactory bulb (mOB). The data has been prepared for you and is available as a part of the package. Here, `pos` is a dataframe where each row is a voxel's x and y positions in space, and `cd` is a counts matrix where each column is a voxel and each row is a gene.
 
-```{r, init}
+```{r, mob-init}
 library(MERingue)
 data(mOB)
 pos <- mOB$pos
@@ -38,7 +38,7 @@ cd <- mOB$counts
 First, we will filter out poor voxels, defined as those with fewer than 10 counts. Likewise, we will filter out poor genes, defined as those with fewer than 10 counts. 
 We will then normalize to counts per million (CPM). An appropriate normalization will be crucial to ensure that our identified spatial patterns are not driven by technical artifacts.
 
-```{r, qc, fig.width=8, fig.height=3}
+```{r, mob-qc, fig.width=8, fig.height=3}
 # Remove poor datasets and genes
 counts <- cleanCounts(counts = cd, 
                       min.reads = 10, 
@@ -54,7 +54,7 @@ mat <- normalizeCounts(counts = counts,
 
 To better understand the value of integrating spatial information, we will first perform a spatially-unaware analysis. Without considering the spatial information of each voxel, we will simply perform dimensionality reduction and graph-based clustering to identify transcriptional subpoplations in the mOB. Note for spatial transcriptomics, a transcriptional subpopulation in this context may reflect underlying cell-type transcriptional differences or cell-type composition differences among voxels. In this particular instance, the identified transcriptional subpopulations primarily reflect understanding cell-type. We can annotate the identified clusters based on their proposed cell-type in accordance with the original publication. We can then visualize the data using a tSNE embedding. 
 
-```{r, spatially-unaware, fig.width=8, fig.height=4}
+```{r, mob-spatially-unaware, fig.width=8, fig.height=4}
 # Dimensionality reduction by PCA on log10 CPM expression values
 pcs.info <- prcomp(t(log10(as.matrix(mat)+1)), center=TRUE)
 nPcs <- 5
@@ -102,7 +102,7 @@ plotEmbedding(pos, groups=annot,
 
 Having identified multiple transcriptionally distinct cell-types, we may be interested in identifying marker genes for each cell-type. We can use a Wilcox rank-test to look for genes that are significantly upregulated in each cell-type compared to all others. For demonstration purposes, we will restrict analysis to 2000 random genes. 
 
-```{r, diff-gexp}
+```{r, mob-diff-gexp}
 # Sample 2000 genes for demo purposes only to minimize runtime
 set.seed(0)
 test <- sample(rownames(mat), 2000)
@@ -121,7 +121,7 @@ print(lapply(dg.sig, length))
 
 Indeed, we are able to identify a number of marker genes per cell-type. We can visualize the results as a heatmap, where each column is a voxel with column colors denoting the cell-types, and each row is a gene with row colors denoting which subpopulation it is a marker for. 
 
-```{r, diff-gexp-plot, fig.width=4, fig.height=4}
+```{r, mob-diff-gexp-plot, fig.width=4, fig.height=4}
 dg.genes <- unlist(dg.sig)
 ggroup <- unlist(lapply(1:length(dg.sig), function(i) { 
   rep(names(dg.sig)[i], length(dg.sig[[i]]))
@@ -160,7 +160,7 @@ plotNetwork(pos, w, line.power=3,
 
 We will then assess the same set of 2000 genes for evidence of significant spatial auto-correlation or spatial clustering. 
 
-```{r, spatial-gexp}
+```{r, mob-spatial-gexp}
 # Identify sigificantly spatially auto-correlated genes
 I <- getSpatialPatterns(mat[test,], w)
 results.filter <- filterSpatialPatterns(mat = mat,
@@ -174,7 +174,7 @@ results.filter <- filterSpatialPatterns(mat = mat,
 
 We anticipate that these spatially clustered genes will likely fall into similar spatial patterns. This could be due to their inherent co-expression within cell-types or for other biological reasons. Therefore, we can compute a spatial cross-correlation for all gene pairs. Genes that are spatially co-localized will be grouped into the same spatial pattern. 
 
-```{r, spatial-patterns, fig.width=6, fig.height=10}
+```{r, mob-spatial-patterns, fig.width=6, fig.height=8}
 # Identify primary patterns
 scc <- spatialCrossCorMatrix(sigMat = as.matrix(mat[results.filter,]), 
                              w = w)
@@ -188,7 +188,7 @@ ggroup <- groupSigSpatialPatterns(pos = pos,
 
 We can visualize the spatial cross-correlation matrix to ensure that our pattern grouping is reasonable. 
 
-```{r, spatially-cross-cor, fig.width=4, fig.height=4}
+```{r, mob-spatially-cross-cor, fig.width=4, fig.height=4}
 # Look at pattern association
 gcol <- rainbow(length(levels(ggroup$groups)), v=0.5)[ggroup$groups]
   names(gcol) <- names(ggroup$groups)
@@ -204,7 +204,7 @@ heatmap(scc[ggroup$hc$labels, ggroup$hc$labels], scale='none',
 
 We can also visualize these spatially clustered genes within their identified spatial patterns as a heatmap. Again, each column is a voxel ordered and colored by their identified cell-type from our clustering analysis. Each row is a significantly spatially clustered gene ordered and colored by their identified spatial pattern. 
 
-```{r, spatial-heatmap, fig.width=4, fig.height=4}
+```{r, mob-spatial-heatmap, fig.width=4, fig.height=4}
 # Plot as heatmap
 sp.genes <- unlist(lapply(levels(ggroup$groups), function(x) {
   names(ggroup$groups)[ggroup$groups==x]
@@ -225,7 +225,7 @@ heatmap(m, scale="none",
 
 Indeed, in this particular case, as cell-types in the mOB are inherently spatially organized, we see a strong correspondence between spatially clustered genes and the cell-type markers we identified previously. Specifically, the spatially clustered genes in Spatial Pattern 1 to be highly overlapping with marker genes for the Olfactory Nerve Layer. Similarly, spatially clustered genes in Spatial Pattern 2 to be highly overlapping with marker genes for the Granular Cell Layer. Other spatial patterns appear to mark combinations of spatially-colocalized cell-types. 
 
-```{r, comparison, fig.width=8, fig.height=6}
+```{r, mob-comparison, fig.width=8, fig.height=6}
 # Compare two different types of identifying genes
 diffgexp <- dg.sig
 spatgexp <- lapply(levels(ggroup$groups), function(x) {
