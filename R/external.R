@@ -75,6 +75,8 @@ getDifferentialGenes <- function(cd, cols, verbose=TRUE) {
   # correct for multiple hypothesis
   y <- matrix(bh.adjust(pnorm(as.numeric(abs(x)), lower.tail = FALSE,
                               log.p = TRUE), log = TRUE), ncol = ncol(x)) * sign(x)
+  #y <- matrix(pnorm(as.numeric(abs(x)), lower.tail = FALSE,
+  #                            log.p = TRUE), ncol = ncol(x)) * sign(x)
   y <- exp(y) # log p-values are difficult to interpret
   y[y>1] <- 1
   x <- matrix(qnorm(bh.adjust(pnorm(as.numeric(abs(x)), lower.tail = FALSE,
@@ -98,6 +100,7 @@ getDifferentialGenes <- function(cd, cols, verbose=TRUE) {
   ## summarize
   ds <- lapply(1:ncol(x),function(i) {
     r <- data.frame(p.adj=y[,i],Z=x[,i],M=log2.fold.change[,i],highest=max.group==i,fe=f.expressing[,i])
+    #r <- data.frame(p.value=y[,i],Z=x[,i],M=log2.fold.change[,i],highest=max.group==i,fe=f.expressing[,i])
     rownames(r) <- rownames(x)
     r
   })

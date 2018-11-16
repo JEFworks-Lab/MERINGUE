@@ -58,7 +58,7 @@ getSpatialPatterns <- function(mat, adj, verbose=TRUE) {
   pv <- 1 - pnorm(results$observed, mean = results$expected, sd = results$sd)
   results$p.value <- pv;
   # multiple testing correction
-  results$p.adj <- stats::p.adjust(results$p.value)
+  results$p.adj <- stats::p.adjust(results$p.value, method="BH")
   # order by significance
   #results <- results[order(results$p.adj),]
 
@@ -74,10 +74,11 @@ getSpatialPatterns <- function(mat, adj, verbose=TRUE) {
 #' @param w Weight adjacency matrix
 #' @param alpha P-value threshold for LISA score to be considered significant.
 #' @param minPercentCells Minimum percent of cells that must be driving spatial pattern
+#' @param details Return details
 #'
 #' @export
 #'
-filterSpatialPatterns <- function(mat, I, w, adjustPv=TRUE, alpha = 0.05, minPercentCells = 0.05, verbose=TRUE) {
+filterSpatialPatterns <- function(mat, I, w, adjustPv=TRUE, alpha = 0.05, minPercentCells = 0.05, verbose=TRUE, details=FALSE) {
   ## filter for significant based on p-value
   if(adjustPv) {
     vi <- I$p.adj < alpha
@@ -106,7 +107,12 @@ filterSpatialPatterns <- function(mat, I, w, adjustPv=TRUE, alpha = 0.05, minPer
     }
   }
 
-  return(results.sig[vi])
+  if(details) {
+    df <- cbind(I[results.sig,], 'minPercentCells'=vi)
+    return(df)
+  } else {
+    return(results.sig[vi])
+  }
 }
 
 
