@@ -52,10 +52,10 @@ torShift <- function(pts,xsh,ysh,rect=NULL)
 }
 
 
-rtorShift <- function(pts, rect=NULL, seed=0)
+rtorShift <- function(pts, rect=NULL, k=4, seed=0)
 {
   set.seed(seed)
-  if(is.null(rect)) { rect <- bbox(pts) }
+  if(is.null(rect)) { rect <- bbox(pts)/k }
   xsc <- max(rect[,1])-min(rect[,1])
   ysc <- max(rect[,2])-min(rect[,2])
   xsh <- runif(1)*xsc
