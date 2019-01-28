@@ -51,7 +51,7 @@ double spatialCrossCor_C(arma::vec x,
   arma::vec v1 = pow(dx, 2);
   arma::vec v2 = pow(dy, 2);
   double v = sqrt(sum(v1) * sum(v2));
-  double SCI = (N/W) * (cv/v);
+  double SCI = (N/W) * (cv/v) * (1/2);
 
   return SCI;
 }
