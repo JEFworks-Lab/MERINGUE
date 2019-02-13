@@ -53,6 +53,16 @@ plotEmbedding(emb, groups = NULL, colors = NULL, cex = 0.6, alpha = 0.4,
 
 \item{...}{Additional parameters to pass to BASE::plot}
 }
+\value{
+None
+}
 \description{
 Plot 2D embedding
+}
+\examples{
+data(mOB)
+pos <- mOB$pos
+gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
+plotEmbedding(pos, colors=scale(gexp)[,1], zlim=c(-2,2), cex=3)
+
 }

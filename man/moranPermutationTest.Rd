@@ -2,17 +2,15 @@
 % Please edit documentation in R/correlationStatistics.R
 \name{moranPermutationTest}
 \alias{moranPermutationTest}
-\title{Spatialy autocorrelation by Moran's I using permutation testing}
+\title{Derive Moran's I p-value using permutation testing}
 \usage{
-moranPermutationTest(z, w, na.rm = FALSE, alternative = "two.sided",
-  N = 10000, seed = 0, ncores = 1, plot = FALSE, ...)
+moranPermutationTest(z, w, alternative = "greater", N = 10000, seed = 0,
+  ncores = 1, plot = FALSE, ...)
 }
 \arguments{
 \item{z}{Feature value}
 
-\item{w}{Adjacency matrix}
-
-\item{na.rm}{Whether to remove NAs from feature value}
+\item{w}{Adjacency weight matrix}
 
 \item{alternative}{"two.sided", "less", or "greater"}
 
@@ -26,6 +24,9 @@ moranPermutationTest(z, w, na.rm = FALSE, alternative = "two.sided",
 
 \item{n.cores}{Number of cores for parallel processing}
 }
+\value{
+Observed Moran's I statistic, the expected statistic under the null hypothesis of no spatial autocorrelation, the standard deviation under the null hypothesis, permutation p-value, and number of permutations
+}
 \description{
-Spatialy autocorrelation by Moran's I using permutation testing
+Derive Moran's I p-value using permutation testing
 }

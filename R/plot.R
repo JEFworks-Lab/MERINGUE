@@ -24,7 +24,16 @@ NULL
 #' @param group.level.colors set group level colors. Default uses rainbow.
 #' @param ... Additional parameters to pass to BASE::plot
 #'
+#' @return None
+#'
+#' @examples
+#' data(mOB)
+#' pos <- mOB$pos
+#' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
+#' plotEmbedding(pos, colors=scale(gexp)[,1], zlim=c(-2,2), cex=3)
+#'
 #' @export
+#'
 plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gradientPalette=NULL, zlim=NULL, s=1, v=0.8, min.group.size=1, show.legend=FALSE, mark.clusters=FALSE, mark.cluster.cex=2, shuffle.colors=F, legend.x='topright', gradient.range.quantile=0.95, verbose=TRUE, unclassified.cell.color='gray70', group.level.colors=NULL, xlab=NA, ylab=NA, ...) {
 
   if(!is.null(colors)) {
@@ -98,8 +107,7 @@ plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gra
     }
   }
 }
-
-## a utility function to translate factor into colors
+# Helper function to translate factor into colors
 fac2col <- function(x,s=1,v=1,shuffle=FALSE,min.group.size=1,return.details=F,unclassified.cell.color='gray50',level.colors=NULL) {
   x <- as.factor(x);
   if(min.group.size>1) {
@@ -123,43 +131,16 @@ fac2col <- function(x,s=1,v=1,shuffle=FALSE,min.group.size=1,return.details=F,un
     return(y);
   }
 }
-
-## quick utility to check if given character vector is colors
-## thanks, Josh O'Brien: http://stackoverflow.com/questions/13289009/check-if-character-string-is-a-valid-color-representation
+# Quick utility to check if given character vector is colors
+# Thanks to Josh O'Brien: http://stackoverflow.com/questions/13289009/check-if-character-string-is-a-valid-color-representation
 areColors <- function(x) {
   is.character(x) &
   sapply(x, function(X) {
     tryCatch(is.matrix(col2rgb(X)), error = function(e) FALSE)
   })
 }
-
-
-
-
-
-
-
-
-#' Plot neighbor network
-#' https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r
-#'
-#' @export
-plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...) {
-  plot(pos, pch=16, col=col, ...)
-  idx <- which(adj>0, arr.ind = T)
-  for(i in seq_len(nrow(idx))) {
-    lines(
-      c(pos[idx[i,1],1], pos[idx[i,2],1]),
-      c(pos[idx[i,1],2], pos[idx[i,2],2]),
-      col=line.col,
-      lwd=adj[idx]^line.power
-    )
-  }
-}
-
-
-#' Helper function to map values to colors
-#' Source: https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r
+# Helper function to map values to colors
+# Source: https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r
 map2col <- function(x, pal=colorRampPalette(c('blue', 'grey', 'red'))(100), na.col='lightgrey', limits=NULL){
   original <- x
   x <- na.omit(x)
@@ -175,124 +156,170 @@ map2col <- function(x, pal=colorRampPalette(c('blue', 'grey', 'red'))(100), na.c
 }
 
 
+#' Plot an adjacency weight matrix as a network
+#' Adapted from https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r
+#'
+#' @param pos Position matrix
+#' @param adj Adjacency weight matrix
+#' @param col Color of points
+#' @param line.col Color of line
+#' @param line.power Thickness of lines
+#' @param ... Additional plotting parameters
+#'
+#' @return None
+#'
+#' @examples
+#' data(mOB)
+#' pos <- mOB$pos
+#' w <- voronoiAdjacency(pos)
+#' plotNetwork(pos, w)
+#'
+#' @export
+#'
+plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...) {
+  if(nrow(pos) != nrow(adj)) {
+    warning('Position and Adjacency matrix dimensions inconsistent')
+  }
+  pos <- pos[rownames(adj),]
+  plot(pos, pch=16, col=col, ...)
+  idx <- which(adj>0, arr.ind = T)
+  for(i in seq_len(nrow(idx))) {
+    lines(
+      c(pos[idx[i,1],1], pos[idx[i,2],1]),
+      c(pos[idx[i,1],2], pos[idx[i,2],2]),
+      col=line.col,
+      lwd=adj[idx]^line.power
+    )
+  }
+}
+
 
 #' Gridded bivariate interpolation
+#' For interpolating primary spatial patterns
+#'
+#' @param pos Position matrix
+#' @param gexp Feature value
+#' @param scale Boolean of whether to scale feature value
+#' @param trim Winsorization trim
+#' @param zlim Feature value range
+#' @param fill Boolean of whether to interpolate regions with no expression value
+#' @param binSize Size of interpolated bins
+#' @param col Color palette
+#' @param plot Boolean of whether to plot
+#' @param ... Additional parameters for plotting
+#'
+#' @return 2D matrix of interpolated feature values
+#'
+#' @examples
+#' data(mOB)
+#' pos <- mOB$pos
+#' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
+#' invisible(interpolate(pos, gexp, zlim=c(-2,2)))
+#'
 #' @export
-interpolate <- function(pos, gexp, trim=0, zlim=c(-1,1), fill=TRUE, binSize=100, cex=1, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
-    z <- scale(winsorize(gexp, trim))[,1]
-    names(z) <- names(gexp)
-    z[z < zlim[1]] <- zlim[1]
-    z[z > zlim[2]] <- zlim[2]
-    x <- pos[,1]
-    y <- pos[,2]
-    names(x) <- names(y) <- rownames(pos)
+#'
+interpolate <- function(pos, gexp, scale=TRUE, trim=0, zlim=range(gexp), fill=TRUE, binSize=100, col=colorRampPalette(c('blue', 'white', 'red'))(100), plot=TRUE, ...) {
 
+  if(nrow(pos) > length(gexp)) {
     if(fill) {
+      print('Filling ...')
+    } else {
+      print('Removing regions with no feature value ...')
+    }
+  }
+  if(scale) {
+    z <- scale(gexp)[,1]
+  }
+  z <- winsorize(z, trim)
+  names(z) <- names(gexp)
+
+  z[z < zlim[1]] <- zlim[1]
+  z[z > zlim[2]] <- zlim[2]
+  x <- pos[,1]
+  y <- pos[,2]
+  names(x) <- names(y) <- rownames(pos)
+
+  if(fill) {
         zb <- rep(0, nrow(pos))
         names(zb) <- rownames(pos)
         zb[names(gexp)] <- z
-    } else {
+  } else {
         x <- x[names(gexp)]
         y <- y[names(gexp)]
         zb <- z
-    }
+  }
 
-    int <- akima::interp(x, y, zb, nx=binSize, ny=binSize, linear=TRUE)
+  int <- akima::interp(x, y, zb, nx=binSize, ny=binSize, linear=TRUE)
 
-    if(plot) {
-        plot(pos[names(gexp),], col=map2col(z), pch=16, axes=FALSE, xlab=NA, ylab=NA, ...); box()
+  if(plot) {
         image(int, col=col, axes=FALSE, frame.plot=TRUE, ...)
-    }
+  }
 
-    return(int)
+  return(int)
 }
 
 
-#' 2D kernel density estimation
-plotInterpolatedDensity <- function(pos) {
-  x <- pos[,1]
-  y <- pos[,2]
-  dens <- MASS::kde2d(x, y)
-  persp(dens, phi = 30, theta = 20, d = 5)
-}
-
-
-
-#' Get density of points in 2 dimensions.
-#' @author Kamil Slowikowski http://slowkow.com/notes/ggplot2-color-by-density/
+#' Expression correlation between cells of group A expressing gene A with neighbors of cells of group A in group B expressing gene B
 #'
-#' @param x A numeric vector.
-#' @param y A numeric vector.
-#' @param n Create a square n by n grid to compute density.
-#' @return The density within each square.
+#' @param gexpA Expression of gene A
+#' @param gexpB Expression of gene B
+#' @param groupA Cells of group A
+#' @param groupB Cells of group B
+#' @param weight Adjacency weight matrix
 #'
-getDensity <- function(pos, n = 100) {
-  x <- pos[,1]
-  y <- pos[,2]
-  dens <- MASS::kde2d(x = x, y = y, n = n)
-  ix <- findInterval(x, dens$x)
-  iy <- findInterval(y, dens$y)
-  ii <- cbind(ix, iy)
-  dens <- dens$z[ii]
-  names(dens) <- rownames(pos)
-  return(dens)
-}
-
-plotDensity <- function(pos, n=100) {
-  dens <- getDensity(pos, n)
-  plot(pos, col=map2col(dens), pch=16)
-}
-
-plotDensitySubset <- function(pos, subset, n=100) {
-  dens <- getDensity(pos[subset,], n)
-  densall <- rep(NA, nrow(pos))
-  names(densall) <- rownames(pos)
-  densall[subset] <- dens
-  plot(pos, col=map2col(densall), pch=16)
-}
-
-
-
-
-#' plot boxplot of expression for nearest neighbor
+#' @return None
+#'
+#' @examples
+#' # Simulate data
+#' set.seed(0)
+#' N <- 100
+#' pos <- cbind(rnorm(N), rnorm(N))
+#' rownames(pos) <- paste0('cell', 1:N)
+#' colnames(pos) <- c('x', 'y')
+#' weight <- voronoiAdjacency(pos)
+#' ctA <- sample(rownames(pos), N/2)
+#' ctB <- setdiff(rownames(pos), ctA)
+#' par(mfrow=c(1,1))
+#' plotNetwork(pos, weight, line.col='grey')
+#' points(pos[ctA,], col='red')
+#' points(pos[ctB,], col='blue')
+#' gexpA <- pos[,2]
+#' gexpA[ctB] <- 0
+#' gexpB <- -pos[,2]
+#' gexpB[ctA] <- 0
+#' plotEmbedding(pos, col=gexpA)
+#' plotEmbedding(pos, col=gexpB)
+#' plotInterCellTypeSpatialCrossCor(gexpA, gexpB, ctA, ctB, weight)
+#' plotInterCellTypeSpatialCrossCor(gexpB, gexpA, ctB, ctA, weight)
+#'
 #' @export
-plotNeighborBoxplot <- function(gexpA, gexpB, groupA, groupB, weight) {
-    par(mfrow=c(1,2))
-
+#'
+plotInterCellTypeSpatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight, fun=mean) {
     ## plot correlation between groupA cells and neighbors
     nbs <- lapply(groupA, function(x) names(which(weight[x,]==1)))
     names(nbs) <- groupA
     ## gene A expression in group A
     foo <- gexpA[groupA]
-
     ## average gene B expression for neighbors from group B
-    bar <- unlist(lapply(nbs, function(y) mean(gexpB[y])))
-
-    lmfit <- lm(bar~foo)
-
-    plot(foo, bar, xlab='gexpA in groupA', ylab='gexpB in nearest neighbor in groupB')
-    abline(lmfit)
-    pv <- coef(summary(lmfit))['foo','Pr(>|t|)']
-    text(0,0, paste0('p-value: ', signif(pv, 3)), adj=0, col='red', font=2)
-
-    ## boxplot of distribution
-    bard <- do.call(rbind, lapply(names(nbs), function(y) {
-                               ngexp <- gexpB[nbs[[y]]]
-                               cbind(cell=rep(y, length(ngexp)), ngexp=ngexp)
-                           }))
-    bard <- cbind(bard, gexp=foo[bard[,'cell']])
-    bard <- data.frame(bard)
-    class(bard$ngexp) <- 'numeric'
-    class(bard$gexp) <- 'numeric'
-    boxplot(ngexp~gexp, data=bard)
-
-    return(lmfit)
+    bar <- unlist(lapply(nbs, function(y) fun(gexpB[y])))
+    ## plot
+    plot(foo, bar, xlab='gene A expression for cells in group A', ylab='gene B expression for neighbors in group B')
 }
 
 
-
-
 #' Rotate position by angle theta in radians
+#'
+#' @param pos Position matrix of x-y coordinates
+#' @param theta Angle of rotation in radians
+#'
+#' @return Position matrix with x-y coordinates rotated
+#'
+#' @examples
+#' pos <- cbind(rnorm(10), rnorm(10))
+#' posRotated <- rotatePos(pos, pi/2)
+#'
+#' @export
+#'
 rotatePos <- function(pos, theta) {
   rotMat <- matrix(c(cos(theta), sin(theta), -sin(theta), cos(theta)), nrow=2)
   pos2 <- t(rotMat %*% t(pos))

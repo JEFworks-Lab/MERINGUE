@@ -2,13 +2,36 @@
 % Please edit documentation in R/plot.R
 \name{plotNetwork}
 \alias{plotNetwork}
-\title{Plot neighbor network
-https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r}
+\title{Plot an adjacency weight matrix as a network
+Adapted from https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r}
 \usage{
 plotNetwork(pos, adj, col = "black", line.col = "red", line.power = 1,
   ...)
 }
+\arguments{
+\item{pos}{Position matrix}
+
+\item{adj}{Adjacency weight matrix}
+
+\item{col}{Color of points}
+
+\item{line.col}{Color of line}
+
+\item{line.power}{Thickness of lines}
+
+\item{...}{Additional plotting parameters}
+}
+\value{
+None
+}
 \description{
-Plot neighbor network
-https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r
+Plot an adjacency weight matrix as a network
+Adapted from https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r
+}
+\examples{
+data(mOB)
+pos <- mOB$pos
+w <- voronoiAdjacency(pos)
+plotNetwork(pos, w)
+
 }

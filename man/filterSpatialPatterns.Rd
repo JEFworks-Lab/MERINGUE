@@ -5,7 +5,7 @@
 \title{Filter for spatial patterns}
 \usage{
 filterSpatialPatterns(mat, I, w, adjustPv = TRUE, alpha = 0.05,
-  minPercentCells = 0.05, verbose = TRUE)
+  minPercentCells = 0.05, verbose = TRUE, details = FALSE)
 }
 \arguments{
 \item{mat}{Gene expression matrix.}
@@ -17,6 +17,8 @@ filterSpatialPatterns(mat, I, w, adjustPv = TRUE, alpha = 0.05,
 \item{alpha}{P-value threshold for LISA score to be considered significant.}
 
 \item{minPercentCells}{Minimum percent of cells that must be driving spatial pattern}
+
+\item{details}{Return details}
 }
 \description{
 Filter out spatial patterns driven by small number of cells using LISA

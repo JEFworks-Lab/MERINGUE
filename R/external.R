@@ -26,8 +26,8 @@ getDifferentialGenes <- function(cd, cols, verbose=TRUE) {
   }
 
   ## modified from pagoda2
-  # run wilcoxon test comparing each group with the rest
-  # calculate rank per column (per-gene) average rank matrix
+  ## run wilcoxon test comparing each group with the rest
+  ## calculate rank per column (per-gene) average rank matrix
   xr <- apply(cm, 2, function(foo) {
     #foo[foo==0] <- NA
     bar <- rank(foo)
@@ -35,28 +35,28 @@ getDifferentialGenes <- function(cd, cols, verbose=TRUE) {
     bar[foo==0] <- 0
     bar
   }); rownames(xr) <- rownames(cm)
-  ##xr <- sparse_matrix_column_ranks(cm);
+  # xr <- sparse_matrix_column_ranks(cm);
 
-  # calculate rank sums per group
+  ## calculate rank sums per group
   grs <- do.call(rbind, lapply(levels(cols), function(g) Matrix::colSums(xr[cols==g,])))
   rownames(grs) <- levels(cols); colnames(grs) <- colnames(xr)
-  ##grs <- colSumByFac(xr,as.integer(cols))[-1,,drop=F]
+  # grs <- colSumByFac(xr,as.integer(cols))[-1,,drop=F]
 
-  # calculate number of non-zero entries per group
+  ## calculate number of non-zero entries per group
   gnzz <- do.call(rbind, lapply(levels(cols), function(g) Matrix::colSums(xr[cols==g,]>0)))
   rownames(gnzz) <- levels(cols); colnames(gnzz) <- colnames(xr)
-  #xr@x <- numeric(length(xr@x))+1
-  #gnzz <- colSumByFac(xr,as.integer(cols))[-1,,drop=F]
+  # xr@x <- numeric(length(xr@x))+1
+  # gnzz <- colSumByFac(xr,as.integer(cols))[-1,,drop=F]
 
-  #group.size <- as.numeric(tapply(cols,cols,length));
-  #group.size <- as.numeric(tapply(cols,cols,length))[1:nrow(gnzz)]; group.size[is.na(group.size)]<-0; # trailing empty levels are cut off by colSumByFac
+  # group.size <- as.numeric(tapply(cols,cols,length));
+  # group.size <- as.numeric(tapply(cols,cols,length))[1:nrow(gnzz)]; group.size[is.na(group.size)]<-0; # trailing empty levels are cut off by colSumByFac
   group.size <- as.numeric(table(cols))
 
   # add contribution of zero entries to the grs
   gnz <- (group.size-gnzz)
 
-  # rank of a 0 entry for each gene
-  #zero.ranks <- (nrow(xr)-diff(xr@p)+1)/2 # number of total zero entries per gene
+  ## rank of a 0 entry for each gene
+  # zero.ranks <- (nrow(xr)-diff(xr@p)+1)/2 # number of total zero entries per gene
   zero.ranks <- apply(cm, 2, function(foo) {
     bar <- rank(foo)
     bar[foo==0][1]
@@ -66,8 +66,8 @@ getDifferentialGenes <- function(cd, cols, verbose=TRUE) {
   # standardize
   n1n2 <- group.size*(nrow(cm)-group.size);
   # usigma <- sqrt(n1n2*(nrow(cm)+1)/12) # without tie correction
-  # correcting for 0 ties, of which there are plenty
-  #usigma <- sqrt(n1n2*(nrow(cm)+1)/12)
+  ## correcting for 0 ties, of which there are plenty
+  # usigma <- sqrt(n1n2*(nrow(cm)+1)/12)
   usigma <- sqrt((nrow(cm) +1 - (gnz^3 - gnz)/(nrow(cm)*(nrow(cm)-1)))*n1n2/12)
   # standardized U value- z score
   x <- t((ustat - n1n2/2)/usigma);
@@ -122,4 +122,23 @@ bh.adjust <- function(x, log = FALSE) {
   a <- rev(cummin(rev(q)))[order(id)]
   ox[nai] <- a
   ox
+}
+
+
+#' Winsorize expression values to prevent outliers
+#'
+#' @param x Values
+#' @param qt Values below this quantile and above 1-this quantile will be set to the quantile value
+#'
+#' @export
+#'
+winsorize <- function (x, qt=.05) {
+  if(length(qt) != 1 || qt < 0 ||
+     qt > 0.5) {
+    stop("bad value for quantile threashold")
+  }
+  lim <- quantile(x, probs=c(qt, 1-qt))
+  x[ x < lim[1] ] <- lim[1]
+  x[ x > lim[2] ] <- lim[2]
+  x
 }

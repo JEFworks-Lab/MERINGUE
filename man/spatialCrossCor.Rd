@@ -2,11 +2,28 @@
 % Please edit documentation in R/correlationStatistics.R
 \name{spatialCrossCor}
 \alias{spatialCrossCor}
-\title{Spatial cross-correlation}
+\title{Calculates spatial cross correlation for two features}
 \usage{
-spatialCrossCor(gexpA, gexpB, groupA, groupB, weight = NULL, pos = NULL,
-  k = 3)
+spatialCrossCor(x, y, weight)
+}
+\arguments{
+\item{x}{Feature 1 value}
+
+\item{y}{Feature 2 value}
+
+\item{weight}{Adjacency weight matrix}
+}
+\value{
+Spatial cross correlation statistic
 }
 \description{
-Spatial cross-correlation
+Calculates spatial cross correlation for two features
+}
+\examples{
+data(mOB)
+pos <- mOB$pos
+weight <- voronoiAdjacency(pos)
+gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
+scc <- spatialCrossCor(gexp[1,], gexp[2,], weight)
+
 }

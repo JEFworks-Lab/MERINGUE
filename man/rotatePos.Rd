@@ -6,6 +6,19 @@
 \usage{
 rotatePos(pos, theta)
 }
+\arguments{
+\item{pos}{Position matrix of x-y coordinates}
+
+\item{theta}{Angle of rotation in radians}
+}
+\value{
+Position matrix with x-y coordinates rotated
+}
 \description{
 Rotate position by angle theta in radians
+}
+\examples{
+pos <- cbind(rnorm(10), rnorm(10))
+posRotated <- rotatePos(pos, pi/2)
+
 }

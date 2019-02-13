@@ -4,15 +4,10 @@
 \alias{voronoiAdjacency}
 \title{Neighbor weight matrix by voronoi adjacency}
 \usage{
-voronoiAdjacency(pos, njitter = 0, ajitter = 0, filterDist = NA,
-  plot = FALSE)
+voronoiAdjacency(pos, filterDist = NA, plot = FALSE)
 }
 \arguments{
 \item{pos}{Position}
-
-\item{njitter}{Number of times to jitter positions (useful for gridded spatial transcriptomics data)}
-
-\item{ajitter}{Amount to jitter}
 
 \item{filterDist}{Euclidean distance beyond which two cells cannot be considered neighbors}
 
@@ -25,7 +20,7 @@ Neighbor weight matrix by voronoi adjacency. Modified from Barry Rowlingson and 
 {
 data(mOB)
 pos <- mOB$pos
-w <- voronoiAdjacency(pos, njitter=100, ajitter=5, filterDist=1.8)
+w <- voronoiAdjacency(pos, plot=TRUE)
 }
 
 }

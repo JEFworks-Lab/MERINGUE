@@ -4,17 +4,26 @@
 \alias{lisaTest}
 \title{Local indicators of spatial association}
 \usage{
-lisaTest(x, weight, na.rm = FALSE, alternative = "greater")
+lisaTest(x, weight, alternative = "greater")
 }
 \arguments{
 \item{x}{Feature value}
 
-\item{weight}{Adjacency matrix}
-
-\item{na.rm}{Whether to remove NAs from feature value}
+\item{weight}{Adjacency weight matrix}
 
 \item{alternative}{"two.sided", "less", or "greater"}
 }
+\value{
+Data frame of observed, expected, standard deviation, and p-value for each point
+}
 \description{
 Local indicators of spatial association
+}
+\examples{
+data(mOB)
+pos <- mOB$pos
+weight <- voronoiAdjacency(pos)
+gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
+lisa <- lisaTest(gexp, weight)
+
 }

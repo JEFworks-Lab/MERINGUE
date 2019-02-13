@@ -2,12 +2,45 @@
 % Please edit documentation in R/plot.R
 \name{interpolate}
 \alias{interpolate}
-\title{Gridded bivariate interpolation}
+\title{Gridded bivariate interpolation
+For interpolating primary spatial patterns}
 \usage{
-interpolate(pos, gexp, trim = 0, zlim = c(-1, 1), fill = TRUE,
-  binSize = 100, cex = 1, col = colorRampPalette(c("blue", "white",
+interpolate(pos, gexp, scale = TRUE, trim = 0, zlim = range(gexp),
+  fill = TRUE, binSize = 100, col = colorRampPalette(c("blue", "white",
   "red"))(100), plot = TRUE, ...)
+}
+\arguments{
+\item{pos}{Position matrix}
+
+\item{gexp}{Feature value}
+
+\item{scale}{Boolean of whether to scale feature value}
+
+\item{trim}{Winsorization trim}
+
+\item{zlim}{Feature value range}
+
+\item{fill}{Boolean of whether to interpolate regions with no expression value}
+
+\item{binSize}{Size of interpolated bins}
+
+\item{col}{Color palette}
+
+\item{plot}{Boolean of whether to plot}
+
+\item{...}{Additional parameters for plotting}
+}
+\value{
+2D matrix of interpolated feature values
 }
 \description{
 Gridded bivariate interpolation
+For interpolating primary spatial patterns
+}
+\examples{
+data(mOB)
+pos <- mOB$pos
+gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
+invisible(interpolate(pos, gexp, zlim=c(-2,2)))
+
 }

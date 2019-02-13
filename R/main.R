@@ -108,7 +108,8 @@ filterSpatialPatterns <- function(mat, I, w, adjustPv=TRUE, alpha = 0.05, minPer
   }
 
   if(details) {
-    df <- cbind(I[results.sig,], 'minPercentCells'=vi)
+    df <- cbind(I[results.sig,], 'minPercentCells'=lisa)
+    df <- df[vi,]
     return(df)
   } else {
     return(results.sig[vi])
@@ -173,4 +174,5 @@ groupSigSpatialPatterns <- function(pos, mat, scc, hclustMethod='complete', trim
 
     return(list(hc=hc, groups=groups, prs=prs))
 }
+
 

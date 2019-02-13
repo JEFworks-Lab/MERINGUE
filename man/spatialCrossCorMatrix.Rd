@@ -2,10 +2,26 @@
 % Please edit documentation in R/correlationStatistics.R
 \name{spatialCrossCorMatrix}
 \alias{spatialCrossCorMatrix}
-\title{Calculates a spatial cross correlation matrix}
+\title{Calculates a spatial cross correlation for all pairs}
 \usage{
 spatialCrossCorMatrix(sigMat, w)
 }
+\arguments{
+\item{sigMat}{Matrix of feature values}
+
+\item{w}{Adjacency weight matrix}
+}
+\value{
+Matrix of spatial cross correlationf or all pairs
+}
 \description{
-Calculates a spatial cross correlation matrix
+Calculates a spatial cross correlation for all pairs
+}
+\examples{
+data(mOB)
+pos <- mOB$pos
+weight <- voronoiAdjacency(pos)
+gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
+sccMat <- spatialCrossCorMatrix(gexp[1:5,], weight)
+
 }
