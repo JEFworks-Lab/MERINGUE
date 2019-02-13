@@ -11,4 +11,4 @@ data/*.gz
 data/*.jpg
 data/*.txt
 data/*.tsv
-test/*
+workinprogress/*
