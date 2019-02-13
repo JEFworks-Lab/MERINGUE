@@ -13,7 +13,7 @@
 #'      will be removed (default: 1)
 #' @param min.detected Minimum number of cells a gene must be seen in. Genes
 #'      not seen in a sufficient number of cells will be removed (default: 1)
-#' @param verbose Verbosity (default: TRUE)
+#' @param verbose Verbosity (default: FALSE)
 #' @param plot Whether to plot (default: TRUE)
 #'
 #' @return a filtered read count matrix
@@ -22,7 +22,7 @@
 #'
 #' @importFrom Matrix Matrix colSums rowSums
 #'
-cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads = 1, min.detected = 1, verbose = TRUE, plot=TRUE) {
+cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads = 1, min.detected = 1, verbose = FALSE, plot=TRUE) {
   if (!class(counts) %in% c("dgCMatrix", "dgTMatrix", "dgeMatrix")) {
     if (verbose) {
       message("Converting to sparse matrix ...")

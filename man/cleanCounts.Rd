@@ -5,7 +5,7 @@
 \title{Filter a counts matrix}
 \usage{
 cleanCounts(counts, min.lib.size = 1, max.lib.size = Inf, min.reads = 1,
-  min.detected = 1, verbose = TRUE, plot = TRUE)
+  min.detected = 1, verbose = FALSE, plot = TRUE)
 }
 \arguments{
 \item{counts}{A sparse read count matrix. The rows correspond to genes,
@@ -23,7 +23,7 @@ will be removed (default: 1)}
 \item{min.detected}{Minimum number of cells a gene must be seen in. Genes
 not seen in a sufficient number of cells will be removed (default: 1)}
 
-\item{verbose}{Verbosity (default: TRUE)}
+\item{verbose}{Verbosity (default: FALSE)}
 
 \item{plot}{Whether to plot (default: TRUE)}
 }

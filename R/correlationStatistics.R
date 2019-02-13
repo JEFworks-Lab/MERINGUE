@@ -51,11 +51,21 @@ getPv <- function(obs, ei, sdi, alternative) {
 #' @export
 #'
 moranTest <- function (x, weight, alternative = "greater") {
+
+  if (nrow(weight) != ncol(weight)) {
+    stop("'weight' must be a square matrix")
+  }
+
+  N <- length(x)
+  if (nrow(weight) != N) {
+    stop("'weight' must have as many rows as observations in 'x'")
+  }
+
   if(sum(rownames(weight) %in% names(x)) != nrow(weight)) {
-    warning('Names in feature vector and adjacency weight matrix do not agree.')
-    return(NA)
+    stop('Names in feature vector and adjacency weight matrix do not agree.')
   }
   x <- x[rownames(weight)]
+
   output <- moranTest_C(x, weight)
   output <- output[,1]
   names(output) <- c('observed', 'expected', 'sd')
@@ -77,17 +87,21 @@ moranTest <- function (x, weight, alternative = "greater") {
 #'
 moranTest_DEPRECATED <- function (x, weight, alternative = "greater") {
 
-  print('DEPRECATED! Use moranTest()')
+  warning('DEPRECATED! Use moranTest()')
 
   if (nrow(weight) != ncol(weight)) {
     stop("'weight' must be a square matrix")
   }
 
   N <- length(x)
-
   if (nrow(weight) != N) {
     stop("'weight' must have as many rows as observations in 'x'")
   }
+
+  if(sum(rownames(weight) %in% names(x)) != nrow(weight)) {
+    stop('Names in feature vector and adjacency weight matrix do not agree.')
+  }
+  x <- x[rownames(weight)]
 
   # first moment
   ei <- -1/(N - 1)
@@ -204,8 +218,8 @@ moranSimple <- function(x, weight) {
 
 #' Calculates a spatial cross correlation for all pairs
 #'
-#' @param sigMat Matrix of feature values
-#' @param w Adjacency weight matrix
+#' @param mat Matrix of feature values
+#' @param weight Adjacency weight matrix
 #'
 #' @return Matrix of spatial cross correlationf or all pairs
 #'
@@ -218,9 +232,24 @@ moranSimple <- function(x, weight) {
 #'
 #' @export
 #'
-spatialCrossCorMatrix <- function(sigMat, w) {
-  scor <- spatialCrossCorMatrix_C(as.matrix(sigMat), w)
-  colnames(scor) <- rownames(scor) <- rownames(sigMat)
+spatialCrossCorMatrix <- function(mat, weight) {
+
+  if (nrow(weight) != ncol(weight)) {
+    stop("'weight' must be a square matrix")
+  }
+
+  N <- ncol(mat)
+  if (nrow(weight) != N) {
+    stop("'weight' must have as many rows as observations in 'x'")
+  }
+
+  if(sum(rownames(weight) %in% colnames(mat)) != nrow(weight)) {
+    stop('Names in feature vector and adjacency weight matrix do not agree.')
+  }
+  mat <- mat[, rownames(weight)]
+
+  scor <- spatialCrossCorMatrix_C(as.matrix(mat), w)
+  colnames(scor) <- rownames(scor) <- rownames(mat)
   return(scor)
 }
 
@@ -243,6 +272,23 @@ spatialCrossCorMatrix <- function(sigMat, w) {
 #' @export
 #'
 spatialCrossCor <- function(x, y, weight) {
+  if(length(x) != length(y)) {
+    stop("'x', and 'y' must be equal in length")
+  }
+  if (nrow(weight) != ncol(weight)) {
+    stop("'weight' must be a square matrix")
+  }
+  N <- length(x)
+  if (nrow(weight) != N) {
+    stop("'weight' must have as many rows as observations in 'x' and 'y'")
+  }
+
+  if(sum(rownames(weight) %in% names(x)) != nrow(weight)) {
+    stop('Names in feature vector and adjacency weight matrix do not agree.')
+  }
+  x <- x[rownames(weight)]
+  y <- y[rownames(weight)]
+
   # scale weights
   rs <- rowSums(weight)
   rs[rs == 0] <- 1
@@ -351,9 +397,18 @@ interCellTypeSpatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight) {
 #' @export
 #'
 lisaTest <- function(x, weight, alternative = "greater") {
+
+  if (nrow(weight) != ncol(weight)) {
+    stop("'weight' must be a square matrix")
+  }
+
+  N <- length(x)
+  if (nrow(weight) != N) {
+    stop("'weight' must have as many rows as observations in 'x'")
+  }
+
   if(sum(rownames(weight) %in% names(x)) != nrow(weight)) {
-    warning('Names in feature vector and adjacency weight matrix do not agree.')
-    return(NA)
+    stop('Names in feature vector and adjacency weight matrix do not agree.')
   }
   x <- x[rownames(weight)]
 

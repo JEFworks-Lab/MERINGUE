@@ -15,6 +15,9 @@ getBnn(cct, nct, pos, k)
 
 \item{k}{Number of nearest neighbors from background for each cell from cell type of interest}
 }
+\value{
+Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
+}
 \description{
 Identify nearest neighbors in the background cell-type
 }

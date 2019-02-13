@@ -11,6 +11,9 @@ getCrossLayerNeighbors(layers, k = 3)
 
 \item{k}{Number of nearest neighbors}
 }
+\value{
+Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
+}
 \description{
 Nearest neighbors across layers
 }

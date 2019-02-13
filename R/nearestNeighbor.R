@@ -5,6 +5,8 @@
 #' @param pos Position
 #' @param k Number of nearest neighbors
 #'
+#' @return Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
+#'
 #' @export
 #'
 getKnn <- function(pos, k) {
@@ -29,6 +31,8 @@ getKnn <- function(pos, k) {
 #' @param ctB vector of cell names in group B
 #' @param pos Position
 #' @param k Number of mutual nearest neighbors
+#'
+#' @return Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
 #'
 #' @export
 #'
@@ -87,6 +91,8 @@ getMnn <- function(ctA, ctB, pos, k) {
 #' @param pos Position
 #' @param k Number of nearest neighbors from background for each cell from cell type of interest
 #'
+#' @return Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
+#'
 #' @export
 #'
 getBnn <- function(cct, nct, pos, k) {
@@ -105,6 +111,8 @@ getBnn <- function(cct, nct, pos, k) {
 #'
 #' @param layers List of positions
 #' @param k Number of nearest neighbors
+#'
+#' @return Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
 #'
 #' @export
 #'
@@ -136,23 +144,25 @@ getCrossLayerNeighbors <- function(layers, k=3) {
 }
 
 
-#' Neighbor weight matrix by voronoi adjacency
+#' Adjacency weight matrix by voronoi adjacency
 #'
-#' @description Neighbor weight matrix by voronoi adjacency. Modified from Barry Rowlingson and Alison Hale's voronoi_adjacency function in the caramellar package
+#' @description Adjacency weight matrix by voronoi adjacency. Modified from Barry Rowlingson and Alison Hale's voronoi_adjacency function in the caramellar package
 #'
 #' @param pos Position
 #' @param filterDist Euclidean distance beyond which two cells cannot be considered neighbors
-#' @param plot Whether to plot
+#' @param nDummy Number of dummy points to use for edge cases
+#' @param plot Boolean of whether to plot
 #'
-#' @examples {
+#' @return Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
+#'
+#' @examples
 #' data(mOB)
 #' pos <- mOB$pos
 #' w <- voronoiAdjacency(pos, plot=TRUE)
-#' }
 #'
 #' @export
 #'
-voronoiAdjacency <- function(pos, filterDist = NA, plot=FALSE){
+voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 10, plot=FALSE){
 
   if(ncol(pos)>2) {
     stop('2D tesselation only')
@@ -167,16 +177,16 @@ voronoiAdjacency <- function(pos, filterDist = NA, plot=FALSE){
   ## deldir doesn't handle edge cases well
   ## create dummy edges
   pos0 <- pos
-  t <- max((max(pos[,1])-min(pos[,1]))/10, (max(pos[,2])-min(pos[,2]))/10)
+  t <- max((max(pos[,1])-min(pos[,1]))/nDummy, (max(pos[,2])-min(pos[,2]))/nDummy)
   x1 <- min(pos[,1])-t
   x2 <- max(pos[,1])+t
   y1 <- min(pos[,2])-t
   y2 <- max(pos[,2])+t
   dummy <- rbind(
-    cbind(seq(x1, x2, by=(x2-x1)/10), y1),
-    cbind(seq(x1, x2, by=(x2-x1)/10), y2),
-    cbind(x1, seq(y1, y2, by=(y2-y1)/10)),
-    cbind(x2, seq(y1, y2, by=(y2-y1)/10))
+    cbind(seq(x1, x2, by=(x2-x1)/nDummy), y1),
+    cbind(seq(x1, x2, by=(x2-x1)/nDummy), y2),
+    cbind(x1, seq(y1, y2, by=(y2-y1)/nDummy)),
+    cbind(x2, seq(y1, y2, by=(y2-y1)/nDummy))
   )
   colnames(dummy) <- c('x', 'y')
   rownames(dummy) <- paste0('dummy', 1:nrow(dummy))

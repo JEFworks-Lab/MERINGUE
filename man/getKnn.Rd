@@ -11,6 +11,9 @@ getKnn(pos, k)
 
 \item{k}{Number of nearest neighbors}
 }
+\value{
+Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
+}
 \description{
 K nearest neighbors in space based on position
 }

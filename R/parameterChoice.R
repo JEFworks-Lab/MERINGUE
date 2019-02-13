@@ -34,14 +34,3 @@ getMinPercentCells <- function(weight, mat, alpha=0.05, M=10000, seed=0, plot=TR
 
   return(mpc)
 }
-
-getSignedLisa <- function(gexp, w, plot=TRUE, ...) {
-  slisa <- -log10(lisaTest(gexp, w)$p.value)
-  slisa[is.infinite(slisa)] <- NA
-  slisa[is.na(slisa)] <- max(slisa, na.rm=TRUE)
-  slisa <- slisa * sign(gexp)
-  if(plot) {
-    plotEmbedding(pos, col=scale(slisa)[,1], ...)
-  }
-  return(slisa)
-}

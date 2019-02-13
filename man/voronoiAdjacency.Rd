@@ -2,25 +2,28 @@
 % Please edit documentation in R/nearestNeighbor.R
 \name{voronoiAdjacency}
 \alias{voronoiAdjacency}
-\title{Neighbor weight matrix by voronoi adjacency}
+\title{Adjacency weight matrix by voronoi adjacency}
 \usage{
-voronoiAdjacency(pos, filterDist = NA, plot = FALSE)
+voronoiAdjacency(pos, filterDist = NA, nDummy = 10, plot = FALSE)
 }
 \arguments{
 \item{pos}{Position}
 
 \item{filterDist}{Euclidean distance beyond which two cells cannot be considered neighbors}
 
-\item{plot}{Whether to plot}
+\item{nDummy}{Number of dummy points to use for edge cases}
+
+\item{plot}{Boolean of whether to plot}
+}
+\value{
+Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
 }
 \description{
-Neighbor weight matrix by voronoi adjacency. Modified from Barry Rowlingson and Alison Hale's voronoi_adjacency function in the caramellar package
+Adjacency weight matrix by voronoi adjacency. Modified from Barry Rowlingson and Alison Hale's voronoi_adjacency function in the caramellar package
 }
 \examples{
-{
 data(mOB)
 pos <- mOB$pos
 w <- voronoiAdjacency(pos, plot=TRUE)
-}
 
 }

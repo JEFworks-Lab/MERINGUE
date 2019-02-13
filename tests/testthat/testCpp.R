@@ -79,3 +79,31 @@ test_that(context("LISA works as expected"), {
 
   expect_equal(all.equal(moranC, mLisa), TRUE)
 })
+
+test_that(context("getSpatialPatterns works"), {
+  data(mOB)
+  pos <- mOB$pos
+  cd <- mOB$counts
+  mat <- normalizeCounts(cd, log=FALSE, verbose=FALSE)
+  w <- voronoiAdjacency(pos)
+
+  set.seed(0)
+  is <- rownames(mat)[sample(1:nrow(mat), 10)]
+
+  # gold standard
+  start_time <- Sys.time()
+  I1 <- do.call(rbind, lapply(is, function(g) { moranTest(mat[g,], w) }))
+  rownames(I1) <- is
+  end_time <- Sys.time()
+  moranTime <- end_time - start_time
+
+  # test
+  start_time <- Sys.time()
+  I2 <- getSpatialPatterns(mat[is,], w)
+  end_time <- Sys.time()
+  moranCTime <- end_time - start_time
+
+  expect_equal(moranCTime < moranTime, TRUE)
+  expect_equal(all.equal(as.numeric(I1[,1]), as.numeric(I2[,1])), TRUE)
+
+})

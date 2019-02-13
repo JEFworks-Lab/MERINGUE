@@ -15,6 +15,9 @@ getMnn(ctA, ctB, pos, k)
 
 \item{k}{Number of mutual nearest neighbors}
 }
+\value{
+Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
+}
 \description{
 Mutual nearest neighbors in space between group A and B based on position
 }

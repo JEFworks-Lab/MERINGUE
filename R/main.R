@@ -41,21 +41,38 @@ getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) 
 #'
 #' @param mat Gene expression matrix. Must be normalized such that correlations
 #'     will not be driven by technical artifacts.
-#' @param adj Spatial weights such as a weighted adjacency matrix
+#' @param weight Spatial weights such as a weighted adjacency matrix
 #'
 #' @export
 #'
-getSpatialPatterns <- function(mat, adj, verbose=TRUE) {
+getSpatialPatterns <- function(mat, weight, alternative='greater', verbose=TRUE) {
+
+  if (nrow(weight) != ncol(weight)) {
+    stop("'weight' must be a square matrix")
+  }
+
+  N <- ncol(mat)
+  if (nrow(weight) != N) {
+    stop("'weight' must have as many rows as observations in 'x'")
+  }
+
+  if(sum(rownames(weight) %in% colnames(mat)) != nrow(weight)) {
+    stop('Names in feature vector and adjacency weight matrix do not agree.')
+  }
+  mat <- mat[, rownames(weight)]
 
   # Calculate Moran's I for each gene
-  results <- MERingue:::getSpatialPatterns_C(as.matrix(mat), as.matrix(adj), verbose)
+  results <- MERingue:::getSpatialPatterns_C(as.matrix(mat), as.matrix(weight), verbose)
   colnames(results) <- c('observed', 'expected', 'sd')
   rownames(results) <- rownames(mat)
   results <- as.data.frame(results)
 
   # Get p-value
   # always assume we want greater autocorrelation
-  pv <- 1 - pnorm(results$observed, mean = results$expected, sd = results$sd)
+  # pv <- 1 - pnorm(results$observed, mean = results$expected, sd = results$sd)
+  pv <- sapply(seq_len(nrow(results)), function(i) {
+    getPv(results$observed[i], results$expected[i], results$sd[i], alternative)
+  })
   results$p.value <- pv;
   # multiple testing correction
   results$p.adj <- stats::p.adjust(results$p.value, method="BH")
