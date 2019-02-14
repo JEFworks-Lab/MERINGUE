@@ -26,7 +26,9 @@ opts_chunk$set(
 )
 ```
 
-In this vignette, we will walk through an analysis of spatial transcriptomics data for 4 consecutive tissue slices of a breast cancer biopsy. The data has been prepared for you and is available as a part of the package. Here, each dataset is a list containing two items: `pos` is a dataframe where each row is a voxel's x and y positions in space, and `counts` is a counts matrix where each column is a voxel and each row is a gene.
+In this vignette, we will walk through an analysis of spatial transcriptomics data for 4 consecutive tissue slices of a breast cancer biopsy. Briefly, for spatial transcriptomics, histological sections are placed on a grid of poly(dT) probe spots approximately 100 um in diameter, each with a unique DNA barcode. By resolving the DNA barcodes, spatial transcriptomics enables matching of detected mRNA abundances with their original spatially resolved spot, resulting in full transcriptome RNA-sequencing data with homogenously-spaced two-dimensional positional information at the pixel level. See the [original publication](http://science.sciencemag.org/content/353/6294/78) for more information.
+
+The data has been prepared for you and is available as a part of the package. Here, each dataset is a list containing two items: `pos` is a dataframe where each row is a probe spot's x and y positions in space, and `counts` is a counts matrix where each column is a probe spot and each row is a gene.
 
 ```{r, bcl-data}
 library(MERingue)
@@ -82,17 +84,19 @@ rownames(posList[[3]]) <- paste0('L3-', rownames(posList[[3]]))
 rownames(posList[[4]]) <- paste0('L4-', rownames(posList[[4]]))
 ```
 
-We will then filter out genes with fewer than 100 counts across all voxels and filter out voxels with fewer than 1500 total counts and update our position information accordingly. 
+We will then filter out genes with fewer than 10 counts across all probe spots and filter out probe spots with fewer than 1500 total counts and update our position information accordingly. 
 
 ```{r, bcl-clean, fig.width=8, fig.height=3}
 # Very stringent filter here
-cc <- cleanCounts(counts, min.reads = 100, min.lib.size = 1500)
-mat <- normalizeCounts(cc, log=FALSE)
+cc <- cleanCounts(counts, min.reads = 10, min.lib.size = 1500, plot=TRUE)
+mat <- normalizeCounts(cc, log=FALSE, verbose=TRUE)
 posList[[1]] <- posList[[1]][intersect(rownames(posList[[1]]), colnames(mat)),]
 posList[[2]] <- posList[[2]][intersect(rownames(posList[[2]]), colnames(mat)),]
 posList[[3]] <- posList[[3]][intersect(rownames(posList[[3]]), colnames(mat)),]
 posList[[4]] <- posList[[4]][intersect(rownames(posList[[4]]), colnames(mat)),]
 ```
+
+Now, let's visualize the probe spots for each layer. For demonstrative purposes, we will look for evidence of significant spatial aggregation for 1000 randomly chosen genes. 
 
 ```{r, bcl-init, fig.width=8, fig.height=8}
 # Plot
@@ -102,29 +106,26 @@ plotEmbedding(posList[[2]], groups=layer, main='Layer 2', cex=2)
 plotEmbedding(posList[[3]], groups=layer, main='Layer 3', cex=2)
 plotEmbedding(posList[[4]], groups=layer, main='Layer 4', cex=2)
 
-# Sample 1000 genes for demo purposes only to minimize runtime
+# Sample 1000 genes for demonstrative purposes only
 set.seed(0)
 test <- sample(rownames(mat), 1000)
 mat <- mat[test,]
 ```
 
-Now we can analyze each layer separately to look for significantly spatially clustered genes affecting more than 1% of cells.
+Now, we can analyze each layer separately to look for significantly spatially aggregated genes affecting more than 5% of cells. For each layer, we will construct a binary weight matrix that represents the spatial relationship
 
 ```{r, bcl-indLayer, fig.width=8, fig.height=8}
 helper <- function(pos, mat) {
-  # jittering only needed for grided positions
-  w <- voronoiAdjacency(pos, njitter = 10, ajitter = 2.5, filterDist = 2.5)
-  # plot network as sanity check
-  plotNetwork(pos=pos, adj=w)
+  w <- voronoiAdjacency(pos, filterDist = 1.5, plot=TRUE)
   # get spatially clustered genes
   I <- getSpatialPatterns(mat, w)
-  # filter for significant hits driven by more than 5% of cells
+  # filter for significant hits driven by more than 10% of cells
   results.filter <- filterSpatialPatterns(mat = mat,
                                           I = I,
                                           w = w,
                                           adjustPv = TRUE,
                                           alpha = 0.05,
-                                          minPercentCells = 0.1,
+                                          minPercentCells = 0.05,
                                           verbose = TRUE)
   # return results
   list(I=I, sig.genes=results.filter)

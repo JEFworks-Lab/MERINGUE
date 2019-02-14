@@ -248,7 +248,7 @@ spatialCrossCorMatrix <- function(mat, weight) {
   }
   mat <- mat[, rownames(weight)]
 
-  scor <- spatialCrossCorMatrix_C(as.matrix(mat), w)
+  scor <- spatialCrossCorMatrix_C(as.matrix(mat), weight)
   colnames(scor) <- rownames(scor) <- rownames(mat)
   return(scor)
 }

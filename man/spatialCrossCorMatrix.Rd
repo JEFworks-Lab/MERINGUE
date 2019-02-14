@@ -4,12 +4,12 @@
 \alias{spatialCrossCorMatrix}
 \title{Calculates a spatial cross correlation for all pairs}
 \usage{
-spatialCrossCorMatrix(sigMat, w)
+spatialCrossCorMatrix(mat, weight)
 }
 \arguments{
-\item{sigMat}{Matrix of feature values}
+\item{mat}{Matrix of feature values}
 
-\item{w}{Adjacency weight matrix}
+\item{weight}{Adjacency weight matrix}
 }
 \value{
 Matrix of spatial cross correlationf or all pairs

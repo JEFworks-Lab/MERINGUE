@@ -4,13 +4,13 @@
 \alias{getSpatialPatterns}
 \title{Identify spatial clusters}
 \usage{
-getSpatialPatterns(mat, adj, verbose = TRUE)
+getSpatialPatterns(mat, weight, alternative = "greater", verbose = TRUE)
 }
 \arguments{
 \item{mat}{Gene expression matrix. Must be normalized such that correlations
 will not be driven by technical artifacts.}
 
-\item{adj}{Spatial weights such as a weighted adjacency matrix}
+\item{weight}{Spatial weights such as a weighted adjacency matrix}
 }
 \description{
 Identify spatially clustered genes using Moran's I

@@ -168,14 +168,12 @@ groupSigSpatialPatterns <- function(pos, mat, scc, hclustMethod='complete', trim
         print(table(groups))
     }
 
-    if(plot) {
-        par(mfrow=c(length(levels(groups)), 2), mar=rep(2,4))
-    }
-
     prs <- lapply(levels(groups), function(g) {
         # summarize as first pc if more than 1 gene in group
         if(sum(groups==g)>1) {
-            m <- winsorize(mat[names(groups)[which(groups==g)],], trim)
+          m <- mat[names(groups)[which(groups==g)],]
+          m <- t(scale(t(m)))
+            m <- winsorize(m, trim)
             ps <- colMeans(m)
             pr <- scale(ps)[,1]
         } else {
