@@ -9,7 +9,7 @@ test_that(context("Moran's I C++ functions compiled and works as expected"), {
   w <- voronoiAdjacency(pos)
 
   set.seed(0)
-  is <- sample(1:nrow(mat), 10)
+  is <- sample(1:nrow(mat), 100)
 
   start_time <- Sys.time()
   moran <- do.call(cbind, lapply(is, function(i) {

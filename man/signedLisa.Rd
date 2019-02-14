@@ -26,7 +26,7 @@ weight <- voronoiAdjacency(pos)
 gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 plotEmbedding(pos, colors=scale(gexp)[,1], cex=3)
 slisa <- signedLisa(gexp, weight)
-plotEmbedding(pos, colors=slisa,
+plotEmbedding(pos, colors=slisa, cex=3,
    gradientPalette=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100))
 
 }

@@ -164,6 +164,8 @@ getCrossLayerNeighbors <- function(layers, k=3) {
 #'
 voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 10, plot=FALSE){
 
+  pos <- as.matrix(pos)
+
   if(ncol(pos)>2) {
     stop('2D tesselation only')
   }

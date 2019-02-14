@@ -12,10 +12,8 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     RANN,
-    BiocParallel,
     Matrix,
     akima,
-    MASS,
     Rcpp,
     deldir,
     dynamicTreeCut
