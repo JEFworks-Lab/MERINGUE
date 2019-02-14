@@ -4,7 +4,7 @@
 \alias{voronoiAdjacency}
 \title{Adjacency weight matrix by voronoi adjacency}
 \usage{
-voronoiAdjacency(pos, filterDist = NA, nDummy = 10, plot = FALSE)
+voronoiAdjacency(pos, filterDist = NA, nDummy = 3, plot = FALSE)
 }
 \arguments{
 \item{pos}{Position}

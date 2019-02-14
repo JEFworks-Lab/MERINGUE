@@ -162,7 +162,7 @@ getCrossLayerNeighbors <- function(layers, k=3) {
 #'
 #' @export
 #'
-voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 10, plot=FALSE){
+voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 3, plot=FALSE){
 
   if(ncol(pos)>2) {
     stop('2D tesselation only')
@@ -221,6 +221,7 @@ voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 10, plot=FALSE){
     if(!is.null(dd1)){
       break
     } else {
+      warning('Error. Increasing nDummy and trying again.')
       i <- i + 1
     }
   }
