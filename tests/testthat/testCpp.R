@@ -1,7 +1,7 @@
-library(MERingue)
 library(testthat)
 
 test_that(context("Moran's I C++ functions compiled and works as expected"), {
+  library(MERingue)
   data(mOB)
   pos <- mOB$pos
   cd <- mOB$counts
@@ -38,6 +38,7 @@ test_that(context("Moran's I C++ functions compiled and works as expected"), {
 })
 
 test_that(context("Spatial cross correlation C++ functions compiled and works as expected"), {
+  library(MERingue)
   data(mOB)
   pos <- mOB$pos
   cd <- mOB$counts
@@ -60,6 +61,7 @@ test_that(context("Spatial cross correlation C++ functions compiled and works as
 })
 
 test_that(context("LISA works as expected"), {
+  library(MERingue)
   data(mOB)
   pos <- mOB$pos
   cd <- mOB$counts
@@ -81,6 +83,7 @@ test_that(context("LISA works as expected"), {
 })
 
 test_that(context("getSpatialPatterns works"), {
+  library(MERingue)
   data(mOB)
   pos <- mOB$pos
   cd <- mOB$counts
