@@ -18,11 +18,11 @@ moranPermutationTest(z, w, alternative = "greater", N = 10000, seed = 0,
 
 \item{seed}{Random seed}
 
+\item{ncores}{Number of cores for parallel processing}
+
 \item{plot}{Plot permutated distribution}
 
 \item{...}{Additional parameters to pass to histogram plotting}
-
-\item{n.cores}{Number of cores for parallel processing}
 }
 \value{
 Observed Moran's I statistic, the expected statistic under the null hypothesis of no spatial autocorrelation, the standard deviation under the null hypothesis, permutation p-value, and number of permutations

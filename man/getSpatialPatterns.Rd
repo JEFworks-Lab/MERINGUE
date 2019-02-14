@@ -11,6 +11,11 @@ getSpatialPatterns(mat, weight, alternative = "greater", verbose = TRUE)
 will not be driven by technical artifacts.}
 
 \item{weight}{Spatial weights such as a weighted adjacency matrix}
+
+\item{alternative}{a character string specifying the alternative hypothesis,
+must be one of "greater" (default), "two.sided" or "less".}
+
+\item{verbose}{Verbosity}
 }
 \description{
 Identify spatially clustered genes using Moran's I

@@ -4,7 +4,7 @@
 \alias{signedLisa}
 \title{Signed local indicators of spatial association to identify regions driving global autocorrelation}
 \usage{
-signedLisa(x, weight, alternative = "greater", plot = TRUE, ...)
+signedLisa(x, weight, alternative = "greater", ...)
 }
 \arguments{
 \item{x}{Feature value}
@@ -13,9 +13,11 @@ signedLisa(x, weight, alternative = "greater", plot = TRUE, ...)
 
 \item{alternative}{"two.sided", "less", or "greater"}
 
-\item{plot}{Boolean of whether to plot}
-
 \item{...}{Additional plotting parameters}
+
+\item{pos}{Position}
+
+\item{plot}{Boolean of whether to plot}
 }
 \value{
 Signed LISA statistic for each point
@@ -30,5 +32,6 @@ weight <- voronoiAdjacency(pos)
 gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 plotEmbedding(pos, colors=scale(gexp)[,1], cex=3)
 lisa <- signedLisa(gexp, weight, cex=3)
+plotEmbedding(pos, colors=slisa, gradientPalette=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100))
 
 }

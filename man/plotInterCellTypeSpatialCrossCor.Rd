@@ -17,6 +17,8 @@ plotInterCellTypeSpatialCrossCor(gexpA, gexpB, groupA, groupB, weight,
 \item{groupB}{Cells of group B}
 
 \item{weight}{Adjacency weight matrix}
+
+\item{fun}{Function for combining multiple gene expression values (ex. mean, median, max)}
 }
 \value{
 None

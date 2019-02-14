@@ -145,7 +145,7 @@ moranTest_DEPRECATED <- function (x, weight, alternative = "greater") {
 #' @param alternative "two.sided", "less", or "greater"
 #' @param N Number of permutations
 #' @param seed Random seed
-#' @param n.cores Number of cores for parallel processing
+#' @param ncores Number of cores for parallel processing
 #' @param plot Plot permutated distribution
 #' @param ... Additional parameters to pass to histogram plotting
 #'
@@ -445,6 +445,7 @@ lisaTest <- function(x, weight, alternative = "greater") {
 #'
 #' @param x Feature value
 #' @param weight Adjacency weight matrix
+#' @param pos Position
 #' @param alternative "two.sided", "less", or "greater"
 #' @param plot Boolean of whether to plot
 #' @param ... Additional plotting parameters
@@ -458,18 +459,14 @@ lisaTest <- function(x, weight, alternative = "greater") {
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 #' plotEmbedding(pos, colors=scale(gexp)[,1], cex=3)
 #' lisa <- signedLisa(gexp, weight, cex=3)
+#' plotEmbedding(pos, colors=slisa, gradientPalette=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100))
 #'
 #' @export
 #'
-signedLisa <- function(x, weight, alternative = "greater", plot=TRUE, ...) {
+signedLisa <- function(x, weight, alternative = "greater", ...) {
   lisa <- lisaTest(x, weight, alternative)
   slisa <- sign(scale(x[rownames(lisa)], center=TRUE)[,1])*lisa$observed
   slisa <- slisa[rownames(weight)]
-
-  if(plot) {
-    plotEmbedding(pos, colors=slisa, gradientPalette=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100), ...)
-  }
-
   return(slisa)
 }
 

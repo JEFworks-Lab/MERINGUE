@@ -42,6 +42,9 @@ getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) 
 #' @param mat Gene expression matrix. Must be normalized such that correlations
 #'     will not be driven by technical artifacts.
 #' @param weight Spatial weights such as a weighted adjacency matrix
+#' @param alternative a character string specifying the alternative hypothesis,
+#'     must be one of "greater" (default), "two.sided" or "less".
+#' @param verbose Verbosity
 #'
 #' @export
 #'
@@ -90,7 +93,9 @@ getSpatialPatterns <- function(mat, weight, alternative='greater', verbose=TRUE)
 #' @param I Output of getSpatialPatterns
 #' @param w Weight adjacency matrix
 #' @param alpha P-value threshold for LISA score to be considered significant.
+#' @param adjustPv Whether to perform BH multiple testing correction
 #' @param minPercentCells Minimum percent of cells that must be driving spatial pattern
+#' @param verbose Verbosity
 #' @param details Return details
 #'
 #' @export
@@ -143,9 +148,14 @@ filterSpatialPatterns <- function(mat, I, w, adjustPv=TRUE, alpha = 0.05, minPer
 #' @param mat Gene expression matrix. Must be normalized such that correlations
 #'     will not be driven by technical artifacts
 #' @param scc Spatial cross-correlation matrix
-#' @param hclustMethod Method for hclust()
+#' @param hclustMethod Linkage criteria for hclust()
+#' @param trim Winsorization trim
 #' @param deepSplit Tuning parameter for dynamic tree cutting cutreeDynamic()
 #' @param minClusterSize Smallest gene cluster size
+#' @param power Raise distance matrix to this power
+#' @param plot Whether to plot
+#' @param verbose Verbosity
+#' @param ... Additional plotting parameters
 #'
 #' @export
 #'

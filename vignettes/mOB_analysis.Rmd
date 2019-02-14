@@ -292,7 +292,8 @@ par(mfrow=c(4,2), mar=rep(2,4))
 invisible(lapply(gs[1:4], function(g) {
   gexp <- scale(mat[g,])[,1]
   plotEmbedding(pos, colors=gexp, cex=2, main=g, verbose=FALSE)
-  signedLisa(gexp, w, plot=TRUE, main='sLISA', cex=2, verbose=FALSE)
+  slisa <- signedLisa(gexp, w, plot=TRUE, main='sLISA', cex=2, verbose=FALSE)
+  plotEmbedding(pos, colors=slisa, gradientPalette=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100), cex=2)
 }))
 ```
 

@@ -22,6 +22,8 @@ NULL
 #' @param verbose verbosity
 #' @param unclassified.cell.color cells not included in groups will be labeled in this color
 #' @param group.level.colors set group level colors. Default uses rainbow.
+#' @param xlab x-axis label.
+#' @param ylab y-axis label.
 #' @param ... Additional parameters to pass to BASE::plot
 #'
 #' @return None
@@ -34,7 +36,7 @@ NULL
 #'
 #' @export
 #'
-plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gradientPalette=NULL, zlim=NULL, s=1, v=0.8, min.group.size=1, show.legend=FALSE, mark.clusters=FALSE, mark.cluster.cex=2, shuffle.colors=F, legend.x='topright', gradient.range.quantile=0.95, verbose=TRUE, unclassified.cell.color='gray70', group.level.colors=NULL, xlab=NA, ylab=NA, ...) {
+plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gradientPalette=NULL, zlim=NULL, s=1, v=0.8, min.group.size=1, show.legend=FALSE, mark.clusters=FALSE, mark.cluster.cex=2, shuffle.colors=F, legend.x='topright', gradient.range.quantile=0.95, verbose=FALSE, unclassified.cell.color='gray70', group.level.colors=NULL, xlab=NA, ylab=NA, ...) {
 
   if(!is.null(colors)) {
     ## use clusters information
@@ -266,6 +268,7 @@ interpolate <- function(pos, gexp, scale=TRUE, trim=0, zlim=range(gexp), fill=TR
 #' @param groupA Cells of group A
 #' @param groupB Cells of group B
 #' @param weight Adjacency weight matrix
+#' @param fun Function for combining multiple gene expression values (ex. mean, median, max)
 #'
 #' @return None
 #'

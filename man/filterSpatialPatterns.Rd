@@ -14,9 +14,13 @@ filterSpatialPatterns(mat, I, w, adjustPv = TRUE, alpha = 0.05,
 
 \item{w}{Weight adjacency matrix}
 
+\item{adjustPv}{Whether to perform BH multiple testing correction}
+
 \item{alpha}{P-value threshold for LISA score to be considered significant.}
 
 \item{minPercentCells}{Minimum percent of cells that must be driving spatial pattern}
+
+\item{verbose}{Verbosity}
 
 \item{details}{Return details}
 }

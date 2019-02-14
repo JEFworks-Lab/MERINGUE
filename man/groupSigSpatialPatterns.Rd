@@ -17,11 +17,21 @@ will not be driven by technical artifacts}
 
 \item{scc}{Spatial cross-correlation matrix}
 
-\item{hclustMethod}{Method for hclust()}
+\item{hclustMethod}{Linkage criteria for hclust()}
+
+\item{trim}{Winsorization trim}
 
 \item{deepSplit}{Tuning parameter for dynamic tree cutting cutreeDynamic()}
 
 \item{minClusterSize}{Smallest gene cluster size}
+
+\item{power}{Raise distance matrix to this power}
+
+\item{plot}{Whether to plot}
+
+\item{verbose}{Verbosity}
+
+\item{...}{Additional plotting parameters}
 }
 \description{
 Identify primary spatial patterns using hierarchical clustering and dynamic tree cutting
