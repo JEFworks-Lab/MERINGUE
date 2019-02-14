@@ -44,6 +44,7 @@ getPv <- function(obs, ei, sdi, alternative) {
 #' @examples
 #' data(mOB)
 #' pos <- mOB$pos
+#' weight <- voronoiAdjacency(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 #' plotEmbedding(pos, colors=scale(gexp)[,1], cex=3)
 #' moranTest(gexp, weight)
@@ -445,10 +446,7 @@ lisaTest <- function(x, weight, alternative = "greater") {
 #'
 #' @param x Feature value
 #' @param weight Adjacency weight matrix
-#' @param pos Position
 #' @param alternative "two.sided", "less", or "greater"
-#' @param plot Boolean of whether to plot
-#' @param ... Additional plotting parameters
 #'
 #' @return Signed LISA statistic for each point
 #'
@@ -458,12 +456,13 @@ lisaTest <- function(x, weight, alternative = "greater") {
 #' weight <- voronoiAdjacency(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 #' plotEmbedding(pos, colors=scale(gexp)[,1], cex=3)
-#' lisa <- signedLisa(gexp, weight, cex=3)
-#' plotEmbedding(pos, colors=slisa, gradientPalette=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100))
+#' slisa <- signedLisa(gexp, weight)
+#' plotEmbedding(pos, colors=slisa,
+#'    gradientPalette=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100))
 #'
 #' @export
 #'
-signedLisa <- function(x, weight, alternative = "greater", ...) {
+signedLisa <- function(x, weight, alternative = "greater") {
   lisa <- lisaTest(x, weight, alternative)
   slisa <- sign(scale(x[rownames(lisa)], center=TRUE)[,1])*lisa$observed
   slisa <- slisa[rownames(weight)]

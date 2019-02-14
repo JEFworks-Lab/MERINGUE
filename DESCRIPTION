@@ -17,7 +17,8 @@ Imports:
     akima,
     MASS,
     Rcpp,
-    deldir
+    deldir,
+    dynamicTreeCut
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 6.0.1
 Suggests: knitr,

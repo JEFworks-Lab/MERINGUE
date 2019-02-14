@@ -1,40 +1,3 @@
-#' Derive spatial weights
-#'
-#' @description Derive spatial weights given position of cells in space
-#'
-#' @param pos Position matrix where each row is a cell, columns are
-#'     x, y, (optionally z) coordinations
-#' @param klist range of number of nearest neighbors to consider
-#' @param ncores Number of cores
-#' @param plot Whether to plot neighbor network
-#'
-#' @export
-#'
-getSpatialWeights <- function(pos, klist=6, ncores=1, plot=FALSE, verbose=TRUE) {
-  pos_norm <- preprocessCore::normalize.quantiles(as.matrix(pos))
-  rownames(pos_norm) <- rownames(pos)
-  colnames(pos_norm) <- colnames(pos)
-
-  if(length(klist)>1) {
-    adjList <-  BiocParallel::bplapply(seq_along(klist), function(i) {
-      k <- klist[i]
-      adj <- getMnn(rownames(pos_norm), rownames(pos_norm), pos_norm, k=i)
-      diag(adj) <- 0
-    }, BPPARAM = BiocParallel::MulticoreParam(workers=ncores, tasks=length(klist)/ncores, progressbar=verbose))
-    adj <- Reduce("+", adjList) / length(adjList)
-  } else {
-    adj <- getMnn(rownames(pos_norm), rownames(pos_norm), pos_norm, k=klist)
-    diag(adj) <- 0
-  }
-
-  if(plot) {
-    plotNetwork(pos, adj, line.power=3)
-  }
-  return(adj)
-}
-
-
-
 #' Identify spatial clusters
 #'
 #' @description Identify spatially clustered genes using Moran's I
@@ -65,7 +28,7 @@ getSpatialPatterns <- function(mat, weight, alternative='greater', verbose=TRUE)
   mat <- mat[, rownames(weight)]
 
   # Calculate Moran's I for each gene
-  results <- MERingue:::getSpatialPatterns_C(as.matrix(mat), as.matrix(weight), verbose)
+  results <- getSpatialPatterns_C(as.matrix(mat), as.matrix(weight), verbose)
   colnames(results) <- c('observed', 'expected', 'sd')
   rownames(results) <- rownames(mat)
   results <- as.data.frame(results)
