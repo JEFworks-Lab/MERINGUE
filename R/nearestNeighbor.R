@@ -164,8 +164,6 @@ getCrossLayerNeighbors <- function(layers, k=3) {
 #'
 voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 10, plot=FALSE){
 
-  pos <- as.matrix(pos)
-
   if(ncol(pos)>2) {
     stop('2D tesselation only')
   }
@@ -177,41 +175,61 @@ voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 10, plot=FALSE){
   }
 
   ## deldir doesn't handle edge cases well
-  ## create dummy edges
   pos0 <- pos
-  t <- max((max(pos[,1])-min(pos[,1]))/nDummy, (max(pos[,2])-min(pos[,2]))/nDummy)
-  x1 <- min(pos[,1])-t
-  x2 <- max(pos[,1])+t
-  y1 <- min(pos[,2])-t
-  y2 <- max(pos[,2])+t
-  dummy <- rbind(
-    cbind(seq(x1, x2, by=(x2-x1)/nDummy), y1),
-    cbind(seq(x1, x2, by=(x2-x1)/nDummy), y2),
-    cbind(x1, seq(y1, y2, by=(y2-y1)/nDummy)),
-    cbind(x2, seq(y1, y2, by=(y2-y1)/nDummy))
-  )
-  colnames(dummy) <- c('x', 'y')
-  rownames(dummy) <- paste0('dummy', 1:nrow(dummy))
-  pos <- rbind(pos, dummy)
+  ## create dummy edges
+  helper <- function(pos, nDummy) {
+    t <- max((max(pos[,1])-min(pos[,1]))/nDummy, (max(pos[,2])-min(pos[,2]))/nDummy)
+    x1 <- min(pos[,1])-t
+    x2 <- max(pos[,1])+t
+    y1 <- min(pos[,2])-t
+    y2 <- max(pos[,2])+t
+    dummy <- rbind(
+      cbind(seq(x1, x2, by=(x2-x1)/nDummy), y1),
+      cbind(seq(x1, x2, by=(x2-x1)/nDummy), y2),
+      cbind(x1, seq(y1, y2, by=(y2-y1)/nDummy)),
+      cbind(x2, seq(y1, y2, by=(y2-y1)/nDummy))
+    )
+    colnames(dummy) <- c('x', 'y')
+    rownames(dummy) <- paste0('dummy', 1:nrow(dummy))
+    pos <- rbind(pos, dummy)
 
-  ## find adjacencies
-  makeixy <- function(data, formula, scale){
-    m = model.frame(formula, data=data)
-    if(ncol(m)!=3){
-      stop("incorrect adjacency formula: id~x+y needed")
+    ## find adjacencies
+    makeixy <- function(data, formula, scale){
+      m = model.frame(formula, data=data)
+      if(ncol(m)!=3){
+        stop("incorrect adjacency formula: id~x+y needed")
+      }
+      names(m)=c("id","x","y")
+      m[,2]=m[,2]/scale
+      m[,3]=m[,3]/scale
+      m
     }
-    names(m)=c("id","x","y")
-    m[,2]=m[,2]/scale
-    m[,3]=m[,3]/scale
-    m
+    data <- as.data.frame(cbind('i'=seq_len(nrow(pos)), pos))
+    data <- makeixy(data, formula=i~x+y, scale=1)
+    return(list('pos'=pos, 'data'=data))
   }
-  data <- data.frame('i'=seq_len(nrow(pos)), pos)
-  data <- makeixy(data, formula=i~x+y, scale=1)
-  dd1 = deldir::deldir(data$x,
-                       data$y,
-                       suppressMsge=TRUE, sort=FALSE,
-                       plotit = plot, col='grey')
+  dd1 <- NULL
+  i <- nDummy
+  repeat {
+    data.info <- helper(pos, i)
+    data <- data.info$data
+    pos <- data.info$pos
+    dd1 <- deldir::deldir(data$x,
+                          data$y,
+                          suppressMsge=TRUE, sort=FALSE,
+                          plotit = plot, col='grey')
+    if(!is.null(dd1)){
+      break
+    } else {
+      i <- i + 1
+    }
+  }
   if(plot) { box() }
+
+  ## final
+  data.info <- helper(pos, i)
+  data <- data.info$data
+  pos <- data.info$pos
 
   ## create distance matrix
   P <- nrow(data) # number of rows
