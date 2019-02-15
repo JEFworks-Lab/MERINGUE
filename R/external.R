@@ -6,6 +6,9 @@
 #'
 #' @export
 #'
+
+
+
 getDifferentialGenes <- function(cd, cols, verbose=TRUE) {
   cm <- t(cd)
 
@@ -61,6 +64,9 @@ getDifferentialGenes <- function(cd, cols, verbose=TRUE) {
     bar <- rank(foo)
     bar[foo==0][1]
   })
+  # if nothing ranked 0, will be NA so fix
+  zero.ranks[is.na(zero.ranks)] <- 0
+
   ustat <- t((t(gnz)*zero.ranks)) + grs - group.size*(group.size+1)/2
 
   # standardize
