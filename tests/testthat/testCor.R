@@ -33,5 +33,28 @@ test_that(context("Simulate inter cell-type spatial cross-correlation tests"), {
   invisible(interpolate(pos, gexpB))
   plotInterCellTypeSpatialCrossCor(gexpA, gexpB, ctA, ctB, weight)
 
-  expect_equal(scor > cor, TRUE)
+  # toroidal shift model
+  set.seed(0)
+  posr <- MERingue:::rtorShift(pos)
+  plotEmbedding(posr, col=gexpA)
+  plotEmbedding(posr, col=gexpB)
+  weightr <- getMnn(ctA, ctB, posr, k=6)
+  plotNetwork(posr, weightr)
+  points(posr[ctA,], col='orange', pch=16)
+  points(posr[ctB,], col='green', pch=16)
+  scorr <- interCellTypeSpatialCrossCor(gexpA, gexpB, ctA, ctB, weightr)
+
+  # random label model
+  set.seed(0)
+  gexpAr <- gexpA
+  gexpBr <- gexpB
+  names(gexpAr) <- sample(names(gexpA), length(gexpA), replace = FALSE)
+  names(gexpBr) <- sample(names(gexpB), length(gexpB), replace = FALSE)
+  plotEmbedding(pos, col=gexpAr)
+  plotEmbedding(pos, col=gexpBr)
+  scorr2 <- interCellTypeSpatialCrossCor(gexpAr, gexpBr, ctA, ctB, weight)
+
+  expect_equal(scor > cor, TRUE) # regular correlation
+  expect_equal(scor > scorr, TRUE) # random toroidal shift
+  expect_equal(scor > scorr2, TRUE) # random label
 })
