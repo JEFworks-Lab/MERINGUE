@@ -1,6 +1,10 @@
 ![](tools/img/meringue_logo.svg)
 # MERingue
 
+[![Build Status](https://travis-ci.org/JEFworks/MERingue.svg?branch=master)](https://travis-ci.org/JEFworks/MERingue)
+[![codecov.io](https://codecov.io/github/JEFworks/MERingue/coverage.svg?branch=master)](https://codecov.io/github/JEFworks/MERingue?branch=master)
+
+
 `MERingue` enables spatial gene expression analysis in non-homogenous tissues. The overall approach is detailed in the following publication: **COMING SOON**
 
 ## Benefits and Capabilities
