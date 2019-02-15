@@ -36,10 +36,6 @@ colnames(pos) <- c('x', 'y')
 weight <- voronoiAdjacency(pos)
 ctA <- sample(rownames(pos), N/2)
 ctB <- setdiff(rownames(pos), ctA)
-par(mfrow=c(1,1))
-plotNetwork(pos, weight, line.col='grey')
-points(pos[ctA,], col='red')
-points(pos[ctB,], col='blue')
 gexpA <- pos[,2]
 gexpA[ctB] <- 0
 gexpB <- -pos[,2]

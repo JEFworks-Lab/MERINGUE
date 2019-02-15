@@ -46,7 +46,6 @@ getPv <- function(obs, ei, sdi, alternative) {
 #' pos <- mOB$pos
 #' weight <- voronoiAdjacency(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
-#' plotEmbedding(pos, colors=scale(gexp)[,1], cex=3)
 #' moranTest(gexp, weight)
 #'
 #' @export
@@ -334,10 +333,6 @@ spatialCrossCor <- function(x, y, weight) {
 #' weight <- voronoiAdjacency(pos)
 #' ctA <- sample(rownames(pos), N/2)
 #' ctB <- setdiff(rownames(pos), ctA)
-#' par(mfrow=c(1,1))
-#' plotNetwork(pos, weight, line.col='grey')
-#' points(pos[ctA,], col='red')
-#' points(pos[ctB,], col='blue')
 #' gexpA <- pos[,2]
 #' gexpA[ctB] <- 0
 #' gexpB <- -pos[,2]

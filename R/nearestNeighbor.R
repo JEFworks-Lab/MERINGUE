@@ -210,20 +210,16 @@ voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 3, plot=FALSE){
   }
   dd1 <- NULL
   i <- nDummy
-  repeat {
-    data.info <- helper(pos, i)
+  while(is.null(dd1)) {
+    warning(paste0('Deldir with nDummy ', i+1, '.'))
+    data.info <- helper(pos0, i)
     data <- data.info$data
     pos <- data.info$pos
     dd1 <- deldir::deldir(data$x,
                           data$y,
                           suppressMsge=TRUE, sort=FALSE,
                           plotit = plot, col='grey')
-    if(!is.null(dd1)){
-      break
-    } else {
-      warning('Error. Increasing nDummy and trying again.')
-      i <- i + 1
-    }
+    i = i+1
   }
   if(plot) { box() }
 
