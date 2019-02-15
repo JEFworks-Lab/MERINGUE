@@ -19,9 +19,19 @@ test_that(context("Simulate inter cell-type spatial cross-correlation tests"), {
   #plotEmbedding(pos, col=gexpB)
 
   weight <- getMnn(ctA, ctB, pos, k=6)
+  plotNetwork(pos, weight)
+  points(pos[ctA,], col='orange', pch=16)
+  points(pos[ctB,], col='green', pch=16)
 
   cor <- cor(gexpA, gexpB)
   scor <- interCellTypeSpatialCrossCor(gexpA, gexpB, ctA, ctB, weight)
+
+  # Test plotting
+  plotEmbedding(pos, col=gexpA)
+  plotEmbedding(pos, col=gexpB)
+  invisible(interpolate(pos, gexpA))
+  invisible(interpolate(pos, gexpB))
+  plotInterCellTypeSpatialCrossCor(gexpA, gexpB, ctA, ctB, weight)
 
   expect_equal(scor > cor, TRUE)
 })
