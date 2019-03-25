@@ -12,3 +12,5 @@ data/*.jpg
 data/*.txt
 data/*.tsv
 workinprogress/*
+src/*.o
+src/*.so
