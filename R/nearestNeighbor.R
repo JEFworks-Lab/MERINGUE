@@ -263,3 +263,31 @@ voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 3, plot=FALSE){
 
   return(D);
 }
+
+
+#' Filter adjacency weight matrix to between two subsets of points
+#'
+#' @description Restrict adjacency relationships to between two subsets of points
+#'
+#' @param cct Cells of cell-type 1
+#' @param nct Cells of cell-type 2 (assumed to be mutually exclusive with cct)
+#' @param weight Adjacency weight matrix
+#' @param pos Position
+#' @param plot Boolean of whether to plot
+#' @param ... Additional plotting parameters
+#'
+#' @return Boolean matrix where value = 1 if two cells are considered adjacency ie. neighbors, else 0
+#'
+#' @export
+#'
+getInterCellTypeWeight <- function(cct, nct, weight, pos=NULL, plot=FALSE, ...) {
+  weightIc <- weight[c(cct, nct), c(cct, nct)]
+  weightIc[nct,nct] <- 0
+  weightIc[cct,cct] <- 0
+  if(plot) {
+    plotNetwork(pos, weightIc, ...)
+    points(pos[nct,], col='blue', pch=16)
+    points(pos[cct,], col='green', pch=16)
+  }
+  return(weightIc)
+}

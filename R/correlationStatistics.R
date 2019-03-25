@@ -464,3 +464,99 @@ signedLisa <- function(x, weight, alternative = "greater") {
   return(slisa)
 }
 
+
+
+
+
+#' Tests for significance of spatial cross correlation for two features using toroidal shift null model
+#'
+#' @param x Feature 1 value
+#' @param y Feature 2 value
+#' @param pos Position
+#' @param k Toroidal shift boxes
+#' @param n Permutation iterations
+#' @param plot Plot permutated distribution
+#' @param ... Additional parameters to pass to histogram plotting
+#'
+#' @return P-value
+#'
+#' @examples
+#' data(mOB)
+#' pos <- mOB$pos
+#' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
+#' pv1 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Nrgn',], pos, n=100, plot=TRUE)
+#' pv2 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Glul',], pos, n=100, plot=TRUE)
+#' pv3 <- spatialCrossCorTorTest(gexp[1,], gexp[2,], pos, n=100, plot=TRUE)
+#'
+#' @export
+#'
+spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
+  # compute statistic
+  w <- suppressMessages(suppressWarnings(voronoiAdjacency(pos, plot=FALSE)))
+  I <- spatialCrossCor(x,y,w)
+
+  # compute background
+  bg <- sapply(seq_len(n), function(i) {
+    # shift pos
+    randpos <- MERingue:::rtorShift(pos,k=k,seed=i)
+    w <- suppressMessages(suppressWarnings(voronoiAdjacency(randpos, plot=FALSE)))
+    spatialCrossCor(x,y,w)
+  })
+  bg <- c(bg, I)
+
+  if(plot) {
+    hist(bg, breaks=n/10, ...)
+    abline(v=I, col='red')
+  }
+
+  # P-value is the fraction of how many times the permuted difference is equal or more extreme than the observed difference
+  pvalue = sum(abs(bg) >= abs(I)) / (n+1)
+  return(pvalue)
+}
+
+
+#' Tests for significance of spatial cross correlation for two features using random label null model
+#'
+#' @param x Feature 1 value
+#' @param y Feature 2 value
+#' @param w Binary weight matrix
+#' @param n Permutation iterations
+#' @param plot Plot permutated distribution
+#' @param ... Additional parameters to pass to histogram plotting
+#'
+#' @return Two-sided test p-value
+#'
+#' @examples
+#' data(mOB)
+#' pos <- mOB$pos
+#' w <- voronoiAdjacency(pos, plot=FALSE)
+#' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
+#' pv1 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Nrgn',], w, n=100, plot=TRUE)
+#' pv2 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Glul',], w, n=100, plot=TRUE)
+#' pv3 <- spatialCrossCorTest(gexp[1,], gexp[2,], w, n=100, plot=TRUE)
+#'
+#' @export
+#'
+spatialCrossCorTest <- function(x, y, w, n=1000, plot=FALSE, ...) {
+  I <- spatialCrossCor(x,y,w)
+
+  # compute background
+  bg <- sapply(seq_len(n), function(i) {
+    set.seed(i)
+    xbg <- x
+    names(xbg) <- sample(names(x))
+    spatialCrossCor(xbg,y,w)
+  })
+  bg <- c(bg, I)
+
+  if(plot) {
+    hist(bg, breaks=n/10, ...)
+    abline(v=I, col='red')
+  }
+
+  # P-value is the fraction of how many times the permuted difference is equal or more extreme than the observed difference
+  # two-sided test
+  pvalue = sum(abs(bg) >= abs(I)) / (n+1)
+  return(pvalue)
+}
+

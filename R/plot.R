@@ -178,12 +178,13 @@ map2col <- function(x, pal=colorRampPalette(c('blue', 'grey', 'red'))(100), na.c
 #'
 #' @export
 #'
-plotNetwork <- function(pos, adj, col='black', line.col='red', line.power=1, ...) {
+plotNetwork <- function(pos, adj, col='black', line.col='grey', line.power=1, ...) {
   if(nrow(pos) != nrow(adj)) {
     warning('Position and Adjacency matrix dimensions inconsistent')
   }
   pos <- pos[rownames(adj),]
-  plot(pos, pch=16, col=col, ...)
+  plot(pos, pch=16, col=col, axes=FALSE, xlab=NA, ylab=NA, ...)
+  box()
   idx <- which(adj>0, arr.ind = T)
   for(i in seq_len(nrow(idx))) {
     lines(
