@@ -215,10 +215,14 @@ voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 3, plot=FALSE){
     data.info <- helper(pos0, i)
     data <- data.info$data
     pos <- data.info$pos
-    dd1 <- deldir::deldir(data$x,
+    dd1 <- tryCatch({
+      deldir::deldir(data$x,
                           data$y,
                           suppressMsge=TRUE, sort=FALSE,
                           plotit = plot, col='grey')
+    }, error = function(e) {
+      warning(paste0('Deldir failed. Retrying.'))
+    })
     i = i+1
   }
   if(plot) { box() }
