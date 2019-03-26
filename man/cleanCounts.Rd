@@ -4,8 +4,8 @@
 \alias{cleanCounts}
 \title{Filter a counts matrix}
 \usage{
-cleanCounts(counts, min.lib.size = 1, max.lib.size = Inf, min.reads = 1,
-  min.detected = 1, verbose = FALSE, plot = TRUE)
+cleanCounts(counts, min.lib.size = 1, max.lib.size = Inf,
+  min.reads = 1, min.detected = 1, verbose = FALSE, plot = TRUE)
 }
 \arguments{
 \item{counts}{A sparse read count matrix. The rows correspond to genes,

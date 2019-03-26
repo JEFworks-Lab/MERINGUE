@@ -4,8 +4,8 @@
 \alias{moranPermutationTest}
 \title{Derive Moran's I p-value using permutation testing}
 \usage{
-moranPermutationTest(z, w, alternative = "greater", N = 10000, seed = 0,
-  ncores = 1, plot = FALSE, ...)
+moranPermutationTest(z, w, alternative = "greater", N = 10000,
+  seed = 0, ncores = 1, plot = FALSE, ...)
 }
 \arguments{
 \item{z}{Feature value}

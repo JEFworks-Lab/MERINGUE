@@ -4,8 +4,8 @@
 \alias{normalizeCounts}
 \title{Normalizes counts to CPM}
 \usage{
-normalizeCounts(counts, normFactor = NULL, depthScale = 1e+06, pseudo = 1,
-  log = TRUE, verbose = TRUE)
+normalizeCounts(counts, normFactor = NULL, depthScale = 1e+06,
+  pseudo = 1, log = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Read count matrix. The rows correspond to genes, columns

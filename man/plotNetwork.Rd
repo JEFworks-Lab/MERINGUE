@@ -5,8 +5,8 @@
 \title{Plot an adjacency weight matrix as a network
 Adapted from https://stackoverflow.com/questions/43879347/plotting-a-adjacency-matrix-using-pure-r}
 \usage{
-plotNetwork(pos, adj, col = "black", line.col = "grey", line.power = 1,
-  ...)
+plotNetwork(pos, adj, col = "black", line.col = "grey",
+  line.power = 1, ...)
 }
 \arguments{
 \item{pos}{Position matrix}

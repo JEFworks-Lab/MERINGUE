@@ -498,7 +498,7 @@ spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
   # compute background
   bg <- sapply(seq_len(n), function(i) {
     # shift pos
-    randpos <- MERingue:::rtorShift(pos,k=k,seed=i)
+    randpos <- rtorShift(pos,k=k,seed=i)
     w <- suppressMessages(suppressWarnings(voronoiAdjacency(randpos, plot=FALSE)))
     spatialCrossCor(x,y,w)
   })

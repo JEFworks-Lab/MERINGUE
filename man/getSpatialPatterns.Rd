@@ -4,7 +4,8 @@
 \alias{getSpatialPatterns}
 \title{Identify spatial clusters}
 \usage{
-getSpatialPatterns(mat, weight, alternative = "greater", verbose = TRUE)
+getSpatialPatterns(mat, weight, alternative = "greater",
+  verbose = TRUE)
 }
 \arguments{
 \item{mat}{Gene expression matrix. Must be normalized such that correlations

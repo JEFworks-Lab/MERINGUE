@@ -4,9 +4,9 @@
 \alias{groupSigSpatialPatterns}
 \title{Group significant spatial patterns}
 \usage{
-groupSigSpatialPatterns(pos, mat, scc, hclustMethod = "complete", trim = 0,
-  deepSplit = 0, minClusterSize = 0, power = 1, plot = TRUE,
-  verbose = TRUE, ...)
+groupSigSpatialPatterns(pos, mat, scc, hclustMethod = "complete",
+  trim = 0, deepSplit = 0, minClusterSize = 0, power = 1,
+  plot = TRUE, verbose = TRUE, ...)
 }
 \arguments{
 \item{pos}{Position matrix where each row is a cell, columns are

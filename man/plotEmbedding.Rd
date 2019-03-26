@@ -4,13 +4,13 @@
 \alias{plotEmbedding}
 \title{Plot 2D embedding}
 \usage{
-plotEmbedding(emb, groups = NULL, colors = NULL, cex = 0.6, alpha = 0.4,
-  gradientPalette = NULL, zlim = NULL, s = 1, v = 0.8,
-  min.group.size = 1, show.legend = FALSE, mark.clusters = FALSE,
-  mark.cluster.cex = 2, shuffle.colors = F, legend.x = "topright",
-  gradient.range.quantile = 0.95, verbose = FALSE,
-  unclassified.cell.color = "gray70", group.level.colors = NULL,
-  xlab = NA, ylab = NA, ...)
+plotEmbedding(emb, groups = NULL, colors = NULL, cex = 0.6,
+  alpha = 0.4, gradientPalette = NULL, zlim = NULL, s = 1,
+  v = 0.8, min.group.size = 1, show.legend = FALSE,
+  mark.clusters = FALSE, mark.cluster.cex = 2, shuffle.colors = F,
+  legend.x = "topright", gradient.range.quantile = 0.95,
+  verbose = FALSE, unclassified.cell.color = "gray70",
+  group.level.colors = NULL, xlab = NA, ylab = NA, ...)
 }
 \arguments{
 \item{emb}{dataframe with x and y coordinates}

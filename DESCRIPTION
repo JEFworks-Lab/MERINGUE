@@ -1,5 +1,5 @@
 Package: MERingue
-Title: Neighborhood-based density-aware spatial gradient and patterned expression detection
+Title: spatial gene expression analysis in non-homogenous tissues
 Version: 0.0.0.9000
 Authors@R: person("Jean", "Fan", email = "jeanfan@fas.harvard.edu", role = c("aut", "cre"))
 Description: Identifies spatial gene expression patterns in 
@@ -18,7 +18,7 @@ Imports:
     deldir,
     dynamicTreeCut
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown,
     testthat

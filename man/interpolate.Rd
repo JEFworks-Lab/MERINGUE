@@ -6,8 +6,8 @@
 For interpolating primary spatial patterns}
 \usage{
 interpolate(pos, gexp, scale = TRUE, trim = 0, zlim = range(gexp),
-  fill = TRUE, binSize = 100, col = colorRampPalette(c("blue", "white",
-  "red"))(100), plot = TRUE, ...)
+  fill = TRUE, binSize = 100, col = colorRampPalette(c("blue",
+  "white", "red"))(100), plot = TRUE, ...)
 }
 \arguments{
 \item{pos}{Position matrix}
