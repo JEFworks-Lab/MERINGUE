@@ -481,12 +481,14 @@ signedLisa <- function(x, weight, alternative = "greater") {
 #' @return P-value
 #'
 #' @examples
+#' \dontrun{
 #' data(mOB)
 #' pos <- mOB$pos
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
-#' pv1 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Nrgn',], pos, n=100, plot=TRUE)
-#' pv2 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Glul',], pos, n=100, plot=TRUE)
-#' pv3 <- spatialCrossCorTorTest(gexp[1,], gexp[2,], pos, n=100, plot=TRUE)
+#' pv1 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Nrgn',], pos)
+#' pv2 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Glul',], pos)
+#' pv3 <- spatialCrossCorTorTest(gexp[1,], gexp[2,], pos)
+#' }
 #'
 #' @export
 #'
@@ -527,14 +529,15 @@ spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
 #' @return Two-sided test p-value
 #'
 #' @examples
+#' \dontrun{
 #' data(mOB)
 #' pos <- mOB$pos
 #' w <- voronoiAdjacency(pos, plot=FALSE)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
-#' pv1 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Nrgn',], w, n=100, plot=TRUE)
-#' pv2 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Glul',], w, n=100, plot=TRUE)
-#' pv3 <- spatialCrossCorTest(gexp[1,], gexp[2,], w, n=100, plot=TRUE)
-#'
+#' pv1 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Nrgn',], w)
+#' pv2 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Glul',], w)
+#' pv3 <- spatialCrossCorTest(gexp[1,], gexp[2,], w)
+#' }
 #' @export
 #'
 spatialCrossCorTest <- function(x, y, w, n=1000, plot=FALSE, ...) {

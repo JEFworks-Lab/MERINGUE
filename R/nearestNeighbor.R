@@ -221,7 +221,7 @@ voronoiAdjacency <- function(pos, filterDist = NA, nDummy = 3, plot=FALSE){
                           suppressMsge=TRUE, sort=FALSE,
                           plotit = plot, col='grey')
     }, error = function(e) {
-      warning(paste0('Deldir failed. Retrying.'))
+      warning('Deldir failed. Retrying.')
     })
     i = i+1
   }

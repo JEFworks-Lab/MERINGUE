@@ -26,12 +26,13 @@ Two-sided test p-value
 Tests for significance of spatial cross correlation for two features using random label null model
 }
 \examples{
+\dontrun{
 data(mOB)
 pos <- mOB$pos
 w <- voronoiAdjacency(pos, plot=FALSE)
 gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
-pv1 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Nrgn',], w, n=100, plot=TRUE)
-pv2 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Glul',], w, n=100, plot=TRUE)
-pv3 <- spatialCrossCorTest(gexp[1,], gexp[2,], w, n=100, plot=TRUE)
-
+pv1 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Nrgn',], w)
+pv2 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Glul',], w)
+pv3 <- spatialCrossCorTest(gexp[1,], gexp[2,], w)
+}
 }

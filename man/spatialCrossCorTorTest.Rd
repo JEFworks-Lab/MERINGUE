@@ -28,11 +28,13 @@ P-value
 Tests for significance of spatial cross correlation for two features using toroidal shift null model
 }
 \examples{
+\dontrun{
 data(mOB)
 pos <- mOB$pos
 gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
-pv1 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Nrgn',], pos, n=100, plot=TRUE)
-pv2 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Glul',], pos, n=100, plot=TRUE)
-pv3 <- spatialCrossCorTorTest(gexp[1,], gexp[2,], pos, n=100, plot=TRUE)
+pv1 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Nrgn',], pos)
+pv2 <- spatialCrossCorTorTest(gexp['Gpsm1',], gexp['Glul',], pos)
+pv3 <- spatialCrossCorTorTest(gexp[1,], gexp[2,], pos)
+}
 
 }
