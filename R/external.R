@@ -6,9 +6,6 @@
 #'
 #' @export
 #'
-
-
-
 getDifferentialGenes <- function(cd, cols, verbose=TRUE) {
   cm <- t(cd)
 

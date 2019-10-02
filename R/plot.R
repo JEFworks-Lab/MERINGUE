@@ -196,6 +196,42 @@ plotNetwork <- function(pos, adj, col='black', line.col='grey', line.power=1, ..
   }
 }
 
+#' Plot an adjacency weight matrix as a network in 3D
+#'
+#' @param pos 3D position information
+#' @param adj Adjacency weight matrix
+#' @param col Color of points
+#' @param line.col Color of line
+#' @param alpha Line color transparency
+#' @param line.power Thickness of lines
+#' @param ... Additional plotting parameters
+#'
+#' @return None
+#'
+#' @examples
+#' data(drosophila)
+#' pos <- drosophila$pos
+#' N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
+#' plotNetwork3D(pos, N, size=1)
+#'
+#' @export
+#'
+plotNetwork3D <- function(pos, adj, col='black', line.col='grey', alpha=0.5, line.power=1, ...) {
+  rgl.open()
+  bg3d("white")
+  tc <- delaunayn(pos, output.options=FALSE)
+  ## 3D
+  rgl.viewpoint(45, fov=0, phi = 30)
+  points3d(pos, color=col, alpha=1, ...)
+  idx <- which(adj > 0, arr.ind = T)
+  for (i in seq_len(nrow(idx))) {
+    lines3d(c(pos[idx[i, 1], 1], pos[idx[i, 2], 1]),
+            c(pos[idx[i, 1], 2], pos[idx[i, 2], 2]),
+            c(pos[idx[i, 1], 3], pos[idx[i, 2], 3]),
+            col = line.col, alpha=alpha, lwd=line.power)
+  }
+}
+
 
 #' Gridded bivariate interpolation
 #' For interpolating primary spatial patterns
@@ -325,4 +361,12 @@ rotatePos <- function(pos, theta) {
   pos2 <- t(rotMat %*% t(pos))
   colnames(pos2) <- colnames(pos)
   return(pos2)
+}
+
+
+signedLisaPlot <- function(gexp, W, ...) {
+  lisa <- log10(lisaTest(gexp, W)$observed+1); names(lisa) <- names(z)
+  plot(pos,
+       col=map2col(lisa, pal=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100)),
+       ...)
 }

@@ -16,7 +16,10 @@ Imports:
     akima,
     Rcpp,
     deldir,
-    dynamicTreeCut
+    dynamicTreeCut,
+    geometry,
+    DT,
+    shiny
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 6.1.1
 Suggests: knitr,

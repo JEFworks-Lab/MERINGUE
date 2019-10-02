@@ -1,3 +1,73 @@
+#' Adjacency weight matrix by Delaunay triangulations in 2D or 3D
+#'
+#' @description Adjacency weight matrix by Delaunay triangulations.
+#'
+#' @param pos Position
+#' @param filterDist Euclidean distance beyond which two cells cannot be considered neighbors
+#' @param binary Boolean of whether to binarize output; otherwise Euclidean distances provided
+#' @param verbose
+#'
+#' @return Matrix where value represents distance between two spatially adjacent cells ie. neighbors
+#'
+#' @examples
+#' data(mOB)
+#' pos <- mOB$pos
+#' w <- getSpatialNeighbors(pos)
+#'
+#' @export
+#'
+getSpatialNeighbors <- function(pos, filterDist = NA, binary=TRUE, verbose=FALSE) {
+  if(is.null(rownames(pos))) {
+    rownames(pos) <- seq_len(nrow(pos))
+  }
+
+  ## shift duplicates slightly or else duplicates are lost
+  if(sum(duplicated(pos))>0) {
+    if(verbose) { message(paste0("Duplicated points found: ", sum(duplicated(pos)), "...")) }
+    pos[duplicated(pos),] <- pos[duplicated(pos),] + 1e-6
+  }
+
+  ## delaunay triangulation
+  tc <- geometry::delaunayn(pos, output.options=FALSE)
+
+  ## if 2D, trimesh
+  if(ncol(pos)==2) {
+    ni <- rbind(tc[, -1], tc[, -2], tc[, -3])
+  }
+  ## if 3D, tetramesh
+  if(ncol(pos)==3) {
+    nii <- rbind(tc[, -1], tc[, -2], tc[, -3], tc[, -4])
+    ni <- rbind(nii[, -1], nii[, -2], nii[, -3])
+  }
+
+  ## convert from neighbor indices to adjacency matrix
+  N <- nrow(pos)
+  D <- matrix(0, N, N)
+
+  ## Euclidean distance
+  d <- sapply(seq_len(nrow(ni)), function(i) dist(rbind(pos[ni[i,1],], pos[ni[i,2],])))
+  ## make symmetric
+  D[ni[,c(1,2)]] <- d
+  D[ni[,c(2,1)]] <- d
+  rownames(D) <- colnames(D) <- rownames(pos)
+
+  ## filter by distance
+  if (!is.na(filterDist)) {
+    if(verbose) { message(paste0("Filtering by distance: ", filterDist, "...")) }
+    D[D > filterDist] = 0
+  }
+
+  ## binarize
+  if(binary) {
+    if(verbose) { message(paste0("Binarizing adjacency weight matrix ...")) }
+    D[D > 0] <- 1
+  }
+
+  if(verbose) { message(paste0("Done!")) }
+  return(D)
+}
+
+
 #' Identify spatial clusters
 #'
 #' @description Identify spatially clustered genes using Moran's I
