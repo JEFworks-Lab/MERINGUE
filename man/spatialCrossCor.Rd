@@ -22,7 +22,7 @@ Calculates spatial cross correlation for two features
 \examples{
 data(mOB)
 pos <- mOB$pos
-weight <- voronoiAdjacency(pos)
+weight <- getSpatialNeighbors(pos)
 gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
 scc <- spatialCrossCor(gexp[1,], gexp[2,], weight)
 

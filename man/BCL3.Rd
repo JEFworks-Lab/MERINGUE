@@ -7,7 +7,7 @@
 \format{List where 'counts' is a sparse matrix with columns as voxels and rows as genes and
                    'pos' is a data frame of x and y position values per voxel}
 \source{
-\url{http://www.spatialtranscriptomicsresearch.org/datasets/doi-10-1126science-aaf2403/}
+\url{https://science.sciencemag.org/content/353/6294/78}
 }
 \usage{
 BCL3

@@ -173,7 +173,7 @@ map2col <- function(x, pal=colorRampPalette(c('blue', 'grey', 'red'))(100), na.c
 #' @examples
 #' data(mOB)
 #' pos <- mOB$pos
-#' w <- voronoiAdjacency(pos)
+#' w <- getSpatialNeighbors(pos)
 #' plotNetwork(pos, w)
 #'
 #' @export
@@ -209,10 +209,12 @@ plotNetwork <- function(pos, adj, col='black', line.col='grey', line.power=1, ..
 #' @return None
 #'
 #' @examples
+#' \dontrun{
 #' data(drosophila)
 #' pos <- drosophila$pos
 #' N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
 #' plotNetwork3D(pos, N, size=1)
+#' }
 #'
 #' @export
 #'
@@ -316,7 +318,7 @@ interpolate <- function(pos, gexp, scale=TRUE, trim=0, zlim=range(gexp), fill=TR
 #' pos <- cbind(rnorm(N), rnorm(N))
 #' rownames(pos) <- paste0('cell', 1:N)
 #' colnames(pos) <- c('x', 'y')
-#' weight <- voronoiAdjacency(pos)
+#' weight <- getSpatialNeighbors(pos)
 #' ctA <- sample(rownames(pos), N/2)
 #' ctB <- setdiff(rownames(pos), ctA)
 #' gexpA <- pos[,2]

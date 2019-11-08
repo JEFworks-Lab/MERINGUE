@@ -20,7 +20,7 @@ Calculates a spatial cross correlation for all pairs
 \examples{
 data(mOB)
 pos <- mOB$pos
-weight <- voronoiAdjacency(pos)
+weight <- getSpatialNeighbors(pos)
 gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
 sccMat <- spatialCrossCorMatrix(gexp[1:5,], weight)
 

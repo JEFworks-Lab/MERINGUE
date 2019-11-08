@@ -31,7 +31,7 @@ Adapted from https://stackoverflow.com/questions/43879347/plotting-a-adjacency-m
 \examples{
 data(mOB)
 pos <- mOB$pos
-w <- voronoiAdjacency(pos)
+w <- getSpatialNeighbors(pos)
 plotNetwork(pos, w)
 
 }

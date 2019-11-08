@@ -29,7 +29,7 @@ Tests for significance of spatial cross correlation for two features using rando
 \dontrun{
 data(mOB)
 pos <- mOB$pos
-w <- voronoiAdjacency(pos, plot=FALSE)
+w <- getSpatialNeighbors(pos, plot=FALSE)
 gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
 pv1 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Nrgn',], w)
 pv2 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Glul',], w)
