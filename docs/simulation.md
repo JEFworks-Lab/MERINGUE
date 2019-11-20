@@ -12,7 +12,7 @@ this spatial cross-correlation statistic compared to a general
 (spatially-unaware) cross-correlation using simulations.
 
 ``` r
-library(MERingue)
+suppressMessages(library(MERingue))
 ```
 
 # Simulate cells in space
@@ -99,13 +99,13 @@ cor.test(gexp1, gexp2)
     ##  Pearson's product-moment correlation
     ## 
     ## data:  gexp1 and gexp2
-    ## t = 23.244, df = 223, p-value < 2.2e-16
+    ## t = 25.504, df = 223, p-value < 2.2e-16
     ## alternative hypothesis: true correlation is not equal to 0
     ## 95 percent confidence interval:
-    ##  0.7984015 0.8757598
+    ##  0.8253173 0.8929620
     ## sample estimates:
     ##       cor 
-    ## 0.8413368
+    ## 0.8629571
 
 Likewise, if we compute a spatial cross-correlation statistic between
 `Gene1` and `Gene2`, we can identify a significant positive spatial
@@ -116,16 +116,17 @@ be spatially neighboring cells that tend to express lower levels of
 `Gene2`.
 
 ``` r
-weight <- voronoiAdjacency(posw)
+weight <- getSpatialNeighbors(posw, filterDist = 1)
+plotNetwork(posw, weight)
 ```
 
-    ## Warning in voronoiAdjacency(posw): Deldir with nDummy 4.
+![](simulation_files/figure-gfm/s12-1.png)<!-- -->
 
 ``` r
 spatialCrossCor(gexp1, gexp2, weight)
 ```
 
-    ## [1] 0.8157388
+    ## [1] 0.8352523
 
 ``` r
 par(mfrow=c(1,1), mar=rep(2,4))
@@ -133,7 +134,7 @@ spatialCrossCorTest(gexp1, gexp2, weight,
                     plot=TRUE)
 ```
 
-![](simulation_files/figure-gfm/s12-1.png)<!-- -->
+![](simulation_files/figure-gfm/s12-2.png)<!-- -->
 
     ## [1] 0.000999001
 
@@ -196,13 +197,13 @@ cor.test(gexp3, gexp4)
     ##  Pearson's product-moment correlation
     ## 
     ## data:  gexp3 and gexp4
-    ## t = -21.779, df = 223, p-value < 2.2e-16
+    ## t = -21.655, df = 223, p-value < 2.2e-16
     ## alternative hypothesis: true correlation is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.8625042 -0.7778698
+    ##  -0.8612940 -0.7760043
     ## sample estimates:
     ##        cor 
-    ## -0.8247518
+    ## -0.8232408
 
 However, if we compute a spatial cross-correlation statistic between
 `Gene3` and `Gene4`, we can identify a significant positive spatial
@@ -214,16 +215,10 @@ be spatially neighboring cells that tend to express lower levels of
 
 ``` r
 # Compute spatial cross correlation
-weight <- voronoiAdjacency(posw)
-```
-
-    ## Warning in voronoiAdjacency(posw): Deldir with nDummy 4.
-
-``` r
 spatialCrossCor(gexp3, gexp4, weight)
 ```
 
-    ## [1] 0.1725032
+    ## [1] 0.1827056
 
 ``` r
 par(mfrow=c(1,1), mar=rep(2,4))
@@ -304,7 +299,7 @@ weightIc <- getInterCellTypeWeight(ctA, ctB,
 spatialCrossCor(gexp3, gexp4, weightIc)
 ```
 
-    ## [1] 0.9425412
+    ## [1] 0.9570379
 
 ``` r
 spatialCrossCorTest(gexp3, gexp4, weightIc)
@@ -375,16 +370,10 @@ And also no significant spatial cross-correlation in this case.
 
 ``` r
 # Compute spatial cross correlation
-weight <- voronoiAdjacency(posw)
-```
-
-    ## Warning in voronoiAdjacency(posw): Deldir with nDummy 4.
-
-``` r
 spatialCrossCor(gexp5, gexp6, weight)
 ```
 
-    ## [1] 0.006365304
+    ## [1] 0.006391777
 
 ``` r
 par(mfrow=c(1,1), mar=rep(2,4))
@@ -394,7 +383,7 @@ spatialCrossCorTest(gexp5, gexp6, weight,
 
 ![](simulation_files/figure-gfm/s33-1.png)<!-- -->
 
-    ## [1] 0.9160839
+    ## [1] 0.9300699
 
 Despite neither gene showing any spatial or general cross-correlation
 relationship between them, both genes can and do still exhibit high
