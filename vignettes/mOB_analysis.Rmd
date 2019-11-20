@@ -152,7 +152,8 @@ So now, to take an orthologonal spatially-aware approach, we will apply MERingue
 
 ```{r, spatial-weights, fig.width=6, fig.height=6}
 # Get neighbor-relationships
-w <- voronoiAdjacency(pos, filterDist = 2.5, plot=TRUE)
+w <- getSpatialNeighbors(pos, filterDist = 2.5)
+plotNetwork(pos, w)
 ```
 
 We will then use this adjacency weight matrix to assess the same set of 2000 genes for evidence of statistically significant spatial auto-correlation or spatial aggregation. We will correct for multiple-testing, use an p-value threshold of 0.05, and restrict to patterns driven by more than 5% of probe spots to further reduce false positives.   
@@ -297,7 +298,8 @@ Spatial analysis can also be complementary to spatially-unaware clustering analy
 ```{r, spatial-sub-network, fig.width=6, fig.height=6}
 # Restrict to just voxels corresponding to the Granular Cell Layer.
 sub <- names(annot)[annot == '1: Granular Cell Layer']
-w.sub <- voronoiAdjacency(pos[sub,], filterDist = 2.5, plot=TRUE)
+w.sub <- getSpatialNeighbors(pos[sub,], filterDist = 2.5)
+plotNetwork(pos[sub,], w.sub)
 ```
 
 ```{r, spaital-sub-results, fig.width=6, fig.height=5}

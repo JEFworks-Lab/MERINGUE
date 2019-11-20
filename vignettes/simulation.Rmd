@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 In order to cluster genes that mark similar spatial patterns in space as well as infer evidence of cellular communication between spatially co-localized cell-types, MERingue computes a spatial cross-correlation statistic. In this tutorial, we will explore the distinction between this spatial cross-correlation statistic compared to a general (spatially-unaware) cross-correlation using simulations. 
 
 ```{r load}
-library(MERingue)
+suppressMessages(library(MERingue))
 ```
 
 # Simulate cells in space
@@ -78,7 +78,8 @@ cor.test(gexp1, gexp2)
 Likewise, if we compute a spatial cross-correlation statistic between `Gene1` and `Gene2`, we can identify a significant positive spatial cross-correlation - that is, cells that express higher levels of `Gene1` tend to be spatially neighboring cells that tend to express higher levels of `Gene2` and cells that express lower levels of `Gene1` tend to be spatially neighboring cells that tend to express lower levels of `Gene2`. 
 
 ```{r s12, fig.width=4, fig.height=4}
-weight <- voronoiAdjacency(posw)
+weight <- getSpatialNeighbors(posw, filterDist = 1)
+plotNetwork(posw, weight)
 spatialCrossCor(gexp1, gexp2, weight)
 par(mfrow=c(1,1), mar=rep(2,4))
 spatialCrossCorTest(gexp1, gexp2, weight, 
@@ -127,7 +128,6 @@ However, if we compute a spatial cross-correlation statistic between `Gene3` and
 
 ```{r s22, fig.width=4, fig.height=4}
 # Compute spatial cross correlation
-weight <- voronoiAdjacency(posw)
 spatialCrossCor(gexp3, gexp4, weight)
 par(mfrow=c(1,1), mar=rep(2,4))
 spatialCrossCorTest(gexp3, gexp4, weight, 
@@ -208,7 +208,6 @@ And also no significant spatial cross-correlation in this case.
 
 ```{r s33, fig.width=4, fig.height=4}
 # Compute spatial cross correlation
-weight <- voronoiAdjacency(posw)
 spatialCrossCor(gexp5, gexp6, weight)
 par(mfrow=c(1,1), mar=rep(2,4))
 spatialCrossCorTest(gexp5, gexp6, weight, 
