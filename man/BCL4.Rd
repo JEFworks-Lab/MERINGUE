@@ -10,7 +10,7 @@
 \source{
 \url{https://science.sciencemag.org/content/353/6294/78}
 
-\url{http://www.spatialtranscriptomicsresearch.org/datasets/doi-10-1126science-aaf2403/}
+\url{https://science.sciencemag.org/content/353/6294/78}
 }
 \usage{
 BCL4

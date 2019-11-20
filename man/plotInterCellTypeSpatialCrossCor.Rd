@@ -71,7 +71,7 @@ N <- 100
 pos <- cbind(rnorm(N), rnorm(N))
 rownames(pos) <- paste0('cell', 1:N)
 colnames(pos) <- c('x', 'y')
-weight <- voronoiAdjacency(pos)
+weight <- getSpatialNeighbors(pos)
 ctA <- sample(rownames(pos), N/2)
 ctB <- setdiff(rownames(pos), ctA)
 gexpA <- pos[,2]

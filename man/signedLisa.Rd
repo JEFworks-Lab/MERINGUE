@@ -45,7 +45,7 @@ plotEmbedding(pos, colors=slisa, cex=3,
 
 data(mOB)
 pos <- mOB$pos
-weight <- voronoiAdjacency(pos)
+weight <- getSpatialNeighbors(pos)
 gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 plotEmbedding(pos, colors=scale(gexp)[,1], cex=3)
 slisa <- signedLisa(gexp, weight)

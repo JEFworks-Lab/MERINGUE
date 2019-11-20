@@ -43,7 +43,7 @@ test_that(context("Spatial cross correlation C++ functions compiled and works as
   pos <- mOB$pos
   cd <- mOB$counts
   mat <- normalizeCounts(cd, verbose=FALSE)
-  w <- voronoiAdjacency(pos)
+  w <- getSpatialNeighbors(pos)
 
   set.seed(1)
   is <- sample(1:nrow(mat), 100)
@@ -66,7 +66,7 @@ test_that(context("LISA works as expected"), {
   pos <- mOB$pos
   cd <- mOB$counts
   mat <- normalizeCounts(cd, verbose=FALSE)
-  w <- voronoiAdjacency(pos)
+  w <- getSpatialNeighbors(pos)
 
   set.seed(0)
   is <- sample(1:nrow(mat), 10)
@@ -88,7 +88,7 @@ test_that(context("getSpatialPatterns works"), {
   pos <- mOB$pos
   cd <- mOB$counts
   mat <- normalizeCounts(cd, log=FALSE, verbose=FALSE)
-  w <- voronoiAdjacency(pos)
+  w <- getSpatialNeighbors(pos)
 
   set.seed(0)
   is <- rownames(mat)[sample(1:nrow(mat), 10)]

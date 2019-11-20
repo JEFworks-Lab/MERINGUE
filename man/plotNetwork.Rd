@@ -57,7 +57,7 @@ plotNetwork(pos, w)
 
 data(mOB)
 pos <- mOB$pos
-w <- voronoiAdjacency(pos)
+w <- getSpatialNeighbors(pos)
 plotNetwork(pos, w)
 
 }

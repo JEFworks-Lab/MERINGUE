@@ -58,9 +58,11 @@ N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
 plotNetwork3D(pos, N, size=1)
 }
 
+\dontrun{
 data(drosophila)
 pos <- drosophila$pos
 N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
 plotNetwork3D(pos, N, size=1)
+}
 
 }

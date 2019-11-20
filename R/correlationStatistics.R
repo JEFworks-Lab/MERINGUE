@@ -44,7 +44,7 @@ getPv <- function(obs, ei, sdi, alternative) {
 #' @examples
 #' data(mOB)
 #' pos <- mOB$pos
-#' weight <- voronoiAdjacency(pos)
+#' weight <- getSpatialNeighbors(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 #' moranTest(gexp, weight)
 #'
@@ -226,7 +226,7 @@ moranSimple <- function(x, weight) {
 #' @examples
 #' data(mOB)
 #' pos <- mOB$pos
-#' weight <- voronoiAdjacency(pos)
+#' weight <- getSpatialNeighbors(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
 #' sccMat <- spatialCrossCorMatrix(gexp[1:5,], weight)
 #'
@@ -265,7 +265,7 @@ spatialCrossCorMatrix <- function(mat, weight) {
 #' @examples
 #' data(mOB)
 #' pos <- mOB$pos
-#' weight <- voronoiAdjacency(pos)
+#' weight <- getSpatialNeighbors(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
 #' scc <- spatialCrossCor(gexp[1,], gexp[2,], weight)
 #'
@@ -330,7 +330,7 @@ spatialCrossCor <- function(x, y, weight) {
 #' pos <- cbind(rnorm(N), rnorm(N))
 #' rownames(pos) <- paste0('cell', 1:N)
 #' colnames(pos) <- c('x', 'y')
-#' weight <- voronoiAdjacency(pos)
+#' weight <- getSpatialNeighbors(pos)
 #' ctA <- sample(rownames(pos), N/2)
 #' ctB <- setdiff(rownames(pos), ctA)
 #' gexpA <- pos[,2]
@@ -386,7 +386,7 @@ interCellTypeSpatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight) {
 #' @examples
 #' data(mOB)
 #' pos <- mOB$pos
-#' weight <- voronoiAdjacency(pos)
+#' weight <- getSpatialNeighbors(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 #' lisa <- lisaTest(gexp, weight)
 #'
@@ -448,7 +448,7 @@ lisaTest <- function(x, weight, alternative = "greater") {
 #' @examples
 #' data(mOB)
 #' pos <- mOB$pos
-#' weight <- voronoiAdjacency(pos)
+#' weight <- getSpatialNeighbors(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 #' plotEmbedding(pos, colors=scale(gexp)[,1], cex=3)
 #' slisa <- signedLisa(gexp, weight)
@@ -494,14 +494,14 @@ signedLisa <- function(x, weight, alternative = "greater") {
 #'
 spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
   # compute statistic
-  w <- suppressMessages(suppressWarnings(voronoiAdjacency(pos, plot=FALSE)))
+  w <- suppressMessages(suppressWarnings(getSpatialNeighbors(pos, plot=FALSE)))
   I <- spatialCrossCor(x,y,w)
 
   # compute background
   bg <- sapply(seq_len(n), function(i) {
     # shift pos
     randpos <- rtorShift(pos,k=k,seed=i)
-    w <- suppressMessages(suppressWarnings(voronoiAdjacency(randpos, plot=FALSE)))
+    w <- suppressMessages(suppressWarnings(getSpatialNeighbors(randpos, plot=FALSE)))
     spatialCrossCor(x,y,w)
   })
   bg <- c(bg, I)
@@ -532,7 +532,7 @@ spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
 #' \dontrun{
 #' data(mOB)
 #' pos <- mOB$pos
-#' w <- voronoiAdjacency(pos, plot=FALSE)
+#' w <- getSpatialNeighbors(pos, plot=FALSE)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
 #' pv1 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Nrgn',], w)
 #' pv2 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Glul',], w)

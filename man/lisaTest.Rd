@@ -42,7 +42,7 @@ lisa <- lisaTest(gexp, weight)
 
 data(mOB)
 pos <- mOB$pos
-weight <- voronoiAdjacency(pos)
+weight <- getSpatialNeighbors(pos)
 gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
 lisa <- lisaTest(gexp, weight)
 
