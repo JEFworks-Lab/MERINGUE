@@ -1,5 +1,5 @@
 ---
-title: "3D Breast Cancer Spatial Transcriptomics Analysis with MERingue"
+title: "Multi-Layer Breast Cancer Spatial Transcriptomics Analysis with MERingue"
 author: "Jean Fan"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document

@@ -1,7 +1,7 @@
 ---
 title: "Understanding MERingue's Spatial Cross-Correlation Statistic using Simulations"
 author: "Jean Fan"
-date: "2/14/2019"
+date: "February 14, 2019"
 output: github_document
 vignette: >
   %\VignetteIndexEntry{Understanding MERingue's Spatial Cross-Correlation Statistic using Simulations}
