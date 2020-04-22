@@ -26,6 +26,7 @@
 #' pcs <- cbind(pcs, abs(10-pcs))
 #' colnames(pcs) <- paste0('PC:', 1:ncol(pcs))
 #' rownames(pcs) <- rownames(pos)
+#' W <- getSpatialNeighbors(pos, filterDist=5)
 #' com <- getSpatiallyInformedClusters(pcs, W)
 #'
 #' @export
