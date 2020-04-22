@@ -3,7 +3,6 @@
 \docType{package}
 \name{MERingue}
 \alias{MERingue}
-\alias{MERingue-package}
 \title{MERingue}
 \description{
 This package contains methods for spatially-resolved transcriptomics data analysis

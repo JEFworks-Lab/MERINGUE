@@ -83,11 +83,9 @@ moranTest <- function (x, weight, alternative = "greater") {
 #'
 #' @return Observed Moran's I statistic, the expected statistic under the null hypothesis of no spatial autocorrelation, the standard deviation under the null hypothesis, and p-value
 #'
-#' @export
-#'
 moranTest_DEPRECATED <- function (x, weight, alternative = "greater") {
 
-  warning('DEPRECATED! Use moranTest()')
+  warning('DEPRECATED! Use the faster moranTest()')
 
   if (nrow(weight) != ncol(weight)) {
     stop("'weight' must be a square matrix")
@@ -151,6 +149,13 @@ moranTest_DEPRECATED <- function (x, weight, alternative = "greater") {
 #'
 #' @return Observed Moran's I statistic, the expected statistic under the null hypothesis of no spatial autocorrelation, the standard deviation under the null hypothesis, permutation p-value, and number of permutations
 #'
+#' @examples
+#' data(mOB)
+#' pos <- mOB$pos
+#' weight <- getSpatialNeighbors(pos)
+#' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
+#' moranPermutationTest(gexp, weight)
+#'
 #' @export
 #'
 moranPermutationTest <- function(z, w, alternative = "greater", N=1e4, seed=0, ncores=1, plot=FALSE, ...) {
@@ -163,7 +168,9 @@ moranPermutationTest <- function(z, w, alternative = "greater", N=1e4, seed=0, n
 
   # Simulate null distribution
   sim <- unlist(parallel::mclapply(seq_len(N), function(i) {
-    moranSimple(sample(z, length(z), replace=TRUE), w)
+    foo <- sample(z, length(z), replace=TRUE)
+    names(foo) <- names(z)
+    moranSimple(foo, w)
   }, mc.cores=ncores))
   sim[is.nan(sim)] <- NA
   sim <- na.omit(sim)
@@ -199,6 +206,11 @@ moranSimple <- function(x, weight) {
   if (nrow(weight) != N) {
     stop("'weight' must have as many rows as observations in 'x'")
   }
+
+  if(sum(rownames(weight) %in% names(x)) != nrow(weight)) {
+    stop('Names in feature vector and adjacency weight matrix do not agree.')
+  }
+  x <- x[rownames(weight)]
 
   # unitization
   rs <- rowSums(weight)
@@ -335,11 +347,12 @@ spatialCrossCor <- function(x, y, weight) {
 #' ctB <- setdiff(rownames(pos), ctA)
 #' gexpA <- pos[,2]
 #' gexpA[ctB] <- 0
-#' gexpB <- -pos[,2]
+#' gexpB <- pos[,2]
 #' gexpB[ctA] <- 0
-#' plotEmbedding(pos, col=gexpA)
-#' plotEmbedding(pos, col=gexpB)
+#' #plotEmbedding(pos, col=gexpA)
+#' #plotEmbedding(pos, col=gexpB)
 #' interCellTypeSpatialCrossCor(gexpA, gexpB, ctA, ctB, weight)
+#' cor(gexpA, gexpB) # compare
 #'
 #' @export
 #'
@@ -450,7 +463,7 @@ lisaTest <- function(x, weight, alternative = "greater") {
 #' pos <- mOB$pos
 #' weight <- getSpatialNeighbors(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
-#' plotEmbedding(pos, colors=scale(gexp)[,1], cex=3)
+#' plotEmbedding(pos, colors=gexp, cex=3)
 #' slisa <- signedLisa(gexp, weight)
 #' plotEmbedding(pos, colors=slisa, cex=3,
 #'    gradientPalette=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100))
@@ -463,9 +476,6 @@ signedLisa <- function(x, weight, alternative = "greater") {
   slisa <- slisa[rownames(weight)]
   return(slisa)
 }
-
-
-
 
 
 #' Tests for significance of spatial cross correlation for two features using toroidal shift null model
@@ -494,14 +504,14 @@ signedLisa <- function(x, weight, alternative = "greater") {
 #'
 spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
   # compute statistic
-  w <- suppressMessages(suppressWarnings(getSpatialNeighbors(pos, plot=FALSE)))
+  w <- suppressMessages(suppressWarnings(getSpatialNeighbors(pos)))
   I <- spatialCrossCor(x,y,w)
 
   # compute background
   bg <- sapply(seq_len(n), function(i) {
     # shift pos
     randpos <- rtorShift(pos,k=k,seed=i)
-    w <- suppressMessages(suppressWarnings(getSpatialNeighbors(randpos, plot=FALSE)))
+    w <- suppressMessages(suppressWarnings(getSpatialNeighbors(randpos)))
     spatialCrossCor(x,y,w)
   })
   bg <- c(bg, I)
@@ -532,7 +542,7 @@ spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
 #' \dontrun{
 #' data(mOB)
 #' pos <- mOB$pos
-#' w <- getSpatialNeighbors(pos, plot=FALSE)
+#' w <- getSpatialNeighbors(pos)
 #' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)
 #' pv1 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Nrgn',], w)
 #' pv2 <- spatialCrossCorTest(gexp['Gpsm1',], gexp['Glul',], w)
@@ -546,8 +556,8 @@ spatialCrossCorTest <- function(x, y, w, n=1000, plot=FALSE, ...) {
   # compute background
   bg <- sapply(seq_len(n), function(i) {
     set.seed(i)
-    xbg <- x
-    names(xbg) <- sample(names(x))
+    xbg <- sample(x)
+    names(xbg) <- names(x)
     spatialCrossCor(xbg,y,w)
   })
   bg <- c(bg, I)

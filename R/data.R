@@ -43,3 +43,25 @@
 
 #' SlideSeq data
 "purkinje"
+
+#' Receptor ligand list
+#'
+#' @format Data frame corresponding to ncomms8866-s3.xlsx in Ramilowski et al (Nature Communications 2015)
+#'
+#' @source \url{https://www.nature.com/articles/ncomms8866}
+#'
+#' @examples
+#' data(receptorLigandInfo)
+#' receptors <- unique(receptorLigandInfo$Receptor.ApprovedSymbol)
+#' receptorLigandList <- lapply(receptors, function(rp) {
+#'      vi <- receptorLigandInfo$Receptor.ApprovedSymbol == rp
+#'      return(df[vi,]$Ligand.ApprovedSymbol)
+#' })
+#' names(receptorLigandList) <- receptors
+#' ligands <- unique(df$Ligand.ApprovedSymbol)
+#' ligandReceptorList <- lapply(ligands, function(rp) {
+#'      vi <- df$Ligand.ApprovedSymbol == rp
+#'      return(df[vi,]$Receptor.ApprovedSymbol)
+#' })
+#' names(ligandReceptorList) <- ligands
+"receptorLigandInfo"

@@ -4,9 +4,17 @@
 \alias{makeApp}
 \title{Make a shiny app to interactively explore data}
 \usage{
-makeApp(pos, gexp, results, title, description = NULL,
-  pal = colorRampPalette(c("blue", "grey", "red"))(100), scale = TRUE,
-  zlim = c(-1.5, 1.5), ...)
+makeApp(
+  pos,
+  gexp,
+  results,
+  title,
+  description = NULL,
+  pal = colorRampPalette(c("blue", "grey", "red"))(100),
+  scale = TRUE,
+  zlim = c(-1.5, 1.5),
+  ...
+)
 }
 \arguments{
 \item{pos}{Position}

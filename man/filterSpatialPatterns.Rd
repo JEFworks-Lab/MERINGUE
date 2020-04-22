@@ -4,8 +4,16 @@
 \alias{filterSpatialPatterns}
 \title{Filter for spatial patterns}
 \usage{
-filterSpatialPatterns(mat, I, w, adjustPv = TRUE, alpha = 0.05,
-  minPercentCells = 0.05, verbose = TRUE, details = FALSE)
+filterSpatialPatterns(
+  mat,
+  I,
+  w,
+  adjustPv = TRUE,
+  alpha = 0.05,
+  minPercentCells = 0.05,
+  verbose = TRUE,
+  details = FALSE
+)
 }
 \arguments{
 \item{mat}{Gene expression matrix.}

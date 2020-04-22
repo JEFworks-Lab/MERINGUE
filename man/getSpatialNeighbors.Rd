@@ -4,8 +4,7 @@
 \alias{getSpatialNeighbors}
 \title{Adjacency weight matrix by Delaunay triangulations in 2D or 3D}
 \usage{
-getSpatialNeighbors(pos, filterDist = NA, binary = TRUE,
-  verbose = FALSE)
+getSpatialNeighbors(pos, filterDist = NA, binary = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{pos}{Position}
