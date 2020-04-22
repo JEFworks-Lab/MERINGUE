@@ -6,7 +6,7 @@ test_that(context("Moran's I C++ functions compiled and works as expected"), {
   pos <- mOB$pos
   cd <- mOB$counts
   mat <- normalizeCounts(cd, verbose=FALSE)
-  w <- voronoiAdjacency(pos)
+  w <- getSpatialNeighbors(pos)
 
   set.seed(0)
   is <- sample(1:nrow(mat), 100)
