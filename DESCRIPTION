@@ -19,7 +19,8 @@ Imports:
     dynamicTreeCut,
     geometry,
     DT,
-    shiny
+    shiny,
+    igraph
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 7.1.0
 Suggests: knitr,
