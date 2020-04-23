@@ -21,13 +21,13 @@ data(receptorLigandInfo)
 receptors <- unique(receptorLigandInfo$Receptor.ApprovedSymbol)
 receptorLigandList <- lapply(receptors, function(rp) {
      vi <- receptorLigandInfo$Receptor.ApprovedSymbol == rp
-     return(df[vi,]$Ligand.ApprovedSymbol)
+     return(receptorLigandInfo[vi,]$Ligand.ApprovedSymbol)
 })
 names(receptorLigandList) <- receptors
-ligands <- unique(df$Ligand.ApprovedSymbol)
+ligands <- unique(receptorLigandInfo$Ligand.ApprovedSymbol)
 ligandReceptorList <- lapply(ligands, function(rp) {
-     vi <- df$Ligand.ApprovedSymbol == rp
-     return(df[vi,]$Receptor.ApprovedSymbol)
+     vi <- receptorLigandInfo$Ligand.ApprovedSymbol == rp
+     return(receptorLigandInfo[vi,]$Receptor.ApprovedSymbol)
 })
 names(ligandReceptorList) <- ligands
 }
