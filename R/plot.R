@@ -196,28 +196,27 @@ plotNetwork <- function(pos, adj, col='black', line.col='grey', line.power=1, ..
   }
 }
 
-#' Plot an adjacency weight matrix as a network in 3D
-#'
-#' @param pos 3D position information
-#' @param adj Adjacency weight matrix
-#' @param col Color of points
-#' @param line.col Color of line
-#' @param alpha Line color transparency
-#' @param line.power Thickness of lines
-#' @param ... Additional plotting parameters
-#'
-#' @return None
-#'
-#' @examples
-#' \dontrun{
-#' data(drosophila)
-#' pos <- drosophila$pos
-#' N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
-#' plotNetwork3D(pos, N, size=1)
-#' }
-#'
-#' @export
-#'
+# Plot an adjacency weight matrix as a network in 3D
+# Not exported to avoid rgl dependency
+#
+# @param pos 3D position information
+# @param adj Adjacency weight matrix
+# @param col Color of points
+# @param line.col Color of line
+# @param alpha Line color transparency
+# @param line.power Thickness of lines
+# @param ... Additional plotting parameters
+#
+# @return None
+#
+# @examples
+# \dontrun{
+# data(drosophila)
+# pos <- drosophila$pos
+# N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
+# plotNetwork3D(pos, N, size=1)
+# }
+#
 plotNetwork3D <- function(pos, adj, col='black', line.col='grey', alpha=0.5, line.power=1, ...) {
   rgl::rgl.open()
   rgl::bg3d("white")
