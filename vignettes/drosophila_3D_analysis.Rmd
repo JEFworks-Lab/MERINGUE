@@ -1,10 +1,10 @@
 ---
-title: "3D Drosophila Spatial Transcriptomics Analysis with MERingue"
+title: "3D Drosophila Spatial Transcriptomics Analysis with MERINGUE"
 author: "Jean Fan"
 date: 'November, 20, 2019'
 output: github_document
 vignette: >
-  %\VignetteIndexEntry{3D Drosophila Spatial Transcriptomics Analysis with MERingue}
+  %\VignetteIndexEntry{3D Drosophila Spatial Transcriptomics Analysis with MERINGUE}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 ---
@@ -18,7 +18,7 @@ opts_chunk$set(
 ```
 
 ```{r}
-library(MERingue)
+library(MERINGUE)
 ```
 
 In this vignette, we will walk through an analysis of spatial gene expression data for the drosophila embryo from the Berkeley Drosophila Transcription Network Project. Notably, 3D spatial coordinates are available for this dataset, allowing us to analyze beyond a single plane. 
@@ -71,7 +71,7 @@ invisible(lapply(sub, function(g) {
 We are able to distinguish 2 patterns corresponding to even and odd pair-rule genes.
 
 ```{r, drosophila-pattern, fig.width=8, fig.height=3}
-scc <- MERingue::spatialCrossCorMatrix(gexp[sub,], N)
+scc <- MERINGUE::spatialCrossCorMatrix(gexp[sub,], N)
 
 method = 'ward.D'
 par(mfrow=c(1,2), mar=rep(2,4))

@@ -1,0 +1,10 @@
+citHeader("To cite MERINGUE in publications, please use:")
+
+citEntry(
+  author = "Jean Fan",
+  title = "",
+  publisher = "",
+  year = "",
+  isbn = "",
+  textVersion = ""
+)

@@ -5,7 +5,7 @@
 #' @param pos Position
 #' @param filterDist Euclidean distance beyond which two cells cannot be considered neighbors
 #' @param binary Boolean of whether to binarize output; otherwise Euclidean distances provided
-#' @param verbose
+#' @param verbose Verbosity
 #'
 #' @return Matrix where value represents distance between two spatially adjacent cells ie. neighbors
 #'

@@ -1,4 +1,4 @@
 library(testthat)
-library(MERingue)
+library(MERINGUE)
 
-test_check("MERingue")
+test_check("MERINGUE")

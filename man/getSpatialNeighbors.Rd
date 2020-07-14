@@ -13,7 +13,7 @@ getSpatialNeighbors(pos, filterDist = NA, binary = TRUE, verbose = FALSE)
 
 \item{binary}{Boolean of whether to binarize output; otherwise Euclidean distances provided}
 
-\item{verbose}{}
+\item{verbose}{Verbosity}
 }
 \value{
 Matrix where value represents distance between two spatially adjacent cells ie. neighbors

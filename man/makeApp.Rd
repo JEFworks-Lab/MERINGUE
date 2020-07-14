@@ -47,6 +47,10 @@ pos <- mOB$pos
 gexp <- as.matrix(normalizeCounts(mOB$counts, log=FALSE))
 results <- mOB$results
 results[, 1:3] <- round(results[, 1:3], digits=3)
-makeApp(pos, gexp, results, title='mOB', description='Mouse Olfactory Bulb Spatial Transcriptomics Data')
+makeApp(pos,
+        gexp,
+        results,
+        title='mOB',
+        description='Mouse Olfactory Bulb Spatial Transcriptomics Data')
 
 }

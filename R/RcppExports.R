@@ -2,22 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 unitize_C <- function(weight) {
-    .Call('_MERingue_unitize_C', PACKAGE = 'MERingue', weight)
+    .Call('_MERINGUE_unitize_C', PACKAGE = 'MERINGUE', weight)
 }
 
 spatialCrossCor_C <- function(x, y, weight) {
-    .Call('_MERingue_spatialCrossCor_C', PACKAGE = 'MERingue', x, y, weight)
+    .Call('_MERINGUE_spatialCrossCor_C', PACKAGE = 'MERINGUE', x, y, weight)
 }
 
 spatialCrossCorMatrix_C <- function(sigMat, weight, display_progress = TRUE) {
-    .Call('_MERingue_spatialCrossCorMatrix_C', PACKAGE = 'MERingue', sigMat, weight, display_progress)
+    .Call('_MERINGUE_spatialCrossCorMatrix_C', PACKAGE = 'MERINGUE', sigMat, weight, display_progress)
 }
 
 moranTest_C <- function(x, weight) {
-    .Call('_MERingue_moranTest_C', PACKAGE = 'MERingue', x, weight)
+    .Call('_MERINGUE_moranTest_C', PACKAGE = 'MERINGUE', x, weight)
 }
 
 getSpatialPatterns_C <- function(mat, adj, display_progress = TRUE) {
-    .Call('_MERingue_getSpatialPatterns_C', PACKAGE = 'MERingue', mat, adj, display_progress)
+    .Call('_MERINGUE_getSpatialPatterns_C', PACKAGE = 'MERINGUE', mat, adj, display_progress)
 }
 

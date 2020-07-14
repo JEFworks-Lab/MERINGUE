@@ -18,7 +18,11 @@
 #' gexp <- as.matrix(normalizeCounts(mOB$counts, log=FALSE))
 #' results <- mOB$results
 #' results[, 1:3] <- round(results[, 1:3], digits=3)
-#' makeApp(pos, gexp, results, title='mOB', description='Mouse Olfactory Bulb Spatial Transcriptomics Data')
+#' makeApp(pos,
+#'         gexp,
+#'         results,
+#'         title='mOB',
+#'         description='Mouse Olfactory Bulb Spatial Transcriptomics Data')
 #'
 #' @export
 #'
@@ -34,9 +38,9 @@ makeApp <- function(pos, gexp, results, title, description=NULL,
   if (interactive()) {
     ui <- shiny::fluidPage(
       title = title,
-      titlePanel(title),
+      shiny::titlePanel(title),
       shiny::fluidRow(
-        column(12, description, hr())
+        shiny::column(12, description, shiny::hr())
       ),
       shiny::sidebarLayout(
         shiny::sidebarPanel(
@@ -51,8 +55,8 @@ makeApp <- function(pos, gexp, results, title, description=NULL,
       output$table = DT::renderDataTable(results, server = TRUE,
                                       selection = 'single',
                                       options = list(scrollX = TRUE))
-      output$plot = renderPlot({
-        validate(need(input$table_rows_selected, "Select a Gene (Click on a Data Table Row)"))
+      output$plot = shiny::renderPlot({
+        shiny::validate(shiny::need(input$table_rows_selected, "Select a Gene (Click on a Data Table Row)"))
         s = input$table_rows_selected
         if(is.null(s)) { s = rownames(gexp)[1] }
         g = rownames(results)[s]
@@ -68,27 +72,5 @@ makeApp <- function(pos, gexp, results, title, description=NULL,
   }
 }
 
-
-makeMobApp <- function() {
-  data(mOB)
-  pos <- mOB$pos
-  gexp <- as.matrix(normalizeCounts(mOB$counts, log=FALSE))
-  results <- mOB$results
-  results[, 1:3] <- round(results[, 1:3], digits=3)
-  makeApp(pos, gexp, results, title='mOB',
-          description='mouse olfactory bulb spatial transcriptomics data',
-          cex=3)
-}
-
-
-makeDrosophilaApp <- function() {
-  data(drosophila)
-  pos <- drosophila$pos
-  gexp <- as.matrix(normalizeCounts(drosophila$counts, log=FALSE))
-  results <- drosophila$results
-  results[, 1:3] <- round(results[, 1:3], digits=3)
-  makeApp(pos, gexp, results, title='Drosophila melanogaster embryo',
-          description='Drosophila melanogaster embryo aligned in situ hybridization data from BDTN')
-}
 
 

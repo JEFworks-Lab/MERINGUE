@@ -2,7 +2,7 @@ library(testthat)
 
 test_that(context("Test winsorization"), {
 
-  library(MERingue)
+  library(MERINGUE)
   x <- rnorm(100,0,1)
   x <- c(x, 10)
   xw <- winsorize(x, 0.01)
@@ -11,7 +11,7 @@ test_that(context("Test winsorization"), {
 
 test_that(context("Test differential expression"), {
 
-  library(MERingue)
+  library(MERINGUE)
 
   set.seed(0)
   G <- 2

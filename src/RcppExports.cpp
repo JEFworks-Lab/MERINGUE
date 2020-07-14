@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // unitize_C
 arma::mat unitize_C(arma::mat weight);
-RcppExport SEXP _MERingue_unitize_C(SEXP weightSEXP) {
+RcppExport SEXP _MERINGUE_unitize_C(SEXP weightSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -19,7 +19,7 @@ END_RCPP
 }
 // spatialCrossCor_C
 double spatialCrossCor_C(arma::vec x, arma::vec y, arma::mat weight);
-RcppExport SEXP _MERingue_spatialCrossCor_C(SEXP xSEXP, SEXP ySEXP, SEXP weightSEXP) {
+RcppExport SEXP _MERINGUE_spatialCrossCor_C(SEXP xSEXP, SEXP ySEXP, SEXP weightSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,7 +32,7 @@ END_RCPP
 }
 // spatialCrossCorMatrix_C
 arma::mat spatialCrossCorMatrix_C(arma::mat sigMat, arma::mat weight, bool display_progress);
-RcppExport SEXP _MERingue_spatialCrossCorMatrix_C(SEXP sigMatSEXP, SEXP weightSEXP, SEXP display_progressSEXP) {
+RcppExport SEXP _MERINGUE_spatialCrossCorMatrix_C(SEXP sigMatSEXP, SEXP weightSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -45,7 +45,7 @@ END_RCPP
 }
 // moranTest_C
 arma::vec moranTest_C(arma::vec x, arma::mat weight);
-RcppExport SEXP _MERingue_moranTest_C(SEXP xSEXP, SEXP weightSEXP) {
+RcppExport SEXP _MERINGUE_moranTest_C(SEXP xSEXP, SEXP weightSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -57,7 +57,7 @@ END_RCPP
 }
 // getSpatialPatterns_C
 arma::mat getSpatialPatterns_C(arma::mat mat, arma::mat adj, bool display_progress);
-RcppExport SEXP _MERingue_getSpatialPatterns_C(SEXP matSEXP, SEXP adjSEXP, SEXP display_progressSEXP) {
+RcppExport SEXP _MERINGUE_getSpatialPatterns_C(SEXP matSEXP, SEXP adjSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -70,15 +70,15 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_MERingue_unitize_C", (DL_FUNC) &_MERingue_unitize_C, 1},
-    {"_MERingue_spatialCrossCor_C", (DL_FUNC) &_MERingue_spatialCrossCor_C, 3},
-    {"_MERingue_spatialCrossCorMatrix_C", (DL_FUNC) &_MERingue_spatialCrossCorMatrix_C, 3},
-    {"_MERingue_moranTest_C", (DL_FUNC) &_MERingue_moranTest_C, 2},
-    {"_MERingue_getSpatialPatterns_C", (DL_FUNC) &_MERingue_getSpatialPatterns_C, 3},
+    {"_MERINGUE_unitize_C", (DL_FUNC) &_MERINGUE_unitize_C, 1},
+    {"_MERINGUE_spatialCrossCor_C", (DL_FUNC) &_MERINGUE_spatialCrossCor_C, 3},
+    {"_MERINGUE_spatialCrossCorMatrix_C", (DL_FUNC) &_MERINGUE_spatialCrossCorMatrix_C, 3},
+    {"_MERINGUE_moranTest_C", (DL_FUNC) &_MERINGUE_moranTest_C, 2},
+    {"_MERINGUE_getSpatialPatterns_C", (DL_FUNC) &_MERINGUE_getSpatialPatterns_C, 3},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_MERingue(DllInfo *dll) {
+RcppExport void R_init_MERINGUE(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

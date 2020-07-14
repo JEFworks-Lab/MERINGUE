@@ -1,10 +1,10 @@
 ---
-title: "mOB Spatial Transcriptomics Analysis with MERingue"
+title: "mOB Spatial Transcriptomics Analysis with MERINGUE"
 author: "Jean Fan"
 date: '`r Sys.Date()`'
 output: rmarkdown::pdf_document
 vignette: >
-  %\VignetteIndexEntry{mOB Spatial Transcriptomics Analysis with MERingue}
+  %\VignetteIndexEntry{mOB Spatial Transcriptomics Analysis with MERINGUE}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 ---
@@ -22,7 +22,7 @@ In this vignette, we will walk through an analysis of spatial transcriptomics da
 The mOB data has been prepared for you and is available as a part of the package. Here, `pos` is a dataframe where each row is a probe spot's x and y positions in space, and `cd` is a counts matrix where each column is a probe spot and each row is a gene.
 
 ```{r, mob-init}
-suppressMessages(library(MERingue))
+suppressMessages(library(MERINGUE))
 data(mOB)
 pos <- mOB$pos
 cd <- mOB$counts
@@ -148,7 +148,7 @@ Because transcriptionally distinct cell-types are spatially organized in the mOB
 
 # Spatially-aware analysis
 
-So now, to take an orthologonal spatially-aware approach, we will apply MERingue to identify spatially aggregated genes and group them into primary spatial patterns. To integrate the spatial information, we will create an adjacency weight matrix. We will use a binary weighting scheme here, where two probe spots will be connected with a weight of 1 if they are neighbors with each other, and otherwise not connected with a weight of 0.  
+So now, to take an orthologonal spatially-aware approach, we will apply MERINGUE to identify spatially aggregated genes and group them into primary spatial patterns. To integrate the spatial information, we will create an adjacency weight matrix. We will use a binary weighting scheme here, where two probe spots will be connected with a weight of 1 if they are neighbors with each other, and otherwise not connected with a weight of 0.  
 
 ```{r, spatial-weights, fig.width=6, fig.height=6}
 # Get neighbor-relationships

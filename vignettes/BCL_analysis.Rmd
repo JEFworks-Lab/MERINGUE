@@ -1,10 +1,10 @@
 ---
-title: "Multi-Layer Breast Cancer Spatial Transcriptomics Analysis with MERingue"
+title: "Multi-Layer Breast Cancer Spatial Transcriptomics Analysis with MERINGUE"
 author: "Jean Fan"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
 vignette: >
-  %\VignetteIndexEntry{3D Breast Cancer Spatial Transcriptomics Analysis with MERingue}
+  %\VignetteIndexEntry{3D Breast Cancer Spatial Transcriptomics Analysis with MERINGUE}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 ---
@@ -24,7 +24,7 @@ The data has been prepared for you and is available as a part of the package. He
 Although a total of 4 tissue layers are available, we will focus on analyzing 3 tissue layers for demonstrative purposes.
 
 ```{r, bcl-data}
-suppressMessages(library(MERingue))
+suppressMessages(library(MERINGUE))
 
 data(BCL1) # layer 1
 data(BCL2) # layer 2

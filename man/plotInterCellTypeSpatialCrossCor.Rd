@@ -10,7 +10,8 @@ plotInterCellTypeSpatialCrossCor(
   groupA,
   groupB,
   weight,
-  fun = mean
+  fun = mean,
+  ...
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ plotInterCellTypeSpatialCrossCor(
 \item{weight}{Adjacency weight matrix}
 
 \item{fun}{Function for combining multiple gene expression values (ex. mean, median, max)}
+
+\item{...}{Additional plotting parameters}
 }
 \value{
 None

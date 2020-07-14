@@ -1,10 +1,10 @@
-#' MERingue
+#' MERINGUE
 #'
 #' This package contains methods for spatially-resolved transcriptomics data analysis
 #'
-#' @name MERingue
+#' @name MERINGUE
 #' @docType package
 #'
-#' @useDynLib MERingue
+#' @useDynLib MERINGUE
 #' @importFrom Rcpp evalCpp
 NULL

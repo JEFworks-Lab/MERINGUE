@@ -1,7 +1,9 @@
-Package: MERingue
+Package: MERINGUE
 Title: spatial gene expression analysis in non-homogenous tissues
-Version: 0.0.0.9000
-Authors@R: person("Jean", "Fan", email = "jeanfan@fas.harvard.edu", role = c("aut", "cre"))
+Version: 1.0
+Authors@R: person("Jean", "Fan", 
+	email = "jeanfan@jhu.edu", role = c("aut", "cre"),
+	comment = c(ORCID = "0000-0002-0212-5451"))
 Description: Identifies spatial gene expression patterns in 
   spatially resolved single cell transcriptomics data 
   taking into consideration potential cell-type and 
@@ -15,15 +17,15 @@ Imports:
     Matrix,
     akima,
     Rcpp,
-    deldir,
     dynamicTreeCut,
     geometry,
     DT,
-    shiny,
     igraph
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 7.1.0
 Suggests: knitr,
     rmarkdown,
-    testthat
+    testthat,
+    rgl,
+    shiny
 VignetteBuilder: knitr

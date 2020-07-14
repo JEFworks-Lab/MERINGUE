@@ -219,15 +219,15 @@ plotNetwork <- function(pos, adj, col='black', line.col='grey', line.power=1, ..
 #' @export
 #'
 plotNetwork3D <- function(pos, adj, col='black', line.col='grey', alpha=0.5, line.power=1, ...) {
-  rgl.open()
-  bg3d("white")
-  tc <- delaunayn(pos, output.options=FALSE)
+  rgl::rgl.open()
+  rgl::bg3d("white")
+  tc <- geometry::delaunayn(pos, output.options=FALSE)
   ## 3D
-  rgl.viewpoint(45, fov=0, phi = 30)
-  points3d(pos, color=col, alpha=1, ...)
+  rgl::rgl.viewpoint(45, fov=0, phi = 30)
+  rgl::points3d(pos, color=col, alpha=1, ...)
   idx <- which(adj > 0, arr.ind = T)
   for (i in seq_len(nrow(idx))) {
-    lines3d(c(pos[idx[i, 1], 1], pos[idx[i, 2], 1]),
+    rgl::lines3d(c(pos[idx[i, 1], 1], pos[idx[i, 2], 1]),
             c(pos[idx[i, 1], 2], pos[idx[i, 2], 2]),
             c(pos[idx[i, 1], 3], pos[idx[i, 2], 3]),
             col = line.col, alpha=alpha, lwd=line.power)
@@ -308,6 +308,7 @@ interpolate <- function(pos, gexp, scale=TRUE, trim=0, zlim=range(gexp), fill=TR
 #' @param groupB Cells of group B
 #' @param weight Adjacency weight matrix
 #' @param fun Function for combining multiple gene expression values (ex. mean, median, max)
+#' @param ... Additional plotting parameters
 #'
 #' @return None
 #'
@@ -332,7 +333,7 @@ interpolate <- function(pos, gexp, scale=TRUE, trim=0, zlim=range(gexp), fill=TR
 #'
 #' @export
 #'
-plotInterCellTypeSpatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight, fun=mean) {
+plotInterCellTypeSpatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weight, fun=mean, ...) {
     ## plot correlation between groupA cells and neighbors
     nbs <- lapply(groupA, function(x) names(which(weight[x,]==1)))
     names(nbs) <- groupA
@@ -341,7 +342,10 @@ plotInterCellTypeSpatialCrossCor <- function(gexpA, gexpB, groupA, groupB, weigh
     ## average gene B expression for neighbors from group B
     bar <- unlist(lapply(nbs, function(y) fun(gexpB[y])))
     ## plot
-    plot(foo, bar, xlab='gene A expression for cells in group A', ylab='gene B expression for neighbors in group B')
+    plot(foo, bar,
+         xlab='gene A expression for cells in group A',
+         ylab='gene B expression for neighbors in group B',
+         ...)
 }
 
 
@@ -366,9 +370,36 @@ rotatePos <- function(pos, theta) {
 }
 
 
-signedLisaPlot <- function(gexp, W, ...) {
-  lisa <- log10(lisaTest(gexp, W)$observed+1); names(lisa) <- names(z)
-  plot(pos,
-       col=map2col(lisa, pal=colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100)),
+#' Signed LISA plot
+#'
+#' @param gexp Feature value
+#' @param pos Position matrix
+#' @param weight Adjacency weight matrix
+#' @param zlim Range for expression (default = c(-2,2))
+#' @param ... Additional plotting parameters
+#'
+#' @return signed LISA scores
+#'
+#' @examples
+#' data(mOB)
+#' pos <- mOB$pos
+#' gexp <- normalizeCounts(mOB$counts, log=FALSE, verbose=FALSE)['Camk4',]
+#' W <- getSpatialNeighbors(pos)
+#' signedLisaPlot(gexp, pos, W)
+#'
+#' @export
+#'
+signedLisaPlot <- function(gexp, pos, weight, zlim=c(-2,2), ...) {
+  lisa <- lisaTest(gexp, weight)$observed;
+  names(lisa) <- names(gexp)
+  sgexp <- scale(gexp)[,1]
+  sgexp[sgexp <= zlim[1]] <- zlim[1]
+  sgexp[sgexp > zlim[2]] <- zlim[2]
+  lisa <- sign(sgexp)*lisa
+  #par(mfrow=c(1,2))
+  #plotEmbedding(pos, col=sgexp)
+  plotEmbedding(pos,
+                colors=lisa[rownames(pos)],
+                gradientPalette = colorRampPalette(c('darkgreen', 'white', 'darkorange'))(100),
        ...)
 }
