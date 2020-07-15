@@ -1,4 +1,4 @@
-#' Mouse olfactory bulb spatial transcriptomics transcriptomics
+#' Spatial transcriptomics transcriptomics of the mouse olfactory bulb
 #'
 #' @format List where 'counts' is a sparse matrix with columns as voxels and rows as genes and
 #'                    'pos' is a data frame of x and y position values per voxel
@@ -6,42 +6,40 @@
 #' @source \url{https://science.sciencemag.org/content/353/6294/78}
 "mOB"
 
-#' Breast cancer biopsy layer 1 bulb spatial transcriptomics transcriptomics
+#' MERFISH data of the mouse pre-optic region for a female naive animal (FN7)
+#'
+#' @format List where 'mat' is a sparse matrix with columns as cells and rows as genes
+#'                          where expression values have already been normalized by volume
+#'                    'pos' is a data frame of x, y, z position values per cell
+#'                          and brain position as 6 slice indices from anterior to posterior
+#'
+#' @source \url{https://science.sciencemag.org/content/362/6416/eaau5324/}
+"mPOA"
+
+#' Spatial transcriptomics transcriptomics of 4 breast cancer biopsy sections
 #'
 #' @format List where 'counts' is a sparse matrix with columns as voxels and rows as genes and
 #'                    'pos' is a data frame of x and y position values per voxel
+#'                          and slice index for 4 consecutive slices
 #'
 #' @source \url{https://science.sciencemag.org/content/353/6294/78}
-"BCL1"
+"BCL"
 
-#' Breast cancer biopsy layer 2 bulb spatial transcriptomics transcriptomics
+#' Drosophila embryo aligned ISH from the in situ database (BDTNP).
 #'
-#' @format List where 'counts' is a sparse matrix with columns as voxels and rows as genes and
-#'                    'pos' is a data frame of x and y position values per voxel
+#' @format List where 'mat' is a matrix with columns as cells and rows as genes and
+#'                    'pos' is a data frame of x, y, and z position values per cells
 #'
-#' @source \url{https://science.sciencemag.org/content/353/6294/78}
-"BCL2"
-
-#' Breast cancer biopsy layer 3 bulb spatial transcriptomics transcriptomics
-#'
-#' @format List where 'counts' is a sparse matrix with columns as voxels and rows as genes and
-#'                    'pos' is a data frame of x and y position values per voxel
-#'
-#' @source \url{https://science.sciencemag.org/content/353/6294/78}
-"BCL3"
-
-#' Breast cancer biopsy layer 4 bulb spatial transcriptomics transcriptomics
-#'
-#' @format List where 'counts' is a sparse matrix with columns as voxels and rows as genes and
-#'                    'pos' is a data frame of x and y position values per voxel
-#'
-#' @source \url{https://science.sciencemag.org/content/353/6294/78}
-"BCL4"
-
-#' Drosophila embryo aligned ISH
+#' @source \url{https://shiny.mdc-berlin.de/DVEX/}
 "drosophila"
 
-#' SlideSeq data
+#' SlideSeq data of the Purkinje layer of the mouse cerebellum for one puck (Puck_180819_12)
+#'
+#' @format List where 'counts' is a sparse matrix with columns as voxels and rows as genes and
+#'                    'pos' is a data frame of x and y position values per voxel
+#'                          and slice index for 4 consecutive slices
+#'
+#' @source \url{https://science.sciencemag.org/content/363/6434/1463}
 "purkinje"
 
 #' Receptor ligand list

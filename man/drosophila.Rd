@@ -3,14 +3,18 @@
 \docType{data}
 \name{drosophila}
 \alias{drosophila}
-\title{Drosophila embryo aligned ISH}
+\title{Drosophila embryo aligned ISH from the in situ database (BDTNP).}
 \format{
-An object of class \code{list} of length 4.
+List where 'mat' is a matrix with columns as cells and rows as genes and
+                   'pos' is a data frame of x, y, and z position values per cells
+}
+\source{
+\url{https://shiny.mdc-berlin.de/DVEX/}
 }
 \usage{
 drosophila
 }
 \description{
-Drosophila embryo aligned ISH
+Drosophila embryo aligned ISH from the in situ database (BDTNP).
 }
 \keyword{datasets}

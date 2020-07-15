@@ -3,14 +3,19 @@
 \docType{data}
 \name{purkinje}
 \alias{purkinje}
-\title{SlideSeq data}
+\title{SlideSeq data of the Purkinje layer of the mouse cerebellum for one puck (Puck_180819_12)}
 \format{
-An object of class \code{list} of length 2.
+List where 'counts' is a sparse matrix with columns as voxels and rows as genes and
+                   'pos' is a data frame of x and y position values per voxel
+                         and slice index for 4 consecutive slices
+}
+\source{
+\url{https://science.sciencemag.org/content/363/6434/1463}
 }
 \usage{
 purkinje
 }
 \description{
-SlideSeq data
+SlideSeq data of the Purkinje layer of the mouse cerebellum for one puck (Puck_180819_12)
 }
 \keyword{datasets}
