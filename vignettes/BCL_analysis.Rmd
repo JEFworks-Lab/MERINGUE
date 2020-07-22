@@ -26,9 +26,19 @@ Although a total of 4 tissue layers are available, we will focus on analyzing 3 
 ```{r, bcl-data}
 suppressMessages(library(MERINGUE))
 
-data(BCL1) # layer 1
-data(BCL2) # layer 2
-data(BCL3) # layer 3
+data(BCL) # object contains counts and positions for all 4 layers. Will only need layers 1-3
+
+BCL1.pos <- BCL$pos[which(grepl("L1-", rownames(BCL$pos))),][,c("x", "y")]
+BCL2.pos <- BCL$pos[which(grepl("L2-", rownames(BCL$pos))),][,c("x", "y")]
+BCL3.pos <- BCL$pos[which(grepl("L3-", rownames(BCL$pos))),][,c("x", "y")]
+
+BCL1.counts <- BCL$counts[,which(grepl("L1-", colnames(BCL$counts)))]
+BCL2.counts <- BCL$counts[,which(grepl("L2-", colnames(BCL$counts)))]
+BCL3.counts <- BCL$counts[,which(grepl("L3-", colnames(BCL$counts)))]
+
+#data(BCL1) # layer 1
+#data(BCL2) # layer 2
+#data(BCL3) # layer 3
 
 ## Additional layers not used in this demonstration but available in the package
 #data(BCL4) # layer 4
@@ -37,40 +47,70 @@ data(BCL3) # layer 3
 We will first combine the data from all four samples into a single counts matrix. We will also combine the position information into a list of positions. 
 
 ```{r, bcl-combine}
-# Get common set of genes
+# Get common set of genes for the layers
 genes.have <- Reduce(intersect, list(
-  rownames(BCL1$counts),
-  rownames(BCL2$counts),
-  rownames(BCL3$counts)
+  rownames(BCL1.counts),
+  rownames(BCL2.counts),
+  rownames(BCL3.counts)
 ))
-# Combine into large counts matrix
+
+#genes.have <- Reduce(intersect, list(
+#  rownames(BCL1$counts),
+#  rownames(BCL2$counts),
+#  rownames(BCL3$counts)
+#))
+
+# Combine into large counts matrix. Counts of genes for all the layers being assessed
 counts <- cbind(
-  BCL1$counts[genes.have,],
-  BCL2$counts[genes.have,],
-  BCL3$counts[genes.have,]
+  BCL1.counts[genes.have,],
+  BCL2.counts[genes.have,],
+  BCL3.counts[genes.have,]
 )
+
+#counts <- cbind(
+#  BCL1$counts[genes.have,],
+#  BCL2$counts[genes.have,],
+#  BCL3$counts[genes.have,]
+#)
+
 # Unique names based on layers
-colnames(counts) <- c(
-  paste0('L1-', colnames(BCL1$counts)),
-  paste0('L2-', colnames(BCL2$counts)),
-  paste0('L3-', colnames(BCL3$counts))
-)
+#colnames(counts) <- c(
+#  paste0('L1-', colnames(BCL1$counts)),
+#  paste0('L2-', colnames(BCL2$counts)),
+#  paste0('L3-', colnames(BCL3$counts))
+#)
+
 # Layer factor
 layer <-  c(
-  rep('L1', ncol(BCL1$counts)),
-  rep('L2', ncol(BCL2$counts)),
-  rep('L3', ncol(BCL3$counts))
+  rep('L1', ncol(BCL1.counts)),
+  rep('L2', ncol(BCL2.counts)),
+  rep('L3', ncol(BCL3.counts))
 )
+
+#layer <-  c(
+#  rep('L1', ncol(BCL1$counts)),
+#  rep('L2', ncol(BCL2$counts)),
+#  rep('L3', ncol(BCL3$counts))
+#)
+
 names(layer) <- colnames(counts)
+
 # List of positions
 posList <- list(
-  BCL1$pos[colnames(BCL1$counts),],
-  BCL2$pos[colnames(BCL2$counts),],
-  BCL3$pos[colnames(BCL3$counts),]
+  BCL1.pos[colnames(BCL1.counts),],
+  BCL2.pos[colnames(BCL2.counts),],
+  BCL3.pos[colnames(BCL3.counts),]
 )
-rownames(posList[[1]]) <- paste0('L1-', rownames(posList[[1]]))
-rownames(posList[[2]]) <- paste0('L2-', rownames(posList[[2]]))
-rownames(posList[[3]]) <- paste0('L3-', rownames(posList[[3]]))
+
+#posList <- list(
+#  BCL1$pos[colnames(BCL1$counts),],
+#  BCL2$pos[colnames(BCL2$counts),],
+#  BCL3$pos[colnames(BCL3$counts),]
+#)
+
+#rownames(posList[[1]]) <- paste0('L1-', rownames(posList[[1]]))
+#rownames(posList[[2]]) <- paste0('L2-', rownames(posList[[2]]))
+#rownames(posList[[3]]) <- paste0('L3-', rownames(posList[[3]]))
 ```
 
 We will then filter out genes with fewer than 100 counts across all probe spots and filter out probe spots with fewer than 100 total counts and update our position information accordingly. 

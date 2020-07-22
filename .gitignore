@@ -14,3 +14,4 @@ data/*.tsv
 workinprogress/*
 src/*.o
 src/*.so
+notes
