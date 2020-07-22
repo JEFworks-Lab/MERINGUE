@@ -26,7 +26,8 @@ In this vignette, we will walk through an analysis of spatial gene expression da
 ```{r, drosophila-data, fig.width=8, fig.height=2}
 data("drosophila")
 pos <- drosophila$pos
-gexp <- drosophila$expression
+#exp <- drosophila$expression
+gexp <- drosophila$mat
 
 par(mfrow=c(1,3), mar=rep(2,4))
 g <- 'apt'
@@ -43,10 +44,12 @@ N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
 
 Optionally, this 3D neighbor network can be visualized using RGL, a 3D real-time rendering system for R.
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 ## plot
-plotNetwork3D(pos, N, size=1)
-rgl.snapshot(paste0(dir, 'neighbors_3D-flat.png'))
+require(rgl)
+#plotNetwork3D(pos, N, size=1)
+MERINGUE:::plotNetwork3D(pos, N, size=1)
+rgl.snapshot(paste0(dir(), 'neighbors_3D-flat.png'))
 ```
 
 In this particular case, all genes were chosen for their known spatial patterning and thus indeed show up as significantly spatially heterogeneous.
