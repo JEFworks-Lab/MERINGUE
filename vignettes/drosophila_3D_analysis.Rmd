@@ -26,7 +26,6 @@ In this vignette, we will walk through an analysis of spatial gene expression da
 ```{r, drosophila-data, fig.width=8, fig.height=2}
 data("drosophila")
 pos <- drosophila$pos
-#exp <- drosophila$expression
 gexp <- drosophila$mat
 
 par(mfrow=c(1,3), mar=rep(2,4))
@@ -42,15 +41,13 @@ We can consider the 3D coordinates in our construction of neighbor relationships
 N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
 ```
 
-Optionally, this 3D neighbor network can be visualized using RGL, a 3D real-time rendering system for R.
+Optionally, this 3D neighbor network can be visualized using RGL, a 3D real-time rendering system for R. WARNING: there will be approximately 25,500 edges to draw and thus will take a significant amount of time.
 
-WARNING: requires the library rgl, and for this dataset there will be approximately 25,500 edges to draw and thus will take a significant amount of time.
-
-```{r, eval=FALSE}
+```{r, drosophila-rgl, eval=FALSE}
 ## plot
 require(rgl)
-#plotNetwork3D(pos, N, size=1)
 MERINGUE:::plotNetwork3D(pos, N, size=1)
+## save plot
 rgl.snapshot(paste0(dir(), 'neighbors_3D-flat.png'))
 ```
 
@@ -76,7 +73,7 @@ invisible(lapply(sub, function(g) {
 We are able to distinguish 2 patterns corresponding to even and odd pair-rule genes.
 
 ```{r, drosophila-pattern, fig.width=8, fig.height=3}
-scc <- MERINGUE::spatialCrossCorMatrix(gexp[sub,], N)
+scc <- spatialCrossCorMatrix(gexp[sub,], N)
 
 method = 'ward.D'
 par(mfrow=c(1,2), mar=rep(2,4))
