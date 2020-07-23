@@ -225,7 +225,9 @@ plotNetwork3D <- function(pos, adj, col='black', line.col='grey', alpha=0.5, lin
   rgl::rgl.viewpoint(45, fov=0, phi = 30)
   rgl::points3d(pos, color=col, alpha=1, ...)
   idx <- which(adj > 0, arr.ind = T)
+  message("drawing adjacent point edges...")
   for (i in seq_len(nrow(idx))) {
+    #message(paste0(i, "/", nrow(idx)))
     rgl::lines3d(c(pos[idx[i, 1], 1], pos[idx[i, 2], 1]),
             c(pos[idx[i, 1], 2], pos[idx[i, 2], 2]),
             c(pos[idx[i, 1], 3], pos[idx[i, 2], 3]),
