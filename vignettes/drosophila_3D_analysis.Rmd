@@ -44,7 +44,9 @@ N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
 
 Optionally, this 3D neighbor network can be visualized using RGL, a 3D real-time rendering system for R.
 
-```{r, eval=TRUE}
+WARNING: requires the library rgl, and for this dataset there will be approximately 25,500 edges to draw and thus will take a significant amount of time.
+
+```{r, eval=FALSE}
 ## plot
 require(rgl)
 #plotNetwork3D(pos, N, size=1)
