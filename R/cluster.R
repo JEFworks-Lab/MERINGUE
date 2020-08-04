@@ -1,3 +1,44 @@
+getClusters <- function (mat, k,
+                              method = igraph::cluster_walktrap,
+                              verbose = TRUE,
+                              details = FALSE) {
+  if (verbose) {
+    print("finding approximate nearest neighbors ...")
+  }
+  knn <- RANN::nn2(mat, k = k)[[1]]
+  adj <- matrix(0, nrow(mat), nrow(mat))
+  rownames(adj) <- colnames(adj) <- rownames(mat)
+  invisible(lapply(seq_len(nrow(mat)), function(i) {
+    adj[i, rownames(mat)[knn[i, ]]] <<- 1
+  }))
+  if (verbose) {
+    print("calculating clustering ...")
+  }
+  g <- igraph::graph.adjacency(adj, mode = "undirected")
+  g <- igraph::simplify(g)
+  km <- method(g)
+  if (verbose) {
+    mod <- igraph::modularity(km)
+    if (mod < 0.3) {
+      print("WARNING")
+    }
+    print(paste0("graph modularity: ", mod))
+  }
+  com <- km$membership
+  names(com) <- km$names
+  com <- factor(com)
+  if (verbose) {
+    print("identifying cluster membership ...")
+    print(table(com))
+  }
+  if (details) {
+    return(list(com = com, mod = mod, g = g))
+  }
+  else {
+    return(com)
+  }
+}
+
 #' Get spatially informed clusters by weighting graph-based clustering with spatial information
 #'
 #' @description Get spatially informed clusters by weighting graph-based clustering with spatial information
@@ -31,17 +72,15 @@
 #'
 #' @export
 #'
-getSpatiallyInformedClusters <- function(pcs, W, k=30) {
+getSpatiallyInformedClusters <- function(pcs, W, k=30, alpha=1, beta=0, details=FALSE) {
   # nearest neighbros in PC space
-  nn = RANN::nn2(as.matrix(pcs), k = k) ## KNN
+  nn = RANN::nn2(pcs, k = k) ## KNN
   names(nn) <- c('idx', 'dists')
 
   # create weights from binary adjacency matrix W
   nw.simple = igraph::graph_from_adjacency_matrix(W)
   nw.simple = igraph::simplify(nw.simple)
   pweight <- do.call(rbind, lapply(1:nrow(nn$idx), function(i) {
-    #d <- as.matrix(dist(pos[nn$idx[i,],]))
-    #d[1,]
     d <- unlist(lapply(nn$idx[i,], function(j) {
       if(i==j) { return(0) }
       else {
@@ -52,11 +91,11 @@ getSpatiallyInformedClusters <- function(pcs, W, k=30) {
     return(d)
   }))
 
+  weight <- 1/(alpha + as.vector(pweight)) + beta
   # graph-based clustering with spatial weights
   nn.df = data.frame(from = rep(1:nrow(nn$idx), k),
                      to = as.vector(nn$idx),
-                     weight = 1/(1 + as.vector(pweight))
-                     #weight = as.vector(pweight)
+                     weight = weight
   )
   nw.norm = igraph::graph_from_data_frame(nn.df, directed = FALSE)
   nw.norm = igraph::simplify(nw.norm)
@@ -64,6 +103,12 @@ getSpatiallyInformedClusters <- function(pcs, W, k=30) {
 
   com = as.factor(igraph::membership(lc.norm))
   names(com) <- rownames(pcs)
-  return(com)
+
+  if(details) {
+    return(list(com=com, pweight=pweight))
+  } else{
+    return(com)
+  }
 }
+
 

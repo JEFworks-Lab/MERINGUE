@@ -1,0 +1,64 @@
+---
+title: "Spatially aware clustering"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r init}
+library(MERINGUE)
+par(mfrow=c(1,1), mar=rep(4,4))
+
+## simulate 3 spatially but 2 transcriptionally distinct groups
+N <- 300
+M <- 30
+
+## Three spatially distinct groups
+pos1 <- cbind(rnorm(N/3), rnorm(N/3))
+pos2 <- cbind(rnorm(N/3, 10), rnorm(N/3))
+pos3 <- cbind(rnorm(N/3, 10), rnorm(N/3, 10))
+pos <- rbind(rbind(pos1, pos2), pos3)
+group <- c(rep(1, N/3), rep(2, N/3), rep(3, N/3))
+names(group) <- rownames(pos) <- paste0('cell', 1:N)
+plotEmbedding(pos, groups=group, main='Cell-Types in Space', xlab='Spatial X', ylab='Spatial Y')
+
+## But two are transcriptionally identical
+pcs12 <- matrix(rnorm(N*2/3*M), N*2/3, M)
+pcs3 <- matrix(rnorm(N*1/3*M, 10), N*1/3, M)
+pcs <- rbind(pcs12, pcs3)
+pcs <- cbind(pcs, abs(10-pcs))
+colnames(pcs) <- paste0('PC:', 1:ncol(pcs))
+rownames(pcs) <- rownames(pos)
+heatmap(pcs, scale="none", Rowv = NA, Colv=NA,
+        RowSideColors=MERINGUE:::fac2col(group),
+        col=colorRampPalette(c('blue', 'white', 'red'))(100))
+
+par(mfrow=c(2,2))
+plotEmbedding(pos, colors=scale(pcs[,1])[,1],
+              main='Cell-Types Gene Expression', xlab='Spatial X', ylab='Spatial Y')
+plotEmbedding(pos, colors=scale(pcs[,50])[,1],
+              main='Cell-Types Gene Expression', xlab='Spatial X', ylab='Spatial Y')
+
+######### See if we can integrate spatial information in cluster detection
+library(uwot)
+emb <- umap(pcs, min_dist = 0.5)
+rownames(emb) <- rownames(pcs)
+plotEmbedding(emb, col=scale(pcs[,1])[,1], zlim=c(-1,1),
+              main='Cell-Types Gene Expression', xlab='UMAP X', ylab='UMAP Y')
+plotEmbedding(emb, col=scale(pcs[,50])[,1],
+              main='Cell-Types Gene Expression', xlab='UMAP X', ylab='UMAP Y')
+
+## First, with standard spatially-unaware cluster detection
+com <- getClusters(pcs, k=50)
+plotEmbedding(pos, groups=com, main='Transcriptional Clusters', xlab='Spatial X', ylab='Spatial Y')
+plotEmbedding(emb, groups=com, main='Transcriptional Clusters', xlab='UMAP X', ylab='UMAP Y')
+
+W <- getSpatialNeighbors(pos, filterDist = 2)
+plotNetwork(pos, W)
+com2 <- getSpatiallyInformedClusters(pcs, W=W, k=50)
+table(com2)
+plotEmbedding(pos, groups=com2, main='Spatially Aware Transcriptional Clusters', xlab='Spatial X', ylab='Spatial Y')
+plotEmbedding(emb, groups=com2, main='Spatially Aware Transcriptional Clusters', xlab='UMAP X', ylab='UMAP Y')
+```
