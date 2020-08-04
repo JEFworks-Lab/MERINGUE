@@ -36,7 +36,10 @@ NULL
 #'
 #' @export
 #'
-plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gradientPalette=NULL, zlim=NULL, s=1, v=0.8, min.group.size=1, show.legend=FALSE, mark.clusters=FALSE, mark.cluster.cex=2, shuffle.colors=F, legend.x='topright', gradient.range.quantile=0.95, verbose=FALSE, unclassified.cell.color='gray70', group.level.colors=NULL, xlab=NA, ylab=NA, ...) {
+plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gradientPalette=NULL, zlim=NULL,
+                          s=1, v=0.8, min.group.size=1, show.legend=FALSE, mark.clusters=FALSE, mark.cluster.cex=2,
+                          shuffle.colors=FALSE, legend.x='topright', gradient.range.quantile=0.95, verbose=FALSE,
+                          unclassified.cell.color='lightgrey', group.level.colors=NULL, xlab=NA, ylab=NA, ...) {
 
   if(!is.null(colors)) {
     ## use clusters information
@@ -50,30 +53,13 @@ plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gra
         if(verbose) cat("treating colors as a gradient")
         if(is.null(gradientPalette)) { # set up default gradients
           if(all(sign(colors)>=0)) {
-            gradientPalette <- colorRampPalette(c('gray80','red'), space = "Lab")(1024)
+            gradientPalette <- colorRampPalette(c('grey','red'))(100)
           } else {
-            gradientPalette <- colorRampPalette(c("blue", "grey70", "red"), space = "Lab")(1024)
+            gradientPalette <- colorRampPalette(c("blue", "grey", "red"))(100)
           }
         }
-        if(is.null(zlim)) { # set up value limits
-          if(all(sign(colors)>=0)) {
-            zlim <- as.numeric(quantile(colors,p=c(1-gradient.range.quantile,gradient.range.quantile)))
-            if(diff(zlim)==0) {
-              zlim <- as.numeric(range(colors))
-            }
-          } else {
-            zlim <- c(-1,1)*as.numeric(quantile(abs(colors),p=gradient.range.quantile))
-            if(diff(zlim)==0) {
-              zlim <- c(-1,1)*as.numeric(max(abs(colors)))
-            }
-          }
-        }
-        # restrict the values
-        colors[colors<zlim[1]] <- zlim[1]; colors[colors>zlim[2]] <- zlim[2];
-
-        if(verbose) cat(' with zlim:',zlim,'\n')
-        colors <- (colors-zlim[1])/(zlim[2]-zlim[1])
-        cols <- gradientPalette[colors[match(rownames(emb),names(colors))]*(length(gradientPalette)-1)+1]
+        cols <- map2col(x=colors, pal=gradientPalette, limits=zlim)
+        print(cols)
         names(cols) <- rownames(emb)
       } else {
         stop("colors argument must be a cell-named vector of either character colors or numeric values to be mapped to a gradient")
@@ -110,7 +96,7 @@ plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gra
   }
 }
 # Helper function to translate factor into colors
-fac2col <- function(x,s=1,v=1,shuffle=FALSE,min.group.size=1,return.details=F,unclassified.cell.color='gray50',level.colors=NULL) {
+fac2col <- function(x,s=1,v=1,shuffle=FALSE,min.group.size=1,return.details=F,unclassified.cell.color='lightgrey',level.colors=NULL) {
   x <- as.factor(x);
   if(min.group.size>1) {
     x <- factor(x,exclude=levels(x)[unlist(tapply(rep(1,length(x)),x,length))<min.group.size])
