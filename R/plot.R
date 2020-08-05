@@ -59,7 +59,6 @@ plotEmbedding <- function(emb, groups=NULL, colors=NULL, cex=0.6, alpha=0.4, gra
           }
         }
         cols <- map2col(x=colors, pal=gradientPalette, limits=zlim)
-        print(cols)
         names(cols) <- rownames(emb)
       } else {
         stop("colors argument must be a cell-named vector of either character colors or numeric values to be mapped to a gradient")

@@ -22,7 +22,7 @@ Imports:
     DT,
     igraph
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: knitr,
     rmarkdown,
     testthat,
