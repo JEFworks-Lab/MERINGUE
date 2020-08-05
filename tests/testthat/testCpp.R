@@ -13,7 +13,7 @@ test_that(context("Moran's I C++ functions compiled and works as expected"), {
 
   start_time <- Sys.time()
   moran <- do.call(cbind, lapply(is, function(i) {
-    moranTest_DEPRECATED(mat[i,], w)
+    MERINGUE:::moranTest_DEPRECATED(mat[i,], w)
   }))
   end_time <- Sys.time()
   moranTime <- end_time - start_time

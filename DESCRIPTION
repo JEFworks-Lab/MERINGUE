@@ -20,7 +20,8 @@ Imports:
     dynamicTreeCut,
     geometry,
     DT,
-    igraph
+    igraph,
+    mgcv
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 7.1.1
 Suggests: knitr,
