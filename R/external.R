@@ -147,7 +147,7 @@ winsorize <- function (x, qt=.05) {
 }
 
 
-#' Normalize gene expression variance relative to transcriptome-wide expectations
+#' Get overdispersed genes whose expression variance is higher than transcriptome-wide expectations
 #' (Modified from SCDE/PAGODA2 code)
 #'
 #' Normalizes gene expression magnitudes to with respect to its ratio to the
@@ -164,20 +164,17 @@ winsorize <- function (x, qt=.05) {
 #' @param verbose Verbosity (default: TRUE)
 #' @param details If true, will return data frame of normalization parameters. Else will return normalized matrix.(default: FALSE)
 #'
-#' @return If details is true, will return data frame of normalization parameters. Else will return normalized matrix.
+#' @return If details is true, will return data frame of normalization parameters. Else will return overdispersed genes.
 #'
-#' @examples {
-#' data(pbmcA)
-#' cd <- pbmcA[, 1:500]
-#' mat <- cleanCounts(cd)
-#' mat <- normalizeVariance(mat)
-#' }
+#' @examples
+#' data(mOB)
+#' ods <- getOverdispersedGenes(mOB$counts)
 #'
 #' @importFrom mgcv s
 #'
 #' @export
 #'
-normalizeVariance <- function(counts, gam.k=5, alpha=0.05, plot=FALSE, use.unadjusted.pvals=FALSE, do.par=TRUE, max.adjusted.variance=1e3, min.adjusted.variance=1e-3, verbose=TRUE, details=FALSE) {
+getOverdispersedGenes <- function(counts, gam.k=5, alpha=0.05, plot=FALSE, use.unadjusted.pvals=FALSE, do.par=TRUE, max.adjusted.variance=1e3, min.adjusted.variance=1e-3, verbose=TRUE, details=FALSE) {
 
   if (!class(counts) %in% c("dgCMatrix", "dgTMatrix")) {
     if(verbose) {
@@ -250,9 +247,9 @@ normalizeVariance <- function(counts, gam.k=5, alpha=0.05, plot=FALSE, use.unadj
   ## variance normalize
   norm.mat <- counts*df$gsf
   if(!details) {
-    return(norm.mat)
+    return(rownames(mat)[ods])
   } else {
     ## return normalization factor
-    return(list(mat=norm.mat, ods=ods, df=df))
+    return(list(mat=norm.mat, ods=rownames(mat)[ods], df=df))
   }
 }
