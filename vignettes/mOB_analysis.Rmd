@@ -68,15 +68,7 @@ rownames(emb) <- rownames(pcs)
 suppressMessages(library(igraph))
 suppressMessages(library(RANN))
 k <- 30
-nn <- nn2(as.matrix(pcs), k = k)
-nn.df <- data.frame(from = rep(1:nrow(nn$nn.idx), k),
-                      to = as.vector(nn$nn.idx),
-                      weight = 1/(1 + as.vector(nn$nn.dists)))
-nw.norm <- graph_from_data_frame(nn.df, directed = FALSE)
-nw.norm <- simplify(nw.norm)
-lc.norm <- cluster_louvain(nw.norm)
-com <- as.factor(membership(lc.norm))
-names(com) <- rownames(pcs)
+com <- getClusters(pcs, k, weight=TRUE)
 
 # Manually annotate identified clusters with cell-types
 annot <- as.character(com); names(annot) <- names(com)
@@ -100,7 +92,7 @@ plotEmbedding(pos, groups=annot,
 Having identified multiple transcriptionally distinct cell-types, we may be interested in identifying marker genes for each cell-type. We can use a Wilcox rank-test to look for genes that are significantly upregulated in each cell-type compared to all others. For demonstration purposes, we will restrict analysis to 2000 random genes. 
 
 ```{r, mob-diff-gexp}
-# Sample 2000 genes for demo purposes only to minimize runtime
+# Sample 2000 genes for demo purposes only to minimize runtime for demo only
 set.seed(0)
 test <- sample(rownames(mat), 2000)
 
