@@ -250,6 +250,6 @@ getOverdispersedGenes <- function(counts, gam.k=5, alpha=0.05, plot=FALSE, use.u
     return(rownames(mat)[ods])
   } else {
     ## return normalization factor
-    return(list(mat=norm.mat, ods=rownames(mat)[ods], df=df))
+    return(list(mat=norm.mat, ods=colnames(mat)[ods], df=df))
   }
 }
