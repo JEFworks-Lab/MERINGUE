@@ -1,533 +1,111 @@
 ---
-title: "mouseCoronal"
-author: "Brendan F. Miller"
+title: "Spatial Transcriptomics Analysis of the Mouse Brain with MERINGUE"
+author: "Brendan F. Miller and Jean Fan"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
 ---
 
-# Setup
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, options, include = FALSE}
+library(knitr)
+opts_chunk$set(
+    cache = FALSE,
+    results = "hold"
+)
+```
 
+In this vignette, we will walk through an analysis of spatial transcriptomics (ST) data for a coronal section of the mouse brain. The mouse brain data for 2702 ST "spots" has been prepared for you and is available as a part of the package. Here, `tissueSpotRotation` is a dataframe where each row is a probe spot's x and y positions in space, and `filteredGenes` is a CPM normalized and log-transformed gene expression matrix with a filtered set of 1263 genes whose expression variance across the 2702 spots is higher than transcriptome-wide expectations. 
+
+```{r load-data, eval=TRUE}
 library(MERINGUE)
 library(Matrix)
 
-```
-
-# 0. Get the data
-
-The positional spot coordinates, and the count matrix of genes at each spot.
-
-```{r load-data, eval=TRUE}
-
-# --------------------------------------------------------------------------------
-# Starting from the processed data files:
-
-# data("mouseCoronal")
-load("mouseCoronal.rda") # loads `mouseCoronal <- list(filteredGenes=filteredGenes, tissueSpotRotation=tissueSpotRotation, cluster6CorrMtx=cluster6CorrMtx)
-
+data("mouseCoronal")
 filteredGenes <- mouseCoronal$filteredGenes
 tissueSpotRotation <- mouseCoronal$tissueSpotRotation
-cluster6CorrMtx <- mouseCoronal$cluster6CorrMtx
-
 ```
 
-```{r load-from-raw-data, eval=FALSE, include=FALSE}
-
-# --------------------------------------------------------------------------------
-# Starting from the raw data files:
-
-spotPos <- read.csv("spatial/tissue_positions_list.csv", header=FALSE)
-geneCounts <- readMM("filtered_feature_bc_matrix/matrix.mtx.gz")
-barcodes <- read.csv("filtered_feature_bc_matrix/barcodes.tsv.gz", header=FALSE)
-features <- read.csv("filtered_feature_bc_matrix/features.tsv.gz", sep="\t", header=FALSE)
-
-rownames(spotPos) <- spotPos$V1
-rownames(geneCounts) <- features[,2]
-colnames(geneCounts) <- barcodes[,1]
-
-# next, find the spots that overlap the tissue section itself
-
-# list of barcode IDs that overlap tissue section
-tissueSpots <- intersect(spotPos[,1], barcodes[,1])
-tissueSpotPos <- spotPos[tissueSpots,c("V5", "V6")] # spot IDs and their positions
-
-```
-
-# 1. Cleanup Gene Counts and Adjust Spot Coordinates
-
-```{r coronal-qc, fig.width=8, fig.height=3, eval=FALSE}
-
-# Remove poor datasets (spots) and genes
-geneCountsClean <- cleanCounts(counts = geneCounts, 
-                      min.reads = 100, 
-                      min.lib.size = 100, 
-                      plot=TRUE,
-                      verbose=TRUE)
-
-tissueSpotPosFilt <- tissueSpotPos[colnames(geneCountsClean),]
-
-# CPM normalize
-geneCountsNorm <- normalizeCounts(counts = geneCountsClean, 
-                       log=FALSE,
-                       verbose=TRUE)
-
-# Adjust the coordinates of the spots to the high resolution image.
-# It will make it slightly easier to quantify which spots are adjacent
-# see "spatial/scalefactors_json.json", "tissue_hires_scalef": 0.17011142
-tissue_hires_scalef <- 0.17011142
-tissueSpotPosFiltAdj <- tissueSpotPosFilt
-tissueSpotPosFiltAdj$V5 <- tissueSpotPosFilt$V5 * tissue_hires_scalef
-tissueSpotPosFiltAdj$V6 <- tissueSpotPosFilt$V6 * tissue_hires_scalef
-```
-
-# 2. Filter for variably expressed genes
-
-Due to the structural and spatial organization of cell types in this tissue, we hypothesize that genes with highly variable expression may also be expressed in a spatially-variable manner.
-
-Further filter the list of genes by selecting those that do not have substantially low expression, and have high variability in expression across the spots.
-
-```{r filter-normalized-genes, fig.width=8, fig.height=4, eval=FALSE}
-
-library(matrixStats)
-
-# remove mitochondrial genes
-filteredGenes <- geneCountsNorm[!grepl("mt-", rownames(geneCountsNorm)),]
-
-# keep genes whose median normalized expression across the spots is above 0
-filteredGenes <- filteredGenes[which(rowMedians(as.matrix(filteredGenes)) > 0), ]
-
-# Get overdispersed genes whose expression variance is higher than transcriptome-wide expectations
-par(mfrow=c(1,2), mar=c(1,1,1,1))
-overdispersedGenes <- getOverdispersedGenes(filteredGenes, plot = TRUE, details = TRUE)
-
-# overdispersedGenes$mat -> normalized matrix
-# overdispersedGenes$ods -> list of overdispersed genes
-# overdispersedGenes$df -> table of stats for all the input genes
-
-filteredGenes <- overdispersedGenes$mat[overdispersedGenes$ods,]
-
-# take top genes with highest expression variance across the spots
-#filteredGenes <- filteredGenes[order(rowVars(as.matrix(filteredGenes)), decreasing=TRUE),][1:1000,]
-```
-
-We now have a filtered list of 1263 genes whose expression variance across the 2702 spots is higher than transcriptome-wide expectations.
-
-Let's use this list to group the spots into transcriptionally distinct clusters. We predict that these clusters should correspond to distinct cell layers.
-
-# 3. Identify transcriptionally distinct clusters that correspond with cell layers
-
-Let's use spatially-unaware dimensionality reduction just based on gene expression. Use PCA to cluster all spots based on gene expression alone and visualize with tsne and iGraph to label the clusters.
-
-Input for the clustering can be the entire set of overdispersed `filteredGenes`
-
-## 3A. Principle component analysis
+First, let's cluster the spots into transcriptionally distinct cell-types and subtypes. We will use spatially-unaware dimensionality reduction just based on gene expression without explicit consideration for spatial information. G=However, given the known spatial organization of cell-types in the brain, we anticipate that identified clusters should correspond to distinct cell layers or other spatially organized structures. 
 
 ```{r pca, eval=TRUE}
-
 # Dimensionality reduction by PCA on log10 CPM normalized expression values
 pcs.info <- prcomp(t(log10(as.matrix(filteredGenes)+1)), center=TRUE)
-
-```
-
-### Check `screeplot` to assess number of PCs to use:
-
-```{r scree-test, fig.width=5, fig.height=3, eval=TRUE}
-
-screeplot(pcs.info, npcs=20)
-
-```
-
-```{r choose-PCs, eval=TRUE}
-
-# number of PCs to look at based on screeplot ("elbow rule")
+# Check `screeplot` to assess number of PCs to use
+screeplot(pcs.info, npcs=20,)
+# Choose number of PCs to look at based on screeplot ("elbow rule")
 numberPcs <- 5 #
 pcs <- pcs.info$x[,1:numberPcs]
-
-```
-
-## 3B. tSNE embedding
-
-```{r tsne-embedding, eval=TRUE}
-
 # 2D embedding by tSNE
-suppressMessages(library(Rtsne))
-emb <- Rtsne(pcs,
+emb <- Rtsne::Rtsne(pcs,
              is_distance=FALSE,
              perplexity=30,
              num_threads=1,
              verbose=FALSE)$Y
-
 rownames(emb) <- rownames(pcs)
-
-```
-
-## 3C. iGraph cluster community labeling
-
-```{r graph-based-clustering, eval=TRUE}
-
+# iGraph cluster community labeling
 spotClusters <- getClusters(pcs, k = 100)
-
-# Graph-based cluster detection
-# suppressMessages(library(igraph))
-# suppressMessages(library(RANN))
-# k <- 100 # use to adjust number of clusters
-# nn <- nn2(as.matrix(pcs), k = k) # nearest neighbor search
-# nn.df <- data.frame(from = rep(1:nrow(nn$nn.idx), k),
-#                       to = as.vector(nn$nn.idx),
-#                       weight = 1/(1 + as.vector(nn$nn.dists)))
-# nw.norm <- graph_from_data_frame(nn.df, directed = FALSE)
-# nw.norm <- simplify(nw.norm)
-# lc.norm <- cluster_louvain(nw.norm) # igraph method for finding communities 
-# com <- as.factor(membership(lc.norm)) # get communities of spots
-# names(com) <- rownames(pcs)
-# 
-# spotClusters <- as.character(com)
-# names(spotClusters) <- names(com)
-
 ```
 
-This approach organized the spots into 8 transcriptionally distinct clusters.
+This approach identified 8 transcriptionally distinct clusters of cells. Indeed, each of the 8 clusters appear to correspond to a particular cell layer or region in the mouse coronal brain slice.
 
-## 3D. Annotation of clusters
-
-```{r cluster-annotation, eval=TRUE}
-
-# Manual Annotation of clusters if necessary
-
-# Annotate identified clusters with cell-types
-levels(spotClusters) <- list('Cluster 1'=1,
-                     'Cluster 2'=2,
-                     'Cluster 3'=3,
-                     '4: Pyramidal Cells'=4,
-                     'Cluster 5'=5,
-                     '6: Isocortex'=6,
-                     'Cluster 7'=7,
-                     'Cluster 8'=8)
-
-# levels(spotClusters) <- list('1: Hypothalamus'=1,
-#                      '2: Amygdala'=2,
-#                      '3: Thalamus'=3,
-#                      '4: Pyramidal Cells'=4,
-#                      '5: Fiber tracts'=5,
-#                      '6: Isocortex'=6,
-#                      '7: Hippocampus'=7,
-#                      '8: Thalamus'=8)
-
-```
-
-## 3E. Visualize the clusters
-
-```{r visualize-clusters, fig.width=10, fig.height=6}
-
-spotClusters <- as.factor(spotClusters)
-
-par(mfrow=c(1,2), mar=c(1,1,1,1))
-
+```{r visualize-clusters, fig.width=8, fig.height=6}
+par(mfrow=c(1,2), mar=rep(2,4))
 # plot the tsne and color by community
 plotEmbedding(emb, groups=spotClusters, 
-              show.legend=TRUE, xlab=NA, ylab=NA,
+              show.legend=TRUE, xlab='tSNE X', ylab='tSNE Y',
               verbose=FALSE)
-
 # plot the spots based on position on tissue, color by community
-tissueSpotRotation <- tissueSpotPosFiltAdj[c("V6", "V5")]
-tissueSpotRotation$V5 <- tissueSpotRotation$V5 * -1
 plotEmbedding(tissueSpotRotation, groups=spotClusters, 
-              cex=1, xlab=NA, ylab=NA,
+              cex=1, xlab='spatial X', ylab='spatial Y',
               verbose=FALSE)
-
-spotClustersOfInterest <- spotClusters
-levels(spotClustersOfInterest) <- list('NA'=1,
-                     'NA'=2,
-                     'NA'=3,
-                     '4: Pyramidal Cells'=4,
-                     'NA'=5,
-                     '6: Isocortex'=6,
-                     'NA'=7,
-                     'NA'=8)
-
-# plot on tissue but just clusters of interest
-plotEmbedding(tissueSpotRotation, groups=spotClustersOfInterest, 
-              cex=1, xlab=NA, ylab=NA,
-              verbose=FALSE)
-
 ```
 
-```{r visualize-individual-layers, fig.width=8, fig.height=5, eval=TRUE}
-# see each layer separately
-par(mfrow=c(2,4), mar=c(1,1,1,1))
-for (group in levels(spotClusters)) {
-  spots <- names(spotClusters[which(spotClusters == group)])
-  plotEmbedding(tissueSpotRotation[spots,], groups=spotClusters, 
-              cex=1, xlab=NA, ylab=NA,
-              verbose=FALSE)
-}
-
-```
-
-In general, each of the 8 clusters appear to correspond to a particular cell layer or region observed in the adult mouse coronal brain slice.
-
-For instance:
-cluster 1 appears to overlap with the hypothalamus,
-cluster 2 appears to overlap with the amydgala,
-cluster 3 appears to overlap with the thalamus,
-cluster 4 appears to overlap with hippocampus layers CA1, CA2, CA3,
-cluster 5 appears to overlap with fiber tracts,
-cluster 6 appears to overlap with the isocortex somatosensory and auditory regions,
-cluster 7 appears to overlap with the hippocampus,
-cluster 8 appears to overlap also with the thalamus.
-
-However, it is apparent that while these clusters overlap certain brain regions, the corresponding spots of a given cluster are not completely confined to these regions. Because this clustering was done strictly based on transcriptional information, it suggests that at least some of the transcriptionally distinct cell types contained within a spot can also be located in different brain structures.
-
-One interesting example of this is cluster 4. This traces the hippocampus proper CA1, CA2, and CA3 feilds quite well, but there are other spots of this cluster present in potentially the olifactory areas of the cerebral cortex. It is possible that this cluster corresponds to pyramidal cells, as these cells form a tract through the hippocampus proper and are also present as a layer in the piriform layer of the olifactory area of the cortical plate.
-
-## 3F. Identify putative cluster marker genes
-
-### Significantly differentially expressed genes
-
-Let's identify genes that are significantly differentially expressed in each cluster
+Interestingly, cluster 4 traces the hippocampus proper CA1, CA2, and CA3 feilds quite well, but there are other spots of this cluster present in potentially the olfactory areas of the cerebral cortex. It is possible that this cluster corresponds to pyramidal cells. To further interpret each cluster 4, let's identify some marker genes that are significantly enriched.
 
 ```{r differentially-expressed-genes, eval=TRUE}
-
 # Identify significantly differentially upregulated genes
 # in each identified cluster by Wilcox test
 diffGenes <- getDifferentialGenes(as.matrix(filteredGenes), spotClusters)
-signDiffGenes <- lapply(diffGenes, function(x) {
-  x <- x[x$p.adj < 0.05,]
-  x <- na.omit(x)
-  x <- x[x$highest,]
-  rownames(x)
-})
-print(lapply(signDiffGenes, length))
-```
-
-423 genes specifically differentially expressed in Cluster 4
-
-### See top hits
-
-Cluster 4 was hypothesized to represent pyramidal cell layers. Are the top significant gene hits those that are associated with pyramidal cells?
-
-```{r filter-top-diff-exp-genes, eval=TRUE}
-
-diffExpCluster4Genes <- diffGenes$`4: Pyramidal Cells`
-
-# gene with highest fold change ina cluster assigned as marker to that cluster
+## focus on cluster 4
+diffExpCluster4Genes <- diffGenes[[4]]
+# gene with highest expression in cluster assigned as marker to that cluster
 highestExpClust4 <- diffExpCluster4Genes[which(diffExpCluster4Genes$highest == TRUE),]
-
+## order and view
 topDiffExpGenesClust4 <- highestExpClust4[order(highestExpClust4$p.adj),]
 topDiffExpGenesClust4[1:10,]
 
 ```
 
-https://mouse.brain-map.org/experiment/ivt?id=71064082,72103854,73520989,73769322&popup=true
-
-Looking at ISH data, several of these genes with coronal brain slice ISH data trace the hippocampus proper pyrimidal cell layer well and have expression in the olifactory region layer that was included in cluster 4. 
-
-The top hit, Cpne6, has been reported to be expressed in pyramidal cells of the CA1-3 regions of the hippocampus (https://www.uniprot.org/uniprot/Q9Z140)
-
-### Visualize expression of top hits in coronal brain slice
-
-Let's see if these top gene hits are expressed in the spots of cluster 4 specifically.
+Looking at [ISH data](https://mouse.brain-map.org/experiment/ivt?id=71064082,72103854,73520989,73769322&popup=true
+), several of these genes with coronal brain slice ISH data trace the hippocampus proper pyrimidal cell layer well and have expression in the olifactory region layer that was included in cluster 4. The top hit, [Cpne6](https://www.uniprot.org/uniprot/Q9Z140), has been reported to be expressed in pyramidal cells of the CA1-3 regions of the hippocampus.
 
 ```{r visualize-top-diff-exp-genes, fig.width=5, fig.height=5, eval=TRUE}
-
-library(ggplot2)
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
-
-for (gene in rownames(topDiffExpGenesClust4[1:20,])) {
-  
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
-  geneOfInterestExp <- filteredGenes[gene,]
-  
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
-  
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
-}
-
-```
-
-Visualizing the expresison of the top genes revelas that overall many of these genes are enriched in the hippocampus proper. Some have expression in the spots of this cluster that are in the olfactory region.
-
-Cpne6 is quite specific for the hippocampus proper. Also Wipf3.
-Scn3b seems to be specific to CA1-2 regions.
-Crym seems to be specific to CA2.
-Itpka seems to be sepcific to CA1
-
-### Orthogonal approach: Genes driving PCs
-
-```{r pcs-driving-cluster, fig.width=6, fig.height=4, eval=FALSE}
-
-
-targetGroup <- spotClusters
-levels(targetGroup) <- list("1"='1: Hypothalamus',
-                     "1"='2: Amygdala',
-                     "1"='3: Thalamus',
-                     "2"='4: Pyramidal Cells',
-                     "1"='5: Fiber tracts',
-                     "1"='6: Isocortex',
-                     "1"='7: Hippocampus',
-                     "1"='8: Thalamus')
-
-plotEmbedding(pcs[,c("PC1", "PC5")], groups=targetGroup, 
-              cex=1, xlab=NA, ylab=NA,
+par(mfrow=c(1,2), mar=rep(2,4))
+g <- 'Cpne6'
+gexp <- scale(filteredGenes[g,])[,1]
+plotEmbedding(emb, col=gexp)
+plotEmbedding(tissueSpotRotation, col=gexp, 
+              cex=1, xlab='spatial X', ylab='spatial Y',
               verbose=FALSE)
-
 ```
 
-Principle Components 1 and 5 appear to separate cluster 4 from the others reasonably well. Let's identify genes that are potentially driving these principle components.
+So transcriptionally distinct cluster 4 appears to have identified pyramidal neurons of the hippocampus proper and potentially a pyramidal layer in the olfactory region. The hippocampus proper is a highly specific and striking structure of the brain. During development, one hypothesis is that gene expression gradients are responsible for the organization of cell types into their respective positions and thus drive the formation of tissues and cellular structures. We can further analyze these putative pyramidal cells to identify such potential additional spatial gene expression gradients.
 
-```{r genes-driving-pcs1, eval=FALSE}
-
-genePCvals <- pcs.info$rotation[,c("PC1", "PC2", "PC3", "PC4", "PC5")]
-
-sortedPC1genes <- genePCvals[order(genePCvals[,c("PC1")],
-                                  decreasing = TRUE),]
-
-print(sortedPC1genes[1:20,])
-
-```
-
-Of the top 20 genes driving the clustering of spots cross PC1, NRGN is the top contender. NRGN is a marker for pyramidal cells (https://panglaodb.se/markers.html?cell_type=%27Pyramidal%20cells%27) and its ISH corresponds well with where we see the spots of cluster 4 on the coronal brain slice. (https://mouse.brain-map.org/experiment/ivt?id=736,69153759&popup=true), where it traces the pyramidal cells of the hippocampus proper. It is also present in the olifactory region pyramidal cell layer but not strictly there.
-
-```{r genes-driving-pcs5, eval=FALSE}
-
-sortedPC5genes <- genePCvals[order(genePCvals[,c("PC5")],
-                                  decreasing = FALSE),]
-
-print(sortedPC5genes[1:20,])
-
-```
-
-For PC5, one of the top hits, Wfs1, shows ISH staining that traces the CA1 and CA2 pyramidal cells, and is strongly present in the pyramidal layer of the olifactory region, although not strictly there.
-
-### Visualize the top genes from PC approach
-
-```{r visualize-top-pca1-driving-genes, fig.width=5, fig.height=5, eval=FALSE}
-
-library(ggplot2)
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
-
-for (gene in rownames(sortedPC1genes[1:20,])) {
-  
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
-  geneOfInterestExp <- filteredGenes[gene,]
-  
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
-  
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
-}
-
-```
-
-```{r visualize-top-pca5-driving-genes, fig.width=5, fig.height=5, eval=FALSE}
-
-library(ggplot2)
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
-
-for (gene in rownames(sortedPC5genes[1:20,])) {
-  
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
-  geneOfInterestExp <- filteredGenes[gene,]
-  
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
-  
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
-}
-
-```
-
-In PC5 especially, we see many of the same top hits driving this PC to be top differentially expressed genes for cluster 4.
-
-# 4. Primary Spatial Patterns of Clusters
-
-## EXAMPLE 1: Cluster 4 pyramidal neurons
-
-Transcriptionally distinct cluster 4 appears to have identified pyramidal neurons of the hippocampus proper and potentially a pyramidal layer in the olfactory region.
-
-The hippocampus proper is a highly specific and striking structure of the brain. During development, one hypothesis is that gene expression gradients are responsible for the organization of cell types into their respective positions and thus drive the formation of tissues and cellular structures. Perhaps spatially variable gene expression patterns exist along the pyramidal cells of the hippocampus proper as well.
-
-### Build adjacency matrix of spots in cluster
+We will first build an adjacency matrix of spots in cluster 4.
 
 ```{r cluster-weight-matrix, fig.width=4, fig.height=4, eval=TRUE}
-
-par(mfrow=c(1,1), mar=c(1,1,1,1))
-  
 # get spots that are part of the cluster
-cluster4SpotIDs <- names(spotClusters[which(spotClusters == '4: Pyramidal Cells')])
+cluster4SpotIDs <- names(spotClusters[which(spotClusters == '4')])
 cluster4SpotCoords <- tissueSpotRotation[cluster4SpotIDs,]
-
 # build weight matrix for the cluster spots
 cluster4WeightMatrix <- getSpatialNeighbors(
   cluster4SpotCoords, filterDist = 25, verbose=TRUE)
-
 plotNetwork(cluster4SpotCoords, cluster4WeightMatrix)
-
 ```
 
-### Autocorrelation of genes within cluster spots
-
-Compute autocorrelation of gene in the cluster, from the original list of `filteredGenes`.
+We can then identify significantly spatially variable genes.
 
 ```{r cluster-morans-I, eval=TRUE}
-
 # get gene expression of filteredGenes for just the cluster spots
 cluster4GeneExp <- filteredGenes[,which(colnames(filteredGenes) %in% cluster4SpotIDs)]
 
@@ -537,14 +115,7 @@ cluster4GeneExpMoransI <- getSpatialPatterns(cluster4GeneExp,
                                            cluster4WeightMatrix,
                                            verbose=TRUE)
 
-```
-
-### Filter for significantly spatially variable genes in cluster
-
-Find significantly spatially variable genes in the cluster.
-
-```{r cluster-spatial-genes, eval=TRUE}
-
+# find significantly spatially variable genes
 cluster4SpatialGenes <- filterSpatialPatterns(
   cluster4GeneExp,
   cluster4GeneExpMoransI,
@@ -553,28 +124,24 @@ cluster4SpatialGenes <- filterSpatialPatterns(
   verbose=TRUE,
   minPercentCells = 0.10)
 
+# plot a few genes
+par(mfrow=c(2,2))
+sapply(rownames(cluster4SpatialGenes)[1:4], function(g) {
+  plotEmbedding(emb = cluster4SpotCoords,
+                col = winsorize(scale(cluster4GeneExp[g,])[,1]),
+                main=g)
+})
 ```
 
-### Compute cross-correlation matrix 
+Indeed, we are able to identify a few hundred significantly spatially variable genes. Let's try to organize them into spatial patterns. 
 
-To find spatial patterns, we need to find spatial genes that are correlated with one another.
-
-WARNING: If the number of spots for a given cluster is too high, this can take a while.
-
-```{r cluster-cross-corr-matrix, eval=TRUE}
-
+```{r cluster-spatial-patterns, fig.width=5, fig.height=6, eval=TRUE}
+# spatial cross cor matrix
 cluster4CorrMtx <- spatialCrossCorMatrix(
   cluster4GeneExp[rownames(cluster4SpatialGenes),],
   cluster4WeightMatrix)
 
-```
-
-### Get cluster spatial patterns
-
-```{r cluster-spatial-patterns, fig.width=5, fig.height=6, eval=TRUE}
-
-par(mfrow=c(2,2), mar=c(1,1,1,1))
-  
+par(mfrow=c(2,2))
 # use all tissue spots to make the visualization more representative
 method = 'ward.D'
 cluster4SpatialPatterns <- groupSigSpatialPatterns(
@@ -586,542 +153,23 @@ cluster4SpatialPatterns <- groupSigSpatialPatterns(
   binSize = 50,
   power = 1)
 
-```
-
-### Double check cross correlation matrix
-
-```{r cross-corr-mtx-heatmap, fig.width=6, fig.height=6, eval=TRUE}
-
-par(mfrow=c(1,1), mar=c(1,1,1,1))
+# Double check cross correlation matrix
+par(mfrow=c(1,1))
 # Look at pattern association by plotting SCI matrix as a heatmap and dendrogram
 patternColors <- rainbow(
   length(levels(cluster4SpatialPatterns$groups)), v=0.5)[cluster4SpatialPatterns$groups]
-
 names(patternColors) <- names(cluster4SpatialPatterns$groups)
-
+# Visualize as heatmap
 heatmap(cluster4CorrMtx[cluster4SpatialPatterns$hc$labels, cluster4SpatialPatterns$hc$labels],
         scale='none', 
         Colv=as.dendrogram(cluster4SpatialPatterns$hc), 
         Rowv=as.dendrogram(cluster4SpatialPatterns$hc), 
         labCol=NA, labRow = NA,
         RowSideColors=patternColors[cluster4SpatialPatterns$hc$labels],
-        col=colorRampPalette(c('white', 'black'))(100)
+        ColSideColors=patternColors[cluster4SpatialPatterns$hc$labels],
+        col=colorRampPalette(c('white', 'lightgrey', 'black'))(100)
 )
 
 ```
 
-As we can see, the spatial patterns appear to distinguish the putative pyramidal neuron layer in the olifactory area (spatial pattern 1), and also appear to demarcate the CA1 (spatial pattern 3), CA2 (spatial pattern 4), and CA3 (spatial pattern 2) regions of the hippocampus proper. 
-
-Is there anything interesting about the spatially significant genes assigned to each of these patterns?
-
-```{r explore-genes-in-patterns-cluster4, eval=TRUE}
-
-clust4PatternGenes1 <- names(cluster4SpatialPatterns$groups[which(cluster4SpatialPatterns$groups == 1)])
-clust4PatternGenes2 <- names(cluster4SpatialPatterns$groups[which(cluster4SpatialPatterns$groups == 2)])
-clust4PatternGenes3 <- names(cluster4SpatialPatterns$groups[which(cluster4SpatialPatterns$groups == 3)])
-clust4PatternGenes4 <- names(cluster4SpatialPatterns$groups[which(cluster4SpatialPatterns$groups == 4)])
-
-```
-
-### Explore genes in each of the 4 spatial patterns
-
-```{r visualize-clust4-pattern1-genes, fig.width=5, fig.height=5, eval=FALSE, include=FALSE}
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
-
-for (gene in clust4PatternGenes1[1:10]) {
-  
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
-  geneOfInterestExp <- filteredGenes[gene,]
-  
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
-  
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
-}
-
-```
-
-```{r visualize-clust4-pattern2-genes, fig.width=5, fig.height=5, eval=FALSE, include=FALSE}
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
-
-for (gene in clust4PatternGenes2[1:10]) {
-  
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
-  geneOfInterestExp <- filteredGenes[gene,]
-  
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
-  
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
-}
-
-```
-
-```{r visualize-clust4-pattern3-genes, fig.width=5, fig.height=5, eval=FALSE, include=FALSE}
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
-
-for (gene in clust4PatternGenes3[1:10]) {
-  
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
-  geneOfInterestExp <- filteredGenes[gene,]
-  
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
-  
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
-}
-
-```
-
-```{r visualize-clust4-pattern4-genes, fig.width=5, fig.height=5, eval=FALSE, include=FALSE}
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
-
-for (gene in clust4PatternGenes4[1:10]) {
-  
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
-  geneOfInterestExp <- filteredGenes[gene,]
-  
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
-  
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
-}
-
-```
-
-### Check if the spatial genes in each pattern overlap with significant genes of other clusters
-
-```{r, hypergeom-sig-diff-genes-comparison-clust4, fig.width=8, fig.height=6, eval=TRUE}
-# Compare two different types of identifying genes
-
-diffgexp <- signDiffGenes[ names(signDiffGenes)[-7] ] # drop 7: Hippocampus /c no sig genes
-
-spatgexp <- lapply(levels(cluster4SpatialPatterns$groups), function(x) {
-  names(cluster4SpatialPatterns$groups)[cluster4SpatialPatterns$groups==x]
-})
-
-names(spatgexp) <- paste0('Spatial Pattern ', levels(cluster4SpatialPatterns$groups))
-
-# Assess significance of overlap by hypergeometric test
-sigoverlap <- do.call(rbind, lapply(1:length(spatgexp), function(i) {
-  so <- unlist(lapply(1:length(diffgexp), function(j) {
-    
-    #x = # of genes in common between two groups.
-    #n = # of genes in group 1.
-    #D = # of genes in group 2.
-    #N = total genes
-    x <- length(intersect(spatgexp[[i]], diffgexp[[j]])) ## shared
-    n <- length(spatgexp[[i]])
-    D <- length(diffgexp[[j]])
-    N <- nrow(filteredGenes) ## total
-    
-    phyper(x, D, N-D, n, lower.tail=FALSE)
-  }))
-  names(so) <- names(diffgexp)
-  return(so)
-}))
-
-rownames(sigoverlap) <- 1:length(spatgexp)
-
-# Visualize as heatmap
-pvo <- sigoverlap
-rownames(pvo) <- paste0('spatial: ', rownames(sigoverlap))
-colnames(pvo) <- colnames(sigoverlap)
-pvo[pvo < 1e-6] <- 1e-6 # prevent Infs
-pvo <- -log10(pvo)
-# order for diagonal
-matrix.sort <- function(matrix) {
-  row.max <- apply(matrix,1,which.max)
-  if(all(table(row.max) != 1)) stop("Ties cannot be resolved")
-  matrix[names(sort(row.max)),]
-}
-
-pvo <- matrix.sort(pvo)
-heatmap(pvo, 
-        col=colorRampPalette(c('black', 'white', 'red'))(100), 
-        scale="none", Rowv=NA, Colv=NA, margins = c(25,15))
-  
-```
-
-Genes of spatial patterns 2 and 3 overlap the significantly differentially expressed genes of cluster 4 quite well. These spatial patterns together also overlap the hippocampus proper specifically. Interestingly, all but Spatial Pattern 2 overlap significant genes of the proposed Isocortex region strongly. (Note that `signDiffGenes` are specific for each cluster they were identified in)
-
-So many of these spatial genes are also specifically differentially expressed in the Isocortex. Spatial Pattern 1 genes are also specific to the Amygdala and the Isocortex, but were not found to be differentially expressed in the Pyrimidal cell layers.
-
-Spatial pattern 2 is the only spatial pattern that overlaps the pyrimidal cell cluster specific genes specifically.
-
-## EXAMPLE 2: Cluster 6 Isocortex
-
-Let's check out the Isocortex cluster (6)
-
-```{r filter-top-diff-exp-genes-cluster6, eval=TRUE}
-
-diffExpCluster6Genes <- diffGenes$`6: Isocortex`
-highestExpClust6 <- diffExpCluster6Genes[which(diffExpCluster6Genes$highest == TRUE),]
-topDiffExpGenesClust6 <- highestExpClust6[order(highestExpClust6$p.adj),]
-topDiffExpGenesClust6[1:10,]
-
-```
-
-```{r visualize-top-diff-exp-genes-cluster6, fig.width=5, fig.height=5, eval=TRUE}
-
-library(ggplot2)
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
-
-for (gene in rownames(topDiffExpGenesClust6[1:10,])) {
-  
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
-  geneOfInterestExp <- filteredGenes[gene,]
-  
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
-  
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
-}
-
-```
-
-### Build adjacency matrix of spots in cluster
-
-```{r cluster-weight-matrix-cluster6, fig.width=4, fig.height=4, eval=TRUE}
-
-par(mfrow=c(1,1), mar=c(1,1,1,1))
-  
-# get spots that are part of the cluster
-cluster6SpotIDs <- names(spotClusters[which(spotClusters == '6: Isocortex')])
-cluster6SpotCoords <- tissueSpotRotation[cluster6SpotIDs,]
-
-# build weight matrix for the cluster spots
-cluster6WeightMatrix <- getSpatialNeighbors(
-  cluster6SpotCoords, filterDist = 25, verbose=TRUE)
-
-plotNetwork(cluster6SpotCoords, cluster6WeightMatrix)
-
-```
-
-### Autocorrelation of genes within cluster spots
-
-Compute autocorrelation of gene in the cluster, from the original list of `filteredGenes`.
-
-```{r cluster-morans-I-cluster6, eval=TRUE}
-
-# get gene expression of filteredGenes for just the cluster spots
-cluster6GeneExp <- filteredGenes[,which(colnames(filteredGenes) %in% cluster6SpotIDs)]
-
-# calculate Moran's I for filteredGenes only using the spots in cluster
-# aka autocorrelation of filtered genes within the cluster
-cluster6GeneExpMoransI <- getSpatialPatterns(cluster6GeneExp,
-                                           cluster6WeightMatrix,
-                                           verbose=TRUE)
-
-```
-
-### Filter for significantly spatially variable genes in cluster
-
-Find significantly spatially variable genes in the cluster.
-
-```{r cluster-spatial-genes-cluster6, eval=TRUE}
-
-cluster6SpatialGenes <- filterSpatialPatterns(
-  cluster6GeneExp,
-  cluster6GeneExpMoransI,
-  cluster6WeightMatrix,
-  details = TRUE,
-  verbose=TRUE,
-  minPercentCells = 0.10)
-
-```
-
-### Compute cross-correlation matrix 
-
-To find spatial patterns, we need to find spatial genes that are correlated with one another.
-
-WARNING: If the number of spots for a given cluster is high, this can take a while. (for cluster 6, estimate 45 min)
-
-```{r cluster-cross-corr-matrix-cluster6, eval=FALSE}
-
-cluster6CorrMtx <- spatialCrossCorMatrix(
-  cluster6GeneExp[rownames(cluster6SpatialGenes),],
-  cluster6WeightMatrix)
-
-```
-
-### Get cluster spatial patterns
-
-```{r cluster-spatial-patterns-cluster6, fig.width=5, fig.height=6, eval=TRUE}
-
-par(mfrow=c(2,2), mar=c(1,1,1,1))
-  
-# use all tissue spots to make the visualization more representative
-method = 'ward.D'
-cluster6SpatialPatterns <- groupSigSpatialPatterns(
-  pos=tissueSpotRotation,
-  mat=cluster6GeneExp[rownames(cluster6SpatialGenes),],
-  scc=cluster6CorrMtx,
-  hclustMethod = method,
-  deepSplit = 1,
-  binSize = 50,
-  power = 1)
-
-```
-
-### Double check cross correlation matrix
-
-```{r cross-corr-mtx-heatmap-cluster6, fig.width=6, fig.height=6, eval=TRUE}
-
-par(mfrow=c(1,1), mar=c(1,1,1,1))
-# Look at pattern association by plotting SCI matrix as a heatmap and dendrogram
-patternColors <- rainbow(
-  length(levels(cluster6SpatialPatterns$groups)), v=0.5)[cluster6SpatialPatterns$groups]
-
-names(patternColors) <- names(cluster6SpatialPatterns$groups)
-
-heatmap(cluster6CorrMtx[cluster6SpatialPatterns$hc$labels, cluster6SpatialPatterns$hc$labels],
-        scale='none', 
-        Colv=as.dendrogram(cluster6SpatialPatterns$hc), 
-        Rowv=as.dendrogram(cluster6SpatialPatterns$hc), 
-        labCol=NA, labRow = NA,
-        RowSideColors=patternColors[cluster6SpatialPatterns$hc$labels],
-        col=colorRampPalette(c('white', 'black'))(100)
-)
-
-```
-
-### Check if the spatial genes in each pattern overlap with significant genes of other clusters
-
-```{r, hypergeom-sig-diff-genes-comparison-clust6, fig.width=8, fig.height=6, eval=TRUE}
-# Compare two different types of identifying genes
-
-diffgexp <- signDiffGenes[ names(signDiffGenes)[-7] ] # drop `7: Hippocampus` /c no sig genes found
-
-spatgexp6 <- lapply(levels(cluster6SpatialPatterns$groups), function(x) {
-  names(cluster6SpatialPatterns$groups)[cluster6SpatialPatterns$groups==x]
-})
-names(spatgexp6) <- paste0('Spatial Pattern ', levels(cluster6SpatialPatterns$groups))
-
-# Assess significance of overlap by hypergeometric test
-sigoverlap <- do.call(rbind, lapply(1:length(spatgexp6), function(i) {
-  so <- unlist(lapply(1:length(diffgexp), function(j) {
-    
-    #x = # of genes in common between two groups.
-    #n = # of genes in group 1.
-    #D = # of genes in group 2.
-    #N = total genes
-    x <- length(intersect(spatgexp6[[i]], diffgexp[[j]])) ## shared
-    n <- length(spatgexp6[[i]])
-    D <- length(diffgexp[[j]])
-    N <- nrow(filteredGenes) ## total
-    
-    phyper(x, D, N-D, n, lower.tail=FALSE)
-  }))
-  names(so) <- names(diffgexp)
-  return(so)
-}))
-
-rownames(sigoverlap) <- 1:length(spatgexp6)
-
-# Visualize as heatmap
-pvo <- sigoverlap
-rownames(pvo) <- paste0('spatial: ', rownames(sigoverlap))
-colnames(pvo) <- colnames(sigoverlap)
-pvo[pvo < 1e-6] <- 1e-6 # prevent Infs
-pvo <- -log10(pvo)
-# order for diagonal
-matrix.sort <- function(matrix) {
-  row.max <- apply(matrix,1,which.max)
-  if(all(table(row.max) != 1)) stop("Ties cannot be resolved")
-  matrix[names(sort(row.max)),]
-}
-
-pvo <- matrix.sort(pvo)
-heatmap(pvo, 
-        col=colorRampPalette(c('black', 'white', 'red'))(100), 
-        scale="none", Rowv=NA, Colv=NA, margins = c(25,15))
-  
-```
-
-Spatial patterns 2, 3, and 4 strongly overlap with Isocortex specific significantly differentially expressed genes. 
-
-Previously, it looked like the pyrimidal cell layer spatial patterns overlapped with Isocortex genes as well.
-
-Do the spatial patterns in the isocortex and the pyrimidal cell layers overlap?
-
-### Specific genes in each pattern of cluster 6
-
-```{r explore-genes-in-patterns-cluster6, eval=TRUE}
-
-clust6PatternGenes1 <- names(cluster6SpatialPatterns$groups[which(cluster6SpatialPatterns$groups == 1)])
-clust6PatternGenes2 <- names(cluster6SpatialPatterns$groups[which(cluster6SpatialPatterns$groups == 2)])
-clust6PatternGenes3 <- names(cluster6SpatialPatterns$groups[which(cluster6SpatialPatterns$groups == 3)])
-clust6PatternGenes4 <- names(cluster6SpatialPatterns$groups[which(cluster6SpatialPatterns$groups == 4)])
-
-```
-
-### Is there any overlap with the spatial patterns in the Isocortex versus those in the Pyramidal cell layer?
-
-```{r hypergeom-test-spat-patterns-between-clusters, fig.width=8, fig.height=6, eval=TRUE}
-
-spatgexp6 <- lapply(levels(cluster6SpatialPatterns$groups), function(x) {
-  names(cluster6SpatialPatterns$groups)[cluster6SpatialPatterns$groups==x]
-})
-names(spatgexp6) <- paste0('Isocortex Spatial Pattern ', levels(cluster6SpatialPatterns$groups))
-
-spatgexp4 <- lapply(levels(cluster4SpatialPatterns$groups), function(x) {
-  names(cluster4SpatialPatterns$groups)[cluster4SpatialPatterns$groups==x]
-})
-names(spatgexp4) <- paste0('Pyramidal Spatial Pattern ', levels(cluster4SpatialPatterns$groups))
-
-# Assess significance of overlap by hypergeometric test
-sigoverlap <- do.call(rbind, lapply(1:length(spatgexp4), function(i) {
-  so <- unlist(lapply(1:length(spatgexp6), function(j) {
-    
-    #x = # of genes in common between two groups.
-    #n = # of genes in group 1.
-    #D = # of genes in group 2.
-    #N = total genes
-    x <- length(intersect(spatgexp4[[i]], spatgexp6[[j]])) ## shared
-    n <- length(spatgexp4[[i]])
-    D <- length(spatgexp6[[j]])
-    N <- nrow(filteredGenes) ## total
-    
-    phyper(x, D, N-D, n, lower.tail=FALSE)
-  }))
-  names(so) <- names(spatgexp6)
-  return(so)
-}))
-
-rownames(sigoverlap) <- names(spatgexp4)
-
-# Visualize as heatmap
-pvo <- sigoverlap
-rownames(pvo) <- rownames(sigoverlap)
-colnames(pvo) <- colnames(sigoverlap)
-pvo[pvo < 1e-6] <- 1e-6 # prevent Infs
-pvo <- -log10(pvo)
-# order for diagonal
-matrix.sort <- function(matrix) {
-  row.max <- apply(matrix,1,which.max)
-  if(all(table(row.max) != 1)) stop("Ties cannot be resolved")
-  matrix[names(sort(row.max)),]
-}
-
-pvo <- matrix.sort(pvo)
-heatmap(pvo, 
-        col=colorRampPalette(c('black', 'white', 'red'))(100), 
-        scale="none", Rowv=NA, Colv=NA, margins = c(25,15))
-
-```
-
-Pyramidal spatial clusters 1, 3, and 4 significantly overlap genes that make up Isocortex spatial patterns. 
-
-```{r pyramidal-versus-isocortex-spatial-gene-comparisons, eval=FALSE, include=FALSE}
-
-cluster6Genes <- c()
-for (i in c(seq(4))) {
-  genes <- spatgexp6[[i]]
-  cluster6Genes <- append(cluster6Genes, genes)
-}
-
-cluster4Genes <- c()
-for (i in c(seq(4))) {
-  genes <- spatgexp4[[i]]
-  cluster4Genes <- append(cluster4Genes, genes)
-}
-
-print("Spatial genes specific to Pyramidal spatial pattern 2:")
-print(setdiff(spatgexp4$`Pyramidal Spatial Pattern 2`, cluster6Genes))
-
-print("Spatial genes shared between Pyramidal and Isocortex spatial patterns:")
-print(intersect(cluster4Genes, cluster6Genes))
-
-```
-
+Interestingly, the spatial patterns appear to distinguish the putative pyramidal neuron layer in the olfactory area (spatial pattern 1), and also appear to demarcate the CA1 (spatial pattern 3), CA2 (spatial pattern 4), and CA3 (spatial pattern 2) regions of the hippocampus proper. 

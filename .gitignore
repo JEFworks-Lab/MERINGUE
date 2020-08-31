@@ -16,3 +16,4 @@ src/*.o
 src/*.so
 notes
 R/.Rapp.history
+*.RProj

@@ -64,6 +64,12 @@
 #' @source \url{https://cf.10xgenomics.com/samples/spatial-exp/1.1.0/V1_Adult_Mouse_Brain/}
 "mouseCoronal"
 
+#' Receptor ligand list
+#'
+#' @format Data frame corresponding to ncomms8866-s3.xlsx in Ramilowski et al (Nature Communications 2015)
+#'
+#' @source \url{https://www.nature.com/articles/ncomms8866}
+#'
 #' @examples
 #' data(receptorLigandInfo)
 #' receptors <- unique(receptorLigandInfo$Receptor.ApprovedSymbol)
