@@ -19,6 +19,8 @@
 
 (7) Highly scalable to enable analysis of 10,000s of genes and 1,000s of cells within seconds
 
+(8) Applicable to diverse spatial transcriptomics technologies
+
 ## Installation
 
 To install `MERINGUE`, we recommend using `devtools`:
@@ -36,7 +38,7 @@ devtools::install_github('JEFworks/MERINGUE')
 
 [Understanding MERINGUE's Spatial Cross-Correlation Statistic using Simulations](simulation)
 
-[Spatially-informed transcriptional clustering with MERINGUE](spatiall_clustering)
+[Spatially-informed transcriptional clustering with MERINGUE](spatial_clustering)
 
 ## Contributing
 
