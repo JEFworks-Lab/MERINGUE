@@ -2,7 +2,7 @@
 title: "3D Drosophila Spatial Transcriptomics Analysis with MERINGUE"
 author: "Jean Fan"
 date: 'November, 20, 2019'
-output: github_document
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{3D Drosophila Spatial Transcriptomics Analysis with MERINGUE}
   %\VignetteEncoding{UTF-8}
@@ -21,7 +21,7 @@ opts_chunk$set(
 library(MERINGUE)
 ```
 
-In this vignette, we will walk through an analysis of spatial gene expression data for the drosophila embryo from the Berkeley Drosophila Transcription Network Project. Notably, 3D spatial coordinates are available for this dataset, allowing us to analyze beyond a single plane. 
+In this vignette, we will walk through an analysis of spatial gene expression data for the drosophila embryo from the Berkeley Drosophila Transcription Network Project. Notably, 3D spatial coordinates are available for this dataset, allowing us to analyze beyond a single plane or tissue section. 
 
 ```{r, drosophila-data, fig.width=8, fig.height=2}
 data("drosophila")
@@ -41,7 +41,7 @@ We can consider the 3D coordinates in our construction of neighbor relationships
 N <- getSpatialNeighbors(pos, filterDist = 10, verbose=TRUE)
 ```
 
-Optionally, this 3D neighbor network can be visualized using RGL, a 3D real-time rendering system for R. WARNING: there will be approximately 25,500 edges to draw and thus will take a significant amount of time.
+Optionally, this 3D neighbor network can be visualized using RGL, a 3D real-time rendering system for R. WARNING: there will be approximately 25,500 edges to draw and thus will take a significant amount of time if rendered to your screen (for example using X11). We recommend drawing to file.
 
 ```{r, drosophila-rgl, eval=FALSE}
 ## plot
@@ -51,30 +51,37 @@ MERINGUE:::plotNetwork3D(pos, N, size=1)
 rgl.snapshot(paste0(dir(), 'neighbors_3D-flat.png'))
 ```
 
-In this particular case, all genes were chosen for their known spatial patterning and thus indeed show up as significantly spatially heterogeneous.
+In this particular case, all 84 genes were chosen for their known spatial patterning. We can double check that they all indeed show up as significantly spatially variable.
 
 ```{r, drosophila-analyze}
 ## analyze
 results <- getSpatialPatterns(gexp, N)
-filter <- filterSpatialPatterns(gexp, results, N, details = TRUE, minPercentCells = 0.05)
+filter <- filterSpatialPatterns(mat = gexp, 
+                                I = results, 
+                                w = N,
+                                alpha = 0.05,
+                                details = TRUE, 
+                                minPercentCells = 0.05)
 print(head(filter))
 ```
 
-To identify spatial patterns, we can restrict our analysis to a subset of genes for testing purposes.
+To identify spatial patterns, we can restrict our analysis to a subset of pair-rule genes for demo purposes.
 
 ```{r, drosophila-sub, fig.width=8, fig.height=3}
 par(mfrow=c(2,4), mar=rep(2,4))
+## pair-rule genes
 sub <- c('eve', 'prd', 'odd', 'run', 'ftz', 'trn', 'h', 'dpn')
 invisible(lapply(sub, function(g) {
-  plotEmbedding(pos[,c(1,3)], col=gexp[g,], main=g)
+  plotEmbedding(pos[,c(1,3)], 
+                col=gexp[g,], 
+                main=g)
 }))
 ```
 
-We are able to distinguish 2 patterns corresponding to even and odd pair-rule genes.
+We can use our spatial cross correlation analysis to group genes into their primary spatial patterns. 
 
 ```{r, drosophila-pattern, fig.width=8, fig.height=3}
 scc <- spatialCrossCorMatrix(gexp[sub,], N)
-
 method = 'ward.D'
 par(mfrow=c(1,2), mar=rep(2,4))
 ggroup <- groupSigSpatialPatterns(pos[,c(1,3)], gexp, scc,
@@ -83,6 +90,8 @@ ggroup <- groupSigSpatialPatterns(pos[,c(1,3)], gexp, scc,
                                     binSize = 50,
                                     power = 1)
 ```
+
+Indeed, we are able to distinguish 2 patterns corresponding to even and odd pair-rule genes.
 
 ```{r, drosophila-scc, fig.width=4, fig.height=4}
 # Look at pattern association
@@ -93,6 +102,11 @@ heatmap(scc[ggroup$hc$labels, ggroup$hc$labels], scale='none',
         Rowv=as.dendrogram(ggroup$hc), 
         labCol=NA,
         RowSideColors=gcol[ggroup$hc$labels],
+        ColSideColors=gcol[ggroup$hc$labels],
         col=colorRampPalette(c('white', 'black'))(100)
 )
 ```
+# Additional exercises
+
+1. Analyze all 84 genes.
+2. Instead of analyzing the 3D spatial coordinates, analyze the 2D X-Z projection. How are detected spatial patterns similar or different?

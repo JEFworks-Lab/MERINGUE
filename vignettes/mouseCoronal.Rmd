@@ -173,3 +173,9 @@ heatmap(cluster4CorrMtx[cluster4SpatialPatterns$hc$labels, cluster4SpatialPatter
 ```
 
 Interestingly, the spatial patterns appear to distinguish the putative pyramidal neuron layer in the olfactory area (spatial pattern 1), and also appear to demarcate the CA1 (spatial pattern 3), CA2 (spatial pattern 4), and CA3 (spatial pattern 2) regions of the hippocampus proper. 
+
+# Additional exercises
+
+1. Are there additional aspects of spatial heterogeneity within other cell layers?
+2. Do these aspects of spatial heterogeneity correspond to known anatomical structures?
+3. Are these patterns of spatial heterogeneity within cell layers shared across different brain regions?

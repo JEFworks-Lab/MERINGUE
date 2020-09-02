@@ -36,7 +36,7 @@ devtools::install_github('JEFworks/MERINGUE')
 
 [Understanding MERINGUE's Spatial Cross-Correlation Statistic using Simulations](simulation)
 
-[Spatially-informed transcriptional clustering with MERINGUE](spatially_aware_clustering)
+[Spatially-informed transcriptional clustering with MERINGUE](spatiall_clustering)
 
 ## Contributing
 

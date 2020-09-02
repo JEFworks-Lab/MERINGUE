@@ -2,15 +2,16 @@
 
 Build vignettes:
 ```
-rmarkdown::render('vignettes/spatially_aware_clustering.Rmd', clean=FALSE, output_format='all')
+rmarkdown::render('vignettes/simulation.Rmd', clean=FALSE, output_format='md_document')
 ```
 
 Move files from vignettes directory to docs:
 ```
 # delete old files
-rm -rf spatially_aware_clustering_files/
-mv ../vignettes/spatially_aware_clustering_files/ .
+rm -rf simulation_files/
+mv ../vignettes/simulation_files/ .
 # overwrite old files
-mv ../vignettes/spatially_aware_clustering.knit.md  spatially_aware_clustering.md
-mv ../vignettes/spatially_aware_clustering.pdf .
+#mv ../vignettes/simulation.knit.md  simulation.md
+mv ../vignettes/simulation.md  .
+#mv ../vignettes/simulation.pdf .
 ```
