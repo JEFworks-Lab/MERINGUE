@@ -27,7 +27,8 @@ r_packages:
   - covr
   
 # we need to install BiocInstaller for testing Bioconductor packages
-bioc_required: true
+#bioc_required: true
+bioc_required: false ## causing error in recent travis update https://travis-ci.community/t/in-r-version-4-0-0-library-path-not-writable/9744/15
 
 # only report coverage for the release version
 after_success:
