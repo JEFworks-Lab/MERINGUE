@@ -23,7 +23,7 @@ The positional spot coordinates, and the count matrix of genes at each spot.
 
 # --------------------------------------------------------------------------------
 # Starting from the processed data files:
-setwd("/Users/millerbf2/Desktop/MERINGUE/workinprogress/")
+
 # data("mouseCoronal")
 load("mouseCoronal.rda") # loads `mouseCoronal <- list(filteredGenes=filteredGenes, tissueSpotRotation=tissueSpotRotation, cluster6CorrMtx=cluster6CorrMtx)
 
