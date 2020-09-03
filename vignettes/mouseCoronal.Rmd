@@ -23,7 +23,7 @@ The positional spot coordinates, and the count matrix of genes at each spot.
 
 # --------------------------------------------------------------------------------
 # Starting from the processed data files:
-
+setwd("/Users/millerbf2/Desktop/MERINGUE/workinprogress/")
 # data("mouseCoronal")
 load("mouseCoronal.rda") # loads `mouseCoronal <- list(filteredGenes=filteredGenes, tissueSpotRotation=tissueSpotRotation, cluster6CorrMtx=cluster6CorrMtx)
 
@@ -169,23 +169,6 @@ rownames(emb) <- rownames(pcs)
 
 spotClusters <- getClusters(pcs, k = 100)
 
-# Graph-based cluster detection
-# suppressMessages(library(igraph))
-# suppressMessages(library(RANN))
-# k <- 100 # use to adjust number of clusters
-# nn <- nn2(as.matrix(pcs), k = k) # nearest neighbor search
-# nn.df <- data.frame(from = rep(1:nrow(nn$nn.idx), k),
-#                       to = as.vector(nn$nn.idx),
-#                       weight = 1/(1 + as.vector(nn$nn.dists)))
-# nw.norm <- graph_from_data_frame(nn.df, directed = FALSE)
-# nw.norm <- simplify(nw.norm)
-# lc.norm <- cluster_louvain(nw.norm) # igraph method for finding communities 
-# com <- as.factor(membership(lc.norm)) # get communities of spots
-# names(com) <- rownames(pcs)
-# 
-# spotClusters <- as.character(com)
-# names(spotClusters) <- names(com)
-
 ```
 
 This approach organized the spots into 8 transcriptionally distinct clusters.
@@ -231,8 +214,8 @@ plotEmbedding(emb, groups=spotClusters,
               verbose=FALSE)
 
 # plot the spots based on position on tissue, color by community
-tissueSpotRotation <- tissueSpotPosFiltAdj[c("V6", "V5")]
-tissueSpotRotation$V5 <- tissueSpotRotation$V5 * -1
+# tissueSpotRotation <- tissueSpotPosFiltAdj[c("V6", "V5")]
+# tissueSpotRotation$V5 <- tissueSpotRotation$V5 * -1
 plotEmbedding(tissueSpotRotation, groups=spotClusters, 
               cex=1, xlab=NA, ylab=NA,
               verbose=FALSE)
@@ -330,38 +313,15 @@ The top hit, Cpne6, has been reported to be expressed in pyramidal cells of the 
 
 Let's see if these top gene hits are expressed in the spots of cluster 4 specifically.
 
-```{r visualize-top-diff-exp-genes, fig.width=5, fig.height=5, eval=TRUE}
+```{r visualize-top-diff-exp-genes, fig.width=12, fig.height=4, eval=TRUE}
 
-library(ggplot2)
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
+par(mfrow=c(1,4), mar=c(1,1,1,1))
 
 for (gene in rownames(topDiffExpGenesClust4[1:20,])) {
   
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
   geneOfInterestExp <- filteredGenes[gene,]
   
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
-  
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
+  plotEmbedding(tissueSpotRotation, col=geneOfInterestExp, main=gene)
 }
 
 ```
@@ -422,74 +382,30 @@ For PC5, one of the top hits, Wfs1, shows ISH staining that traces the CA1 and C
 
 ### Visualize the top genes from PC approach
 
-```{r visualize-top-pca1-driving-genes, fig.width=5, fig.height=5, eval=FALSE}
+```{r visualize-top-pca1-driving-genes, fig.width=12, fig.height=4, eval=FALSE}
 
-library(ggplot2)
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
+par(mfrow=c(1,4), mar=c(1,1,1,1))
 
 for (gene in rownames(sortedPC1genes[1:20,])) {
   
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
   geneOfInterestExp <- filteredGenes[gene,]
   
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
+  plotEmbedding(tissueSpotRotation, col=geneOfInterestExp, main=gene)
   
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
 }
 
 ```
 
-```{r visualize-top-pca5-driving-genes, fig.width=5, fig.height=5, eval=FALSE}
+```{r visualize-top-pca5-driving-genes, fig.width=12, fig.height=4, eval=FALSE}
 
-library(ggplot2)
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
+par(mfrow=c(1,4), mar=c(1,1,1,1))
 
 for (gene in rownames(sortedPC5genes[1:20,])) {
   
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
   geneOfInterestExp <- filteredGenes[gene,]
   
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
+  plotEmbedding(tissueSpotRotation, col=geneOfInterestExp, main=gene)
   
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
 }
 
 ```
@@ -625,138 +541,58 @@ clust4PatternGenes4 <- names(cluster4SpatialPatterns$groups[which(cluster4Spatia
 
 ### Explore genes in each of the 4 spatial patterns
 
-```{r visualize-clust4-pattern1-genes, fig.width=5, fig.height=5, eval=FALSE, include=FALSE}
+```{r visualize-clust4-pattern1-genes, fig.width=12, fig.height=4, eval=FALSE, include=FALSE}
 
-par(mfrow=c(2,4), mar=c(1,1,1,1))
+par(mfrow=c(1,4), mar=c(1,1,1,1))
 
 for (gene in clust4PatternGenes1[1:10]) {
   
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
   geneOfInterestExp <- filteredGenes[gene,]
   
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
+  plotEmbedding(tissueSpotRotation, col=geneOfInterestExp, main=gene)
   
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
 }
 
 ```
 
-```{r visualize-clust4-pattern2-genes, fig.width=5, fig.height=5, eval=FALSE, include=FALSE}
+```{r visualize-clust4-pattern2-genes, fig.width=12, fig.height=4, eval=FALSE, include=FALSE}
 
-par(mfrow=c(2,4), mar=c(1,1,1,1))
+par(mfrow=c(1,4), mar=c(1,1,1,1))
 
 for (gene in clust4PatternGenes2[1:10]) {
   
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
   geneOfInterestExp <- filteredGenes[gene,]
   
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
+  plotEmbedding(tissueSpotRotation, col=geneOfInterestExp, main=gene)
   
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
 }
 
 ```
 
-```{r visualize-clust4-pattern3-genes, fig.width=5, fig.height=5, eval=FALSE, include=FALSE}
+```{r visualize-clust4-pattern3-genes, fig.width=12, fig.height=4, eval=FALSE, include=FALSE}
 
-par(mfrow=c(2,4), mar=c(1,1,1,1))
+par(mfrow=c(1,4), mar=c(1,1,1,1))
 
 for (gene in clust4PatternGenes3[1:10]) {
   
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
   geneOfInterestExp <- filteredGenes[gene,]
   
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
+  plotEmbedding(tissueSpotRotation, col=geneOfInterestExp, main=gene)
   
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
 }
 
 ```
 
-```{r visualize-clust4-pattern4-genes, fig.width=5, fig.height=5, eval=FALSE, include=FALSE}
+```{r visualize-clust4-pattern4-genes, fig.width=12, fig.height=4, eval=FALSE, include=FALSE}
 
-par(mfrow=c(2,4), mar=c(1,1,1,1))
+par(mfrow=c(1,4), mar=c(1,1,1,1))
 
 for (gene in clust4PatternGenes4[1:10]) {
   
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
   geneOfInterestExp <- filteredGenes[gene,]
   
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
+  plotEmbedding(tissueSpotRotation, col=geneOfInterestExp, main=gene)
   
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
 }
 
 ```
@@ -834,38 +670,16 @@ topDiffExpGenesClust6[1:10,]
 
 ```
 
-```{r visualize-top-diff-exp-genes-cluster6, fig.width=5, fig.height=5, eval=TRUE}
+```{r visualize-top-diff-exp-genes-cluster6, fig.width=12, fig.height=4, eval=TRUE}
 
-library(ggplot2)
-
-par(mfrow=c(2,4), mar=c(1,1,1,1))
+par(mfrow=c(1,4), mar=c(1,1,1,1))
 
 for (gene in rownames(topDiffExpGenesClust6[1:10,])) {
   
-  print(gene)
-  #plot(c(0,dim(tiff)[2]), c(0,dim(tiff)[1]), main=gene) 
-  
-  # offTissueCounts.GeneOfInterest <- allgeneCountsFiltCPM[gene, nontissueSpots]
   geneOfInterestExp <- filteredGenes[gene,]
   
-  # ramp color for continuous gene expression values
-  #coolToHot <- colorRampPalette(c('blue','red'))
-  #colors <- coolToHot(10)[as.numeric(cut(log10(geneOfInterestExp + 1), breaks = 10))]
+  plotEmbedding(tissueSpotRotation, col=geneOfInterestExp, main=gene)
   
-  # points(spotPosTiff[,]$V6, spotPosTiff[,]$V5, col=colors, pch=15) # all spots
-  # points(spotPosTiff[rownames(tissueSpotPosTiff),]$V6, spotPosTiff[rownames(tissueSpotPosTiff),]$V5, col="white", pch="+") # tissue spots
-  
-  dfexp <- data.frame(
-                 width_X = tissueSpotRotation$V6,
-                 height_Y = tissueSpotRotation$V5,
-                 exp = geneOfInterestExp)
-                 #exp = log10(geneOfInterestExp + 1))
-  
-  
-  print(ggplot(dfexp, aes(width_X, height_Y)) +                     
-    geom_point(aes(color = exp), size = 1, shape=15) +
-    scale_color_gradient(low = "darkblue", high = "yellow") +
-    ggtitle(gene))
 }
 
 ```
