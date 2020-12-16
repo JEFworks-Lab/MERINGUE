@@ -10,7 +10,7 @@
 
 MERINGUE is a computational framework based on spatial auto-correlation and cross-correlation analysis. 
 
-![]({{ site.baseurl }}/assets/img/meringue_overview.png)
+![](docs/assets/img/meringue_overview.png)
 
 You can use MERINGUE to:
 
@@ -18,7 +18,7 @@ You can use MERINGUE to:
 - Group significantly spatially variable genes into primary spatial gene expression patterns
 - Identify pairs of genes with complementary expression patterns in spatially co-localized cell-types that may be indicative of cell-cell communication
 
-![]({{ site.baseurl }}/assets/img/meringue_examples.png)
+![](docs/assets/img/meringue_examples.png)
 
 In a manner that:
 
