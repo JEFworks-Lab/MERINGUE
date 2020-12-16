@@ -1,6 +1,9 @@
 ![](tools/img/meringue_logo.svg)
 # MERINGUE
 
+[![Build Status](https://travis-ci.org/JEFworks/MERingue.svg?branch=master)](https://travis-ci.org/JEFworks/MERingue)
+[![codecov.io](https://codecov.io/github/JEFworks/MERingue/coverage.svg?branch=master)](https://codecov.io/github/JEFworks/MERingue?branch=master)
+
 `MERINGUE` characterizes spatial gene expression heterogeneity in spatially resolved single-cell transcriptomics data with non-uniform cellular densities. The overall approach is detailed in the following publication: **COMING SOON**
 
 ## Overview
