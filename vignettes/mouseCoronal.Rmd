@@ -1,7 +1,7 @@
 ---
 title: "Identification of Spatial Patterns in 10X Visium Mouse Coronal Data"
 author: "Brendan F. Miller"
-date: '`r Sys.Date()`'
+date: "October 19th, 2020"
 output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{Identification of Spatial Patterns in 10X Visium Mouse Coronal Data}
@@ -29,7 +29,10 @@ The positional spot coordinates, and the count matrix of genes at each spot.
 # Starting from the processed data files:
 
 data(mouseCoronal)
-# load("mouseCoronal.rda") # loads `mouseCoronal <- list(filteredGenes=filteredGenes, tissueSpotRotation=tissueSpotRotation, cluster6CorrMtx=cluster6CorrMtx)
+# loads `mouseCoronal <- list(filteredGenes=filteredGenes,
+                              # tissueSpotRotation=tissueSpotRotation,
+                              # cluster6CorrMtx=cluster6CorrMtx)
+# load("mouseCoronal.rda") 
 
 filteredGenes <- mouseCoronal$filteredGenes
 tissueSpotRotation <- mouseCoronal$tissueSpotRotation
@@ -42,10 +45,14 @@ cluster6CorrMtx <- mouseCoronal$cluster6CorrMtx
 # --------------------------------------------------------------------------------
 # Starting from the raw data files:
 
-spotPos <- read.csv("spatial/tissue_positions_list.csv", header=FALSE)
+spotPos <- read.csv("spatial/tissue_positions_list.csv",
+                    header=FALSE)
 geneCounts <- readMM("filtered_feature_bc_matrix/matrix.mtx.gz")
-barcodes <- read.csv("filtered_feature_bc_matrix/barcodes.tsv.gz", header=FALSE)
-features <- read.csv("filtered_feature_bc_matrix/features.tsv.gz", sep="\t", header=FALSE)
+barcodes <- read.csv("filtered_feature_bc_matrix/barcodes.tsv.gz",
+                     header=FALSE)
+features <- read.csv("filtered_feature_bc_matrix/features.tsv.gz",
+                     sep="\t",
+                     header=FALSE)
 
 rownames(spotPos) <- spotPos$V1
 rownames(geneCounts) <- features[,2]
@@ -102,9 +109,12 @@ filteredGenes <- geneCountsNorm[!grepl("mt-", rownames(geneCountsNorm)),]
 # keep genes whose median normalized expression across the spots is above 0
 filteredGenes <- filteredGenes[which(rowMedians(as.matrix(filteredGenes)) > 0), ]
 
-# Get overdispersed genes whose expression variance is higher than transcriptome-wide expectations
+# Get overdispersed genes whose expression variance is higher than 
+# transcriptome-wide expectations
 par(mfrow=c(1,2), mar=c(1,1,1,1))
-overdispersedGenes <- getOverdispersedGenes(filteredGenes, plot = TRUE, details = TRUE)
+overdispersedGenes <- getOverdispersedGenes(filteredGenes,
+                                            plot = TRUE,
+                                            details = TRUE)
 
 # overdispersedGenes$mat -> normalized matrix
 # overdispersedGenes$ods -> list of overdispersed genes
@@ -113,7 +123,8 @@ overdispersedGenes <- getOverdispersedGenes(filteredGenes, plot = TRUE, details 
 filteredGenes <- overdispersedGenes$mat[overdispersedGenes$ods,]
 
 # take top genes with highest expression variance across the spots
-#filteredGenes <- filteredGenes[order(rowVars(as.matrix(filteredGenes)), decreasing=TRUE),][1:1000,]
+#filteredGenes <- filteredGenes[order(rowVars(as.matrix(filteredGenes)),
+                                                    # decreasing=TRUE),][1:1000,]
 ```
 
 We now have a filtered list of 1263 genes whose expression variance across the 2702 spots is higher than transcriptome-wide expectations.
@@ -799,7 +810,8 @@ heatmap(cluster6CorrMtx[cluster6SpatialPatterns$hc$labels, cluster6SpatialPatter
 ```{r, hypergeom-sig-diff-genes-comparison-clust6, fig.width=8, fig.height=6, eval=TRUE}
 # Compare two different types of identifying genes
 
-diffgexp <- signDiffGenes[ names(signDiffGenes)[-7] ] # drop `7: Hippocampus` /c no sig genes found
+# drop `7: Hippocampus` b/c no sig genes found
+diffgexp <- signDiffGenes[ names(signDiffGenes)[-7] ]
 
 spatgexp6 <- lapply(levels(cluster6SpatialPatterns$groups), function(x) {
   names(cluster6SpatialPatterns$groups)[cluster6SpatialPatterns$groups==x]
