@@ -1,25 +1,30 @@
 ![](tools/img/meringue_logo.svg)
 # MERINGUE
 
-`MERINGUE` enables spatial gene expression analysis in non-homogenous tissues. The overall approach is detailed in the following publication: **COMING SOON**
+`MERINGUE` characterizes spatial gene expression heterogeneity in spatially resolved single-cell transcriptomics data with non-uniform cellular densities. The overall approach is detailed in the following publication: **COMING SOON**
 
-## Benefits and Capabilities
+## Overview
 
-(1) Provide a statistical framework to identify and characterize significantly spatially variable genes
+MERINGUE is a computational framework based on spatial auto-correlation and cross-correlation analysis. 
 
-(2) Group significantly spatially variable genes into primary spatial gene expression patterns
+![]({{ site.baseurl }}/assets/img/meringue_overview.png)
 
-(3) Test for putative cellular interactions between spatially co-localized cell-types
+You can use MERINGUE to:
 
-(4) Perform spatially-informed transcriptional clustering to identify spatially-distinct cell-types and cell-states
+- Identify genes with spatially heterogeneous expression
+- Group significantly spatially variable genes into primary spatial gene expression patterns
+- Identify pairs of genes with complementary expression patterns in spatially co-localized cell-types that may be indicative of cell-cell communication
 
-(5) Accomodates 2D, multi-section, and 3D spatial data 
+![]({{ site.baseurl }}/assets/img/meringue_examples.png)
 
-(6) Is robut to variations in cellular densities, distortions, or warping common to tissues
+In a manner that:
 
-(7) Highly scalable to enable analysis of 10,000s of genes and 1,000s of cells within seconds
+- Accomodates 2D, multi-section, and 3D spatial data
+- Is robut to variations in cellular densities, distortions, or warping common to tissues
+- Is highly scalable to enable analysis of 10,000s of genes and 1,000s of cells within minutes
+- Is applicable to diverse spatial transcriptomics technologies
 
-(8) Applicable to diverse spatial transcriptomics technologies
+
 
 ## Installation
 
@@ -30,15 +35,15 @@ devtools::install_github('JEFworks/MERINGUE')
 ```
 ## Tutorials
 
-[mOB Spatial Transcriptomics Analysis](mOB_analysis)
+1. [mOB Spatial Transcriptomics Analysis](mOB_analysis)
 
-[Multi-section 3D Breast Cancer Spatial Transcriptomics Analysis](BCL_analysis)
+2. [Multi-section 3D Breast Cancer Spatial Transcriptomics Analysis](BCL_analysis)
 
-[3D Drosophila Spatial Transcriptomics Analysis](drosophila_3D_analysis)
+3. [3D Drosophila Spatial Transcriptomics Analysis](drosophila_3D_analysis)
 
-[Understanding MERINGUE's Spatial Cross-Correlation Statistic using Simulations](simulation)
+4. [Understanding MERINGUE's Spatial Cross-Correlation Statistic using Simulations](simulation)
 
-[Spatially-informed transcriptional clustering with MERINGUE](spatial_clustering)
+5. [Spatially-informed transcriptional clustering with MERINGUE](spatial_clustering)
 
 ## Contributing
 
