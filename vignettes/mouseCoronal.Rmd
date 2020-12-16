@@ -1,7 +1,7 @@
 ---
 title: "Identification of Spatial Patterns in 10X Visium Mouse Coronal Data"
 author: "Brendan F. Miller"
-date: "`r Sys.Date()`"
+date: '`r Sys.Date()`'
 output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{Identification of Spatial Patterns in 10X Visium Mouse Coronal Data}
@@ -28,8 +28,8 @@ The positional spot coordinates, and the count matrix of genes at each spot.
 # --------------------------------------------------------------------------------
 # Starting from the processed data files:
 
-# data("mouseCoronal")
-load("mouseCoronal.rda") # loads `mouseCoronal <- list(filteredGenes=filteredGenes, tissueSpotRotation=tissueSpotRotation, cluster6CorrMtx=cluster6CorrMtx)
+data(mouseCoronal)
+# load("mouseCoronal.rda") # loads `mouseCoronal <- list(filteredGenes=filteredGenes, tissueSpotRotation=tissueSpotRotation, cluster6CorrMtx=cluster6CorrMtx)
 
 filteredGenes <- mouseCoronal$filteredGenes
 tissueSpotRotation <- mouseCoronal$tissueSpotRotation
