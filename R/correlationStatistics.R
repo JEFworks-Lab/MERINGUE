@@ -485,6 +485,7 @@ signedLisa <- function(x, weight, alternative = "greater") {
 #' @param pos Position
 #' @param k Toroidal shift boxes
 #' @param n Permutation iterations
+#' @param ncores Number of cores for parallel processing
 #' @param plot Plot permutated distribution
 #' @param ... Additional parameters to pass to histogram plotting
 #'
@@ -502,18 +503,18 @@ signedLisa <- function(x, weight, alternative = "greater") {
 #'
 #' @export
 #'
-spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
+spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, ncores=1, plot=FALSE, ...) {
   # compute statistic
   w <- suppressMessages(suppressWarnings(getSpatialNeighbors(pos)))
   I <- spatialCrossCor(x,y,w)
 
   # compute background
-  bg <- sapply(seq_len(n), function(i) {
+  bg <- unlist(parallel::mclapply(seq_len(n), function(i) {
     # shift pos
     randpos <- rtorShift(pos,k=k,seed=i)
     w <- suppressMessages(suppressWarnings(getSpatialNeighbors(randpos)))
     spatialCrossCor(x,y,w)
-  })
+  }, mc.cores=ncores))
   bg <- c(bg, I)
 
   if(plot) {
@@ -533,6 +534,7 @@ spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
 #' @param y Feature 2 value
 #' @param w Binary weight matrix
 #' @param n Permutation iterations
+#' @param ncores Number of cores for parallel processing
 #' @param plot Plot permutated distribution
 #' @param ... Additional parameters to pass to histogram plotting
 #'
@@ -550,16 +552,16 @@ spatialCrossCorTorTest <- function(x, y, pos, k=4, n=1000, plot=FALSE, ...) {
 #' }
 #' @export
 #'
-spatialCrossCorTest <- function(x, y, w, n=1000, plot=FALSE, ...) {
+spatialCrossCorTest <- function(x, y, w, n=1000, ncores=1, plot=FALSE, ...) {
   I <- spatialCrossCor(x,y,w)
 
   # compute background
-  bg <- sapply(seq_len(n), function(i) {
+  bg <- unlist(parallel::mclapply(seq_len(n), function(i) {
     set.seed(i)
     xbg <- sample(x)
     names(xbg) <- names(x)
     spatialCrossCor(xbg,y,w)
-  })
+  }, mc.cores=ncores))
   bg <- c(bg, I)
 
   if(plot) {

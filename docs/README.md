@@ -2,15 +2,16 @@
 
 Build vignettes:
 ```
-rmarkdown::render('vignettes/mOB_analysis.Rmd', clean=FALSE, output_format='all')
+rmarkdown::render('vignettes/simulation.Rmd', clean=FALSE, output_format='md_document')
 ```
 
 Move files from vignettes directory to docs:
 ```
 # delete old files
-rm -r mOB_analysis_files/
-mv ../vignettes/mOB_analysis_files/ .
+rm -rf simulation_files/
+mv ../vignettes/simulation_files/ .
 # overwrite old files
-mv ../vignettes/mOB_analysis.md  .
-mv ../vignettes/mOB_analysis.pdf .
+#mv ../vignettes/simulation.knit.md  simulation.md
+mv ../vignettes/simulation.md  .
+#mv ../vignettes/simulation.pdf .
 ```
