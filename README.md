@@ -18,7 +18,7 @@ You can use MERINGUE to:
 - Group significantly spatially variable genes into primary spatial gene expression patterns
 - Identify pairs of genes with complementary expression patterns in spatially co-localized cell-types that may be indicative of cell-cell communication
 
-![](docs/assets/img/meringue_examples.png)
+![](docs/assets/img/meringue_sample.png)
 
 In a manner that:
 
@@ -28,11 +28,11 @@ In a manner that:
 - Is applicable to diverse spatial transcriptomics technologies
 
 
-
 ## Installation
 
 To install `MERINGUE`, we recommend using `devtools`:
 ```
+# install.packages(devtools)
 require(devtools)
 devtools::install_github('JEFworks/MERINGUE')
 ```
