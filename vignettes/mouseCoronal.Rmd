@@ -90,7 +90,7 @@ g <- 'Cpne6'
 gexp <- scale(filteredGenes[g,])[,1]
 plotEmbedding(emb, col=gexp)
 plotEmbedding(tissueSpotRotation, col=gexp, 
-              cex=1, xlab='spatial X', ylab='spatial Y',
+              cex=1, xlab='spatial X', ylab='spatial Y')
 ```
 
 So transcriptionally distinct cluster 4 appears to have identified pyramidal neurons of the hippocampus proper and potentially a pyramidal layer in the olfactory region. The hippocampus proper is a highly specific and striking structure of the brain. During development, one hypothesis is that gene expression gradients are responsible for the organization of cell types into their respective positions and thus drive the formation of tissues and cellular structures. We can further analyze these putative pyramidal cells to identify such potential additional spatial gene expression gradients.
