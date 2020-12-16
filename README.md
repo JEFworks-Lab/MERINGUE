@@ -32,7 +32,7 @@ To install `MERINGUE`, we recommend using `devtools`:
 ```
 # install.packages(devtools)
 require(devtools)
-devtools::install_github('JEFworks-Lab/MERINGUE')
+devtools::install_github('JEFworks-Lab/MERINGUE', build_vignettes = TRUE)
 ```
 ## Tutorials
 
