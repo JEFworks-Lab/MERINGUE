@@ -2,7 +2,7 @@
 title: "Understanding MERINGUE's Spatial Cross-Correlation Statistic using Simulations"
 author: "Jean Fan"
 date: "February 14, 2019"
-output: github_document
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{Understanding MERINGUE's Spatial Cross-Correlation Statistic using Simulations}
   %\VignetteEncoding{UTF-8}

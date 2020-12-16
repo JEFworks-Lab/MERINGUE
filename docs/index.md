@@ -20,7 +20,7 @@
 To install `MERingue`, we recommend using `devtools`:
 ```
 require(devtools)
-devtools::install_github('JEFworks/MERingue')
+devtools::install_github('JEFworks/MERingue', build_vignettes = TRUE)
 ```
 ## Tutorials
 

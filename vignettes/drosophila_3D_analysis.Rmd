@@ -2,7 +2,7 @@
 title: "3D Drosophila Spatial Transcriptomics Analysis with MERINGUE"
 author: "Jean Fan"
 date: 'November, 20, 2019'
-output: github_document
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{3D Drosophila Spatial Transcriptomics Analysis with MERINGUE}
   %\VignetteEncoding{UTF-8}

@@ -1,8 +1,12 @@
 ---
-title: "mouseCoronal"
+title: "Identification of Spatial Patterns in 10X Visium Mouse Coronal Data"
 author: "Brendan F. Miller"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Identification of Spatial Patterns in 10X Visium Mouse Coronal Data}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 # Setup
