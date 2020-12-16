@@ -10,22 +10,20 @@
 
 MERINGUE is a computational framework based on spatial auto-correlation and cross-correlation analysis. 
 
-![]({{ site.baseurl }}/assets/img/meringue_overview.png)
-
 You can use MERINGUE to:
-
 - Identify genes with spatially heterogeneous expression
 - Group significantly spatially variable genes into primary spatial gene expression patterns
 - Identify pairs of genes with complementary expression patterns in spatially co-localized cell-types that may be indicative of cell-cell communication
 
-![]({{ site.baseurl }}/assets/img/meringue_sample.png)
+![]({{ site.baseurl }}/assets/img/meringue_overview.png)
 
 In a manner that:
-
 - Accomodates 2D, multi-section, and 3D spatial data
 - Is robut to variations in cellular densities, distortions, or warping common to tissues
 - Is highly scalable to enable analysis of 10,000s of genes and 1,000s of cells within minutes
 - Is applicable to diverse spatial transcriptomics technologies
+
+![]({{ site.baseurl }}/assets/img/meringue_sample.png)
 
 
 ## Installation
@@ -34,7 +32,7 @@ To install `MERINGUE`, we recommend using `devtools`:
 ```
 # install.packages(devtools)
 require(devtools)
-devtools::install_github('JEFworks/MERINGUE')
+devtools::install_github('JEFworks-Lab/MERINGUE')
 ```
 ## Tutorials
 
