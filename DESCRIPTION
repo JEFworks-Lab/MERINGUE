@@ -21,8 +21,11 @@ Imports:
     mgcv
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 7.1.1
-Suggests: knitr,
+Suggests: 
+    knitr,
     rmarkdown,
     testthat,
-    shiny
+    shiny,
+    Rtsne,
+    uwot
 VignetteBuilder: knitr

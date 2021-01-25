@@ -70,8 +70,7 @@ So what happens when we perform transcriptome-based dimensionality reduction wit
 ```{r cluster}
 ######### See if we can integrate spatial information in cluster detection
 par(mfrow=c(1,2))
-library(uwot)
-emb <- umap(pcs, min_dist = 0.5)
+emb <- uwot::umap(pcs, min_dist = 0.5)
 rownames(emb) <- rownames(pcs)
 plotEmbedding(emb, col=scale(pcs[,1])[,1], 
               main='Cell-Types Gene Expression', xlab='UMAP X', ylab='UMAP Y')
