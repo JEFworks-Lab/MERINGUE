@@ -1,8 +1,7 @@
 ---
 title: "Multi-section 3D Breast Cancer Spatial Transcriptomics Analysis with MERINGUE"
 author: "Jean Fan"
-date: "`r Sys.Date()`"
-output: rmarkdown::pdf_document
+output: rmarkdown::html_document
 vignette: >
   %\VignetteIndexEntry{Multi-section 3D Breast Cancer Spatial Transcriptomics Analysis with MERINGUE}
   %\VignetteEncoding{UTF-8}

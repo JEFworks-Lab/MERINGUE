@@ -1,8 +1,7 @@
 ---
 title: "Spatially-informed transcriptional clustering with MERINGUE"
 author: "Jean Fan"
-date: "`r Sys.Date()`"
-output: rmarkdown::pdf_document
+output: rmarkdown::html_document
 vignette: >
   %\VignetteIndexEntry{Spatially-informed transcriptional clustering with MERINGUE}
   %\VignetteEncoding{UTF-8}
