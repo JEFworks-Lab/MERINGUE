@@ -1,6 +1,6 @@
 library(testthat)
 
-test_that(context("Test winsorization"), {
+test_that("Test winsorization", {
 
   library(MERINGUE)
   x <- rnorm(100,0,1)

@@ -1,6 +1,6 @@
 library(testthat)
 
-test_that(context("Moran's I C++ functions compiled and works as expected"), {
+test_that("Moran's I C++ functions compiled and works as expected", {
   library(MERINGUE)
   data(mOB)
   pos <- mOB$pos
