@@ -27,5 +27,6 @@ Suggests:
     testthat,
     shiny,
     Rtsne,
-    uwot
+    uwot,
+    rgl
 VignetteBuilder: knitr

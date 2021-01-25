@@ -9,7 +9,7 @@ getSpatiallyInformedClusters(
   W,
   k,
   alpha = 1,
-  beta = 0,
+  beta = 1,
   method = igraph::cluster_louvain,
   verbose = FALSE,
   details = FALSE
@@ -21,6 +21,10 @@ getSpatiallyInformedClusters(
 \item{W}{Binary adjacency matrix}
 
 \item{k}{Number of nearest neighbors for clustering}
+
+\item{alpha}{Pseuodocount in edge weight 1/(alpha + as.vector(pweight)) + beta (default: 1)}
+
+\item{beta}{Pseudocount in edge weight 1/(alpha + as.vector(pweight)) + beta (default: 1)}
 
 \item{method}{igraph method for graph-based clustering (default: cluster_louvain)}
 

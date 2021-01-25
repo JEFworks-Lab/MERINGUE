@@ -96,6 +96,8 @@ getClusters <- function (pcs, k,
 #' @param pcs A matrix of principal components or gene expression to assess transcriptional similarity
 #' @param W Binary adjacency matrix
 #' @param k Number of nearest neighbors for clustering
+#' @param alpha Pseuodocount in edge weight 1/(alpha + as.vector(pweight)) + beta (default: 1)
+#' @param beta Pseudocount in edge weight 1/(alpha + as.vector(pweight)) + beta (default: 1)
 #' @param method igraph method for graph-based clustering (default: cluster_louvain)
 #' @param verbose Verbosity
 #' @param details Return detailed ouputs
@@ -126,7 +128,7 @@ getClusters <- function (pcs, k,
 #' @export
 #'
 getSpatiallyInformedClusters <- function(pcs, W, k,
-                                         alpha=1, beta=0,
+                                         alpha=1, beta=1,
                                          method = igraph::cluster_louvain,
                                          verbose=FALSE,
                                          details=FALSE) {

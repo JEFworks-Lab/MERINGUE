@@ -4,7 +4,16 @@
 \alias{spatialCrossCorTorTest}
 \title{Tests for significance of spatial cross correlation for two features using toroidal shift null model}
 \usage{
-spatialCrossCorTorTest(x, y, pos, k = 4, n = 1000, plot = FALSE, ...)
+spatialCrossCorTorTest(
+  x,
+  y,
+  pos,
+  k = 4,
+  n = 1000,
+  ncores = 1,
+  plot = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{Feature 1 value}
@@ -16,6 +25,8 @@ spatialCrossCorTorTest(x, y, pos, k = 4, n = 1000, plot = FALSE, ...)
 \item{k}{Toroidal shift boxes}
 
 \item{n}{Permutation iterations}
+
+\item{ncores}{Number of cores for parallel processing}
 
 \item{plot}{Plot permutated distribution}
 

@@ -23,7 +23,7 @@
 #' @importFrom Matrix Matrix colSums rowSums
 #'
 cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads = 1, min.detected = 1, verbose = FALSE, plot=TRUE) {
-  if (!class(counts) %in% c("dgCMatrix", "dgTMatrix", "dgeMatrix")) {
+  if (!any(class(counts) %in% c("dgCMatrix", "dgTMatrix"))) {
     if (verbose) {
       message("Converting to sparse matrix ...")
     }
@@ -70,7 +70,7 @@ cleanCounts <- function (counts, min.lib.size = 1, max.lib.size = Inf, min.reads
 #' @importFrom Matrix Matrix colSums t
 #'
 normalizeCounts <- function (counts, normFactor = NULL, depthScale = 1e+06, pseudo=1, log=TRUE, verbose = TRUE) {
-  if (!class(counts) %in% c("dgCMatrix", "dgTMatrix")) {
+  if (!any(class(counts) %in% c("dgCMatrix", "dgTMatrix"))) {
     if (verbose) {
       message("Converting to sparse matrix ...")
     }

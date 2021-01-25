@@ -176,7 +176,7 @@ winsorize <- function (x, qt=.05) {
 #'
 getOverdispersedGenes <- function(counts, gam.k=5, alpha=0.05, plot=FALSE, use.unadjusted.pvals=FALSE, do.par=TRUE, max.adjusted.variance=1e3, min.adjusted.variance=1e-3, verbose=TRUE, details=FALSE) {
 
-  if (!class(counts) %in% c("dgCMatrix", "dgTMatrix")) {
+  if (!any(class(counts) %in% c("dgCMatrix", "dgTMatrix"))) {
     if(verbose) {
       message('Converting to sparse matrix ...')
     }
