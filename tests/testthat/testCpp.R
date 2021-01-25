@@ -37,7 +37,7 @@ test_that("Moran's I C++ functions compiled and works as expected", {
   #all.equal(x[4], y[4])
 })
 
-test_that(context("Spatial cross correlation C++ functions compiled and works as expected"), {
+test_that("Spatial cross correlation C++ functions compiled and works as expected", {
   library(MERINGUE)
   data(mOB)
   pos <- mOB$pos
@@ -60,7 +60,7 @@ test_that(context("Spatial cross correlation C++ functions compiled and works as
   expect_equal(all.equal(spatialCrossCor(mat[is[20],], mat[is[10],], w), scc[20,10]), TRUE)
 })
 
-test_that(context("LISA works as expected"), {
+test_that("LISA works as expected", {
   library(MERINGUE)
   data(mOB)
   pos <- mOB$pos
@@ -82,7 +82,7 @@ test_that(context("LISA works as expected"), {
   expect_equal(all.equal(moranC, mLisa), TRUE)
 })
 
-test_that(context("getSpatialPatterns works"), {
+test_that("getSpatialPatterns works", {
   library(MERINGUE)
   data(mOB)
   pos <- mOB$pos
