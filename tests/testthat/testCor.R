@@ -1,6 +1,6 @@
 library(testthat)
 
-test_that(context("Simulate inter cell-type spatial cross-correlation tests"), {
+test_that("Simulate inter cell-type spatial cross-correlation tests", {
   library(MERINGUE)
 
   # Simulate data

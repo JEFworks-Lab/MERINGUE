@@ -3,10 +3,8 @@
 \docType{data}
 \name{mouseCoronal}
 \alias{mouseCoronal}
-\title{Receptor ligand list}
+\title{Visium 10X Spatial Transcriptomics data of an adult mouse brain coronal section (P56)}
 \format{
-Data frame corresponding to ncomms8866-s3.xlsx in Ramilowski et al (Nature Communications 2015)
-
 List where 'filteredGenes' is a sparse matrix with columns as genes and rows as spot IDs
                          where expression values have already been normalized and genes filtered
                          to 1263 genes whose expression variance across the 2702 spots is higher
@@ -19,15 +17,12 @@ List where 'filteredGenes' is a sparse matrix with columns as genes and rows as 
                          variable expressed genes in cluster 6.
 }
 \source{
-\url{https://www.nature.com/articles/ncomms8866}
-#' Visium 10X Spatial Transcriptomics data of an adult mouse brain coronal section (P56)
-
 \url{https://cf.10xgenomics.com/samples/spatial-exp/1.1.0/V1_Adult_Mouse_Brain/}
 }
 \usage{
 mouseCoronal
 }
 \description{
-Receptor ligand list
+Visium 10X Spatial Transcriptomics data of an adult mouse brain coronal section (P56)
 }
 \keyword{datasets}

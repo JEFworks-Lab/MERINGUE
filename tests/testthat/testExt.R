@@ -1,6 +1,6 @@
 library(testthat)
 
-test_that(context("Test winsorization"), {
+test_that("Test winsorization", {
 
   library(MERINGUE)
   x <- rnorm(100,0,1)
@@ -9,7 +9,7 @@ test_that(context("Test winsorization"), {
   expect_equal(max(x[1:100]), xw[101])
 })
 
-test_that(context("Test differential expression"), {
+test_that("Test differential expression", {
 
   library(MERINGUE)
 

@@ -64,7 +64,7 @@
 #' names(ligandReceptorList) <- ligands
 "receptorLigandInfo"
 
-#'#' Visium 10X Spatial Transcriptomics data of an adult mouse brain coronal section (P56)
+#' Visium 10X Spatial Transcriptomics data of an adult mouse brain coronal section (P56)
 #'
 #' @format List where 'filteredGenes' is a sparse matrix with columns as genes and rows as spot IDs
 #'                          where expression values have already been normalized and genes filtered

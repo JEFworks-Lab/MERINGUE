@@ -4,7 +4,7 @@
 \alias{spatialCrossCorTest}
 \title{Tests for significance of spatial cross correlation for two features using random label null model}
 \usage{
-spatialCrossCorTest(x, y, w, n = 1000, plot = FALSE, ...)
+spatialCrossCorTest(x, y, w, n = 1000, ncores = 1, plot = FALSE, ...)
 }
 \arguments{
 \item{x}{Feature 1 value}
@@ -14,6 +14,8 @@ spatialCrossCorTest(x, y, w, n = 1000, plot = FALSE, ...)
 \item{w}{Binary weight matrix}
 
 \item{n}{Permutation iterations}
+
+\item{ncores}{Number of cores for parallel processing}
 
 \item{plot}{Plot permutated distribution}
 
