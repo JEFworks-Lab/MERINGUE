@@ -36,15 +36,15 @@ devtools::install_github('JEFworks-Lab/MERINGUE', build_vignettes = TRUE)
 ```
 ## Tutorials
 
-1. [mOB Spatial Transcriptomics Analysis](mOB_analysis)
+1. [mOB Spatial Transcriptomics Analysis](https://github.com/JEFworks-Lab/MERINGUE/blob/master/docs/mOB_analysis.md)
 
-2. [Multi-section 3D Breast Cancer Spatial Transcriptomics Analysis](BCL_analysis)
+2. [Multi-section 3D Breast Cancer Spatial Transcriptomics Analysis](https://github.com/JEFworks-Lab/MERINGUE/blob/master/docs/BCL_analysis.md)
 
-3. [3D Drosophila Spatial Transcriptomics Analysis](drosophila_3D_analysis)
+3. [3D Drosophila Spatial Transcriptomics Analysis](https://github.com/JEFworks-Lab/MERINGUE/blob/master/docs/drosophila_3D_analysis.md)
 
-4. [Understanding MERINGUE's Spatial Cross-Correlation Statistic using Simulations](simulation)
+4. [Understanding MERINGUE's Spatial Cross-Correlation Statistic using Simulations](https://github.com/JEFworks-Lab/MERINGUE/blob/master/docs/simulation.md)
 
-5. [Spatially-informed transcriptional clustering with MERINGUE](spatial_clustering)
+5. [Spatially-informed transcriptional clustering with MERINGUE](https://github.com/JEFworks-Lab/MERINGUE/blob/master/docs/spatial_clustering.md)
 
 ## Contributing
 
