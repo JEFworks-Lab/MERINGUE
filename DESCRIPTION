@@ -18,7 +18,8 @@ Imports:
     geometry,
     DT,
     igraph,
-    mgcv
+    mgcv,
+    clue
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 7.1.1
 Suggests: 
