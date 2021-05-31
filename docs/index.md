@@ -4,7 +4,9 @@
 [![Build Status](https://travis-ci.org/JEFworks/MERingue.svg?branch=master)](https://travis-ci.org/JEFworks/MERingue)
 [![codecov.io](https://codecov.io/github/JEFworks/MERingue/coverage.svg?branch=master)](https://codecov.io/github/JEFworks/MERingue?branch=master)
 
-`MERINGUE` characterizes spatial gene expression heterogeneity in spatially resolved single-cell transcriptomics data with non-uniform cellular densities. The overall approach is detailed in the following publication: **COMING SOON**
+`MERINGUE` characterizes spatial gene expression heterogeneity in spatially resolved single-cell transcriptomics data with non-uniform cellular densities. 
+
+The overall approach is detailed in the following publication: [Miller, B., Bambah-Mukku, D., Dulac, C., Zhuang, X. and Fan, J. Characterizing spatial gene expression heterogeneity in spatially resolved single-cell transcriptomics data with nonuniform cellular densities. Genome Research. May 2021.](https://genome.cshlp.org/content/early/2021/05/25/gr.271288.120)
 
 ## Overview
 
@@ -14,6 +16,7 @@ You can use MERINGUE to:
 - Identify genes with spatially heterogeneous expression
 - Group significantly spatially variable genes into primary spatial gene expression patterns
 - Identify pairs of genes with complementary expression patterns in spatially co-localized cell-types that may be indicative of cell-cell communication
+- Integrate density-agnostic spatial distance weighting to perform spatially-informed transcriptional clustering analysis
 
 ![]({{ site.baseurl }}/assets/img/meringue_overview.png)
 
