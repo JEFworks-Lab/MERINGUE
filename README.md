@@ -1,4 +1,4 @@
-![](tools/img/meringue_logo.svg)
+<img src="tools/img/meringue_logo.svg" alt="MERINGUE logo" width="220"/>
 
 [![Build Status](https://travis-ci.org/JEFworks/MERingue.svg?branch=master)](https://travis-ci.org/JEFworks/MERingue)
 [![codecov.io](https://codecov.io/github/JEFworks/MERingue/coverage.svg?branch=master)](https://codecov.io/github/JEFworks/MERingue?branch=master)
