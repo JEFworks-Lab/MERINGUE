@@ -1,4 +1,3 @@
-![](tools/img/meringue_logo.svg)
 # MERINGUE
 
 [![Build Status](https://travis-ci.org/JEFworks/MERingue.svg?branch=master)](https://travis-ci.org/JEFworks/MERingue)
@@ -10,9 +9,9 @@ The overall approach is detailed in the following publication: [Miller, B., Bamb
 
 ## Overview
 
-MERINGUE is a computational framework based on spatial auto-correlation and cross-correlation analysis. 
+`MERINGUE` is a computational framework based on spatial auto-correlation and cross-correlation analysis. 
 
-You can use MERINGUE to:
+You can use `MERINGUE` to:
 - Identify genes with spatially heterogeneous expression
 - Group significantly spatially variable genes into primary spatial gene expression patterns
 - Identify pairs of genes with complementary expression patterns in spatially co-localized cell-types that may be indicative of cell-cell communication
@@ -31,12 +30,13 @@ In a manner that:
 
 ## Installation
 
-To install `MERINGUE`, we recommend using `devtools`:
+To install `MERINGUE`, we recommend using `remotes`:
 ```
-# install.packages(devtools)
-require(devtools)
-devtools::install_github('JEFworks-Lab/MERingue', build_vignettes = TRUE)
+# install.packages(remotes)
+require(remotes)
+remotes::install_github('JEFworks-Lab/MERingue', build_vignettes = TRUE)
 ```
+
 ## Tutorials
 
 1. [mOB Spatial Transcriptomics Analysis](mOB_analysis)

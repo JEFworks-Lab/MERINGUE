@@ -1,2 +1,3 @@
-url: http://jef.works
-baseurl: /MERINGUE/
+theme: jekyll-theme-minimal
+description: characterizing spatial gene expression heterogeneity in spatially resolved single-cell transcriptomics data with nonuniform cellular densities
+logo: https://github.com/JEFworks-Lab/MERINGUE/blob/package/docs/img/meringue_logo.png?raw=true
