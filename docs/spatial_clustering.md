@@ -1,5 +1,4 @@
-Introduction
-============
+# Introduction
 
 The spatial organization and positioning of cells play important roles
 in shaping cellular identities. In a variety of biological systems (from
@@ -14,8 +13,7 @@ but spatially distinct cellular subpopulations? In this vignette, we
 will explore the utility of this spatially-informed transcriptional
 clustering using simulated examples.
 
-Simulation
-==========
+# Simulation
 
 First, let’s simulate 3 spatially distinct groups of cells. Each group
 will have 300 cells that are spatially positioned in distinct groups. We
@@ -75,8 +73,7 @@ distinct clusters of cells.
 
     ######### See if we can integrate spatial information in cluster detection
     par(mfrow=c(1,2))
-    library(uwot)
-    emb <- umap(pcs, min_dist = 0.5)
+    emb <- uwot::umap(pcs, min_dist = 0.5)
     rownames(emb) <- rownames(pcs)
     plotEmbedding(emb, col=scale(pcs[,1])[,1], 
                   main='Cell-Types Gene Expression', xlab='UMAP X', ylab='UMAP Y')
@@ -117,7 +114,7 @@ construction.
 
 ![](spatial_clustering_files/figure-markdown_strict/spatcluster-1.png)
 
-    com2 <- getSpatiallyInformedClusters(pcs, W=W, k=50)
+    com2 <- getSpatiallyInformedClusters(pcs, W=W, k=50, alpha=0, beta=0)
     table(com2)
     plotEmbedding(pos, groups=com2, main='Spatially Aware Transcriptional Clusters', xlab='Spatial X', ylab='Spatial Y')
 
