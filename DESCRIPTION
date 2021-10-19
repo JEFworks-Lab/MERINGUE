@@ -26,6 +26,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat,
+    rcmdcheck,
     shiny,
     Rtsne,
     uwot,
