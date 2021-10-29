@@ -24,6 +24,7 @@ LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,
+    markdown,
     rmarkdown,
     testthat,
     rcmdcheck,
