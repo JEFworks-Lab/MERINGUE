@@ -32,7 +32,7 @@ In a manner that:
 
 To install `MERINGUE`, we recommend using `remotes`:
 ```
-# install.packages(remotes)
+# install.packages("remotes")
 require(remotes)
 remotes::install_github('JEFworks-Lab/MERINGUE', build_vignettes = TRUE)
 ```
