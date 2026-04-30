@@ -5,7 +5,7 @@
 
 `MERINGUE` characterizes spatial gene expression heterogeneity in spatially resolved single-cell transcriptomics data with non-uniform cellular densities.
 
-The overall approach is detailed in the following publication: [Miller, B., Bambah-Mukku, D., Dulac, C., Zhuang, X. and Fan, J. Characterizing spatial gene expression heterogeneity in spatially resolved single-cell transcriptomics data with nonuniform cellular densities. Genome Research. May 2021.](https://genome.cshlp.org/content/early/2021/05/25/gr.271288.120)
+The overall approach is detailed in the following publication: [Miller, B., Bambah-Mukku, D., Dulac, C., Zhuang, X. and Fan, J. Characterizing spatial gene expression heterogeneity in spatially resolved single-cell transcriptomics data with nonuniform cellular densities. Genome Research. May 2021.](https://genome.cshlp.org/content/31/10/1843)
 
 ## Overview
 
